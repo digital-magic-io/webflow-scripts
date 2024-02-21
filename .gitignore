@@ -1,0 +1,18 @@
+# Node specific
+/node_modules
+/build
+/dist
+/coverage
+
+# IDE
+.idea/
+.vscode
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Parcel
+.parcel-cache/**
+.parcel-cache/data.mdb
+
