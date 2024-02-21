@@ -9,14 +9,20 @@ const idVehicleMake = 'make'
 const idVehicleModel = 'model'
 
 type VehicleMntSearchResponse = {
-  engine?: string
-  engineVolCm3?: string
-  engineKw?: string
-  firstRegYear?: string
+  engine?: {
+    type: 'FUELS'
+    value: number
+  }
+  engineVolCm3?: number
+  engineKw?: number
+  firstRegYear?: number
   mark: string
   model: string
   nextInspectionDate?: string
-  transmission?: string
+  transmission?: {
+    type: 'TRANSMISSIONS'
+    value: number
+  }
   registrationNumber?: string
 }
 
