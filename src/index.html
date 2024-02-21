@@ -11,8 +11,18 @@
   <body>
     <div id="root">
       <h1>Welcome</h1>
-      <form id="form">
-        <input type="text" id="name" name="name" value="John Snow" />
+      <form id="search-form">
+        <label for="plateNumber">Enter your plate number:</label>
+        <input type="text" id="plateNumber" name="plateNumber" value="" />
+        <em id="error-message" style="color: red"></em>
+        <button type="submit" id="find">Find</button>
+      </form>
+      <hr />
+      <form id="vehicle-form">
+        <label for="make">Make:</label>
+        <input type="text" id="make" name="make" value="" />
+        <label for="model">Model:</label>
+        <input type="text" id="model" name="model" value="" />
         <button type="submit" id="submit">Submit</button>
       </form>
     </div>

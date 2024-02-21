@@ -9,6 +9,7 @@
   "scripts": {
     "build": "parcel build && cp ./src/index.html ./dist/index.html",
     "start": "parcel watch",
+    "dev": "npx http-server dist",
     "lint": "eslint . --fix",
     "deploy": "gh-pages -d dist",
     "test": "echo \"Error: no test specified\" && exit 1"
