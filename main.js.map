@@ -1,0 +1,1 @@
+{"mappings":";;;;;;AAAO,MAAM,4CAAQ;IACnB,QAAQ,GAAG,CAAC;AACd;AAEA","sources":["src/index.ts"],"sourcesContent":["export const hello = (): void => {\n  console.log('Hello there!');\n}\n\nhello();"],"names":[],"version":3,"file":"main.js.map"}

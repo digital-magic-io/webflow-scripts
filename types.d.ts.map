@@ -1,0 +1,1 @@
+{"mappings":"AAAA,OAAO,MAAM,aAAY,IAExB,CAAA","sources":["src/src/index.ts","src/index.ts"],"sourcesContent":[null,"export const hello = (): void => {\n  console.log('Hello there!');\n}\n\nhello();"],"names":[],"version":3,"file":"types.d.ts.map"}
