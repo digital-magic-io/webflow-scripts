@@ -10,6 +10,7 @@ type WfElements = {
     stepVehicle: {
         plateNumber: {
             form: string;
+            msgError: string;
             txtPlateNumber: string;
             btnSubmit: string;
         };

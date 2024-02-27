@@ -30,9 +30,13 @@
               btnSubmit: '[wf_id="client"] [wf_name="submit"]',
             },
             stepVehicle: {
+              plateNumber: {
+                form: '[wf_id="plate_number"]',
+                msgError: '[wf_id="plate_number"] [wf_name="error-message"]',
+                txtPlateNumber: '[wf_id="plate_number"] [name="plateNumber"]',
+              },
               form: '[wf_id="vehicle"]',
               msgError: '[wf_id="vehicle"] [wf_name="error-message"]',
-              txtPlateNumber: '[wf_id="vehicle"] [name="plateNumber"]',
               txtMake: '[wf_id="vehicle"] [name="make"]',
               txtModel: '[wf_id="vehicle"] [name="model"]',
               btnSubmit: '[wf_id="vehicle"] [name="submit"]'
@@ -65,22 +69,36 @@
           <button type="submit" wf_name="submit">Submit</button>
         </div>
       </form>
-      <!--
-      <form id="search-form">
-        <label for="plateNumber">Enter your plate number:</label>
-        <input type="text" id="plateNumber" name="plateNumber" value="" />
-        <em id="error-message" style="color: red"></em>
-        <button type="submit" id="find">Find</button>
+      <hr />
+      <form wf_id="plate_number">
+        <div>
+          <label for="plateNumber">Enter your plate number:</label>
+          <input type="text" id="plateNumber" name="plateNumber" value="" />
+        </div>
+        <div>
+          <em wf_name="error-message" style="color: red"></em>
+        </div>
+        <div>
+          <button type="submit" wf_name="submit">Find</button>
+        </div>
       </form>
       <hr />
-      <form id="vehicle-form">
-        <label for="make">Make:</label>
-        <input type="text" id="make" name="make" value="" />
-        <label for="model">Model:</label>
-        <input type="text" id="model" name="model" value="" />
-        <button type="submit" id="submit">Submit</button>
+      <form wf_id="vehicle">
+        <div>
+          <label for="make">Make:</label>
+          <input type="text" id="make" name="make" value="" />
+        </div>
+        <div>
+          <label for="model">Model:</label>
+          <input type="text" id="model" name="model" value="" />
+        </div>
+        <div>
+          <em wf_name="error-message" style="color: red"></em>
+        </div>
+        <div>
+          <button type="submit" wf_name="submit">Submit</button>
+        </div>
       </form>
-      -->
     </div>
   </body>
 </html>

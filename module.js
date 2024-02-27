@@ -89,18 +89,19 @@ const $513ce829a2edcd51$var$handleSubmitSearchVehicle = (f)=>(e)=>{
                 (0, $ed94571e78be955b$export$a212451ed6854bb0)(f.txtModel, response.model);
             }).catch((error)=>{
                 console.error("Car error:", error);
-                (0, $ed94571e78be955b$export$c76514939c3de41d)(f.msgError, "Car not found!");
+                (0, $ed94571e78be955b$export$c76514939c3de41d)(f.plateNumber.msgError, "Car not found!");
             });
-        } else (0, $ed94571e78be955b$export$c76514939c3de41d)(f.msgError, "Plate number must be filled!");
+        } else (0, $ed94571e78be955b$export$c76514939c3de41d)(f.plateNumber.msgError, "Plate number must be filled!");
     };
 const $513ce829a2edcd51$var$handleSubmitVehicle = (f)=>(e)=>{
         console.log("Form submitted", e.target);
         const make = (0, $ed94571e78be955b$export$7c112ceec8941e67)(f.txtMake)?.value;
         const model = (0, $ed94571e78be955b$export$7c112ceec8941e67)(f.txtModel)?.value;
-        console.log(`Submitted: make=${make}, model=${model}`);
+        if (make && model) console.log(`Submitted: make=${make}, model=${model}`);
+        else (0, $ed94571e78be955b$export$c76514939c3de41d)(f.msgError, "Make and model must be filled!");
     };
 const $513ce829a2edcd51$export$2cd8252107eb640b = (conf)=>{
-    console.log("Initializing...");
+    console.log("Initializing...", conf);
     (0, $1f0b5237e50658ba$export$7d7650bf4871ff57)().then((client)=>{
         console.log("Client", client);
         (0, $ed94571e78be955b$export$52987f4b88db0f2)(conf.elements.stepClient.form, $513ce829a2edcd51$var$handleSubmitClient(conf.stepper, conf.elements.stepClient));
