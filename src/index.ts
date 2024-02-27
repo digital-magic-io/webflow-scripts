@@ -1,100 +1,76 @@
-// Application entry point
-const getCarUrl = (plateNumber: string): string => `https://test.carprof.ee/api/v1/cars/mnt/${plateNumber}`
+import { apiGetCar, apiGetClient, apiPostClient, ClientPersonalData } from './api'
+import { getInput, setErrorMsg, setInput, setupFormHandler } from './wfdom'
+import { WfConfiguration } from './wfconfig'
 
-const idErrorMessage = 'error-message'
-const idFormSearch = 'search-form'
-const idInputPlateNumber = 'plateNumber'
-const idFormVehicle = 'vehicle-form'
-const idVehicleMake = 'make'
-const idVehicleModel = 'model'
-
-type VehicleMntSearchResponse = {
-  engine?: {
-    type: 'FUELS'
-    value: number
+const handleSubmitClient =
+  (stepper: WfConfiguration['stepper'], f: WfConfiguration['elements']['stepClient']) =>
+  (e: Event): void => {
+    console.log('Form submitted', e.target)
+    const client: ClientPersonalData = {
+      formType: 'BUYOUT',
+      name: getInput(f.txtName)?.value ?? '',
+      email: getInput(f.txtEmail)?.value ?? '',
+      phoneNumber: getInput(f.txtPhone)?.value ?? '',
+      language: 'et'
+    }
+    if (client.name && client.email && client.phoneNumber) {
+      void apiPostClient(client)
+        .then(() => {
+          stepper.nextStepFn(1)
+        })
+        .catch((error) => {
+          console.error('API error:', error)
+          setErrorMsg(f.msgError, 'Unable to send client data!')
+        })
+    } else {
+      setErrorMsg(f.msgError, 'All fields must be filled!')
+    }
   }
-  engineVolCm3?: number
-  engineKw?: number
-  firstRegYear?: number
-  mark: string
-  model: string
-  nextInspectionDate?: string
-  transmission?: {
-    type: 'TRANSMISSIONS'
-    value: number
+
+const handleSubmitSearchVehicle =
+  (f: WfConfiguration['elements']['stepVehicle']) =>
+  (e: Event): void => {
+    console.log('Form submitted', e.target)
+    const plateNumber = getInput(f.plateNumber.txtPlateNumber)?.value
+    if (plateNumber && plateNumber.length > 0) {
+      console.log('Plate number:', plateNumber)
+      apiGetCar(plateNumber)
+        .then((response) => {
+          console.log('Car response:', response)
+          setInput(f.txtMake, response.mark)
+          setInput(f.txtModel, response.model)
+        })
+        .catch((error) => {
+          console.error('Car error:', error)
+          setErrorMsg(f.plateNumber.msgError, 'Car not found!')
+        })
+    } else {
+      setErrorMsg(f.plateNumber.msgError, 'Plate number must be filled!')
+    }
   }
-  registrationNumber?: string
-}
 
-const getElById = <T extends HTMLElement>(id: string): T | undefined => {
-  const el: HTMLElement | null = document.getElementById(id)
-  if (el === null) {
-    console.error(`Element with id "${id}" not found`)
-    return undefined
-  } else {
-    return el as T
+const handleSubmitVehicle =
+  (f: WfConfiguration['elements']['stepVehicle']) =>
+  (e: Event): void => {
+    console.log('Form submitted', e.target)
+    const make = getInput(f.txtMake)?.value
+    const model = getInput(f.txtModel)?.value
+    if (make && model) {
+      console.log(`Submitted: make=${make}, model=${model}`)
+    } else {
+      setErrorMsg(f.msgError, 'Make and model must be filled!')
+    }
   }
+
+export const init = (conf: WfConfiguration): void => {
+  console.log('Initializing...', conf)
+  void apiGetClient().then((client) => {
+    console.log('Client', client)
+    setupFormHandler(conf.elements.stepClient.form, handleSubmitClient(conf.stepper, conf.elements.stepClient))
+    setupFormHandler(conf.elements.stepVehicle.plateNumber.form, handleSubmitSearchVehicle(conf.elements.stepVehicle))
+    setupFormHandler(conf.elements.stepVehicle.form, handleSubmitVehicle(conf.elements.stepVehicle))
+  })
+
+  //dom.setupFormHandler(conf.stepVehicle, handleSubmitSearch(dom))
+  //dom.setupFormHandler(idFormVehicle, handleSubmitVehicle(dom))
 }
-const getInputById = (id: string): HTMLInputElement | undefined => getElById<HTMLInputElement>(id)
-const setInputById = (id: string, value: string): void => {
-  const input = getInputById(id)
-  if (input) {
-    input.value = value
-  }
-}
-
-const getFormById = (id: string): HTMLFormElement | undefined => getElById<HTMLFormElement>(id)
-
-const fetchTyped = async <T>(url: string): Promise<T> => {
-  const response = await fetch(url)
-  return (await response.json()) as Promise<T>
-}
-
-const setupFormHandler = (formId: string, handler: (e: Event) => void): void => {
-  const form = getFormById(formId)
-  if (form) {
-    form.action = ''
-    form.method = ''
-    form.addEventListener('submit', handler)
-  } else {
-    console.error(`Unable to find form with id "${idFormSearch}"`)
-  }
-}
-
-const apiGetCar = (plateNumber: string): Promise<VehicleMntSearchResponse> => fetchTyped(getCarUrl(plateNumber))
-
-const handleSubmitSearch = (e: Event): void => {
-  e.preventDefault()
-  const formData = e.target as HTMLFormElement
-  console.log('Form submitted', formData)
-  const plateNumber = getInputById(idInputPlateNumber)?.value
-  if (plateNumber && plateNumber.length > 0) {
-    console.log('Plate number:', plateNumber)
-    apiGetCar(plateNumber)
-      .then((response) => {
-        console.log('Car response:', response)
-        setInputById(idVehicleMake, response.mark)
-        setInputById(idVehicleModel, response.model)
-      })
-      .catch((error) => {
-        console.error('Car error:', error)
-        const errMsg = getElById(idErrorMessage)
-        if (errMsg) {
-          errMsg.innerHTML = 'Car not found'
-        }
-      })
-  }
-}
-
-const handleSubmitVehicle = (e: Event): void => {
-  e.preventDefault()
-  const formData = e.target as HTMLFormElement
-  console.log('Form submitted', formData)
-}
-
-export const init = (): void => {
-  setupFormHandler(idFormSearch, handleSubmitSearch)
-  setupFormHandler(idFormVehicle, handleSubmitVehicle)
-}
-
-init()

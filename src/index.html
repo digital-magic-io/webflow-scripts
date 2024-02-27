@@ -6,24 +6,98 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Example page for testing Webflow script" />
     <title>Digital Magic | Webflow script example page</title>
-    <script type="module" src="./module.js"></script>
+    <script type="module">
+      import { init } from './module.js';
+      window.onload = () => {
+        console.log("page is fully loaded");
+        init({
+          stepper: {
+            steps: 3,
+            nextStepFn: (currentStep) => {
+              console.log('Next step', currentStep);
+            },
+            prevStepFn: (currentStep) => {
+              console.log('Previous step', currentStep);
+            },
+          },
+          elements: {
+            stepClient: {
+              form: '[wf_id="client"]',
+              msgError: '[wf_id="client"] [wf_name="error-message"]',
+              txtName: '[wf_id="client"] [name="name"]',
+              txtEmail: '[wf_id="client"] [name="email"]',
+              txtPhone: '[wf_id="client"] [name="phone"]',
+              btnSubmit: '[wf_id="client"] [wf_name="submit"]',
+            },
+            stepVehicle: {
+              plateNumber: {
+                form: '[wf_id="plate_number"]',
+                msgError: '[wf_id="plate_number"] [wf_name="error-message"]',
+                txtPlateNumber: '[wf_id="plate_number"] [name="plateNumber"]',
+              },
+              form: '[wf_id="vehicle"]',
+              msgError: '[wf_id="vehicle"] [wf_name="error-message"]',
+              txtMake: '[wf_id="vehicle"] [name="make"]',
+              txtModel: '[wf_id="vehicle"] [name="model"]',
+              btnSubmit: '[wf_id="vehicle"] [name="submit"]'
+            }
+          }
+        });
+      };
+    </script>
   </head>
   <body>
     <div id="root">
       <h1>Welcome</h1>
-      <form id="search-form">
-        <label for="plateNumber">Enter your plate number:</label>
-        <input type="text" id="plateNumber" name="plateNumber" value="" />
-        <em id="error-message" style="color: red"></em>
-        <button type="submit" id="find">Find</button>
+      <form wf_id="client">
+        <div>
+          <label for="name">Name:</label>
+          <input type="text" id="name" name="name" value="" />
+        </div>
+        <div>
+          <label for="email">Email:</label>
+          <input type="email" id="email" name="email" value="" />
+        </div>
+        <div>
+          <label for="phone">Phone:</label>
+          <input type="tel" id="phone" name="phone" value="" />
+        </div>
+        <div>
+          <em wf_name="error-message" style="color: red"></em>
+        </div>
+        <div>
+          <button type="submit" wf_name="submit">Submit</button>
+        </div>
       </form>
       <hr />
-      <form id="vehicle-form">
-        <label for="make">Make:</label>
-        <input type="text" id="make" name="make" value="" />
-        <label for="model">Model:</label>
-        <input type="text" id="model" name="model" value="" />
-        <button type="submit" id="submit">Submit</button>
+      <form wf_id="plate_number">
+        <div>
+          <label for="plateNumber">Enter your plate number:</label>
+          <input type="text" id="plateNumber" name="plateNumber" value="" />
+        </div>
+        <div>
+          <em wf_name="error-message" style="color: red"></em>
+        </div>
+        <div>
+          <button type="submit" wf_name="submit">Find</button>
+        </div>
+      </form>
+      <hr />
+      <form wf_id="vehicle">
+        <div>
+          <label for="make">Make:</label>
+          <input type="text" id="make" name="make" value="" />
+        </div>
+        <div>
+          <label for="model">Model:</label>
+          <input type="text" id="model" name="model" value="" />
+        </div>
+        <div>
+          <em wf_name="error-message" style="color: red"></em>
+        </div>
+        <div>
+          <button type="submit" wf_name="submit">Submit</button>
+        </div>
       </form>
     </div>
   </body>
