@@ -67,52 +67,51 @@ const $02e46d9ff778ee32$export$89a6f6b18f17322b = (path, handler)=>{
 };
 
 
-/*
-const handleSubmitSearch = (dom: DomUtils) => (e: Event): void => {
-  e.preventDefault()
-  e.stopPropagation()
-  const formData = e.target as HTMLFormElement
-  console.log('Form submitted', formData)
-  const plateNumber = getInputById(idInputPlateNumber)?.value
-  if (plateNumber && plateNumber.length > 0) {
-    console.log('Plate number:', plateNumber)
-    apiGetCar(plateNumber)
-      .then((response) => {
-        console.log('Car response:', response)
-        setInputById(idVehicleMake, response.mark)
-        setInputById(idVehicleModel, response.model)
-      })
-      .catch((error) => {
-        console.error('Car error:', error)
-        const errMsg = getElById(idErrorMessage)
-        if (errMsg) {
-          errMsg.innerHTML = 'Car not found'
-        }
-      })
-  }
-}
-*/ const $46808a7dabd6e18e$var$handleSubmitClient = (conf)=>(e)=>{
-        e.preventDefault();
+const $46808a7dabd6e18e$var$handleSubmitClient = (stepper, f)=>(e)=>{
+        console.log("Form submitted", e.target);
         const client = {
             formType: "BUYOUT",
-            name: (0, $02e46d9ff778ee32$export$7c112ceec8941e67)(conf.elements.stepClient.txtName)?.value ?? "",
-            email: (0, $02e46d9ff778ee32$export$7c112ceec8941e67)(conf.elements.stepClient.txtEmail)?.value ?? "",
-            phoneNumber: (0, $02e46d9ff778ee32$export$7c112ceec8941e67)(conf.elements.stepClient.txtPhone)?.value ?? "",
+            name: (0, $02e46d9ff778ee32$export$7c112ceec8941e67)(f.txtName)?.value ?? "",
+            email: (0, $02e46d9ff778ee32$export$7c112ceec8941e67)(f.txtEmail)?.value ?? "",
+            phoneNumber: (0, $02e46d9ff778ee32$export$7c112ceec8941e67)(f.txtPhone)?.value ?? "",
             language: "et"
         };
         if (client.name && client.email && client.phoneNumber) (0, $940a411301273780$export$3e93138bfea324f5)(client).then(()=>{
-            conf.stepper.nextStepFn(1);
+            stepper.nextStepFn(1);
         }).catch((error)=>{
             console.error("API error:", error);
-            (0, $02e46d9ff778ee32$export$c76514939c3de41d)(conf.elements.stepClient.msgError, "Unable to send client data!");
+            (0, $02e46d9ff778ee32$export$c76514939c3de41d)(f.msgError, "Unable to send client data!");
         });
-        else (0, $02e46d9ff778ee32$export$c76514939c3de41d)(conf.elements.stepClient.msgError, "All fields must be filled!");
+        else (0, $02e46d9ff778ee32$export$c76514939c3de41d)(f.msgError, "All fields must be filled!");
     };
-const $46808a7dabd6e18e$export$2cd8252107eb640b = async (conf)=>{
+const $46808a7dabd6e18e$var$handleSubmitSearchVehicle = (f)=>(e)=>{
+        console.log("Form submitted", e.target);
+        const plateNumber = (0, $02e46d9ff778ee32$export$7c112ceec8941e67)(f.plateNumber.txtPlateNumber)?.value;
+        if (plateNumber && plateNumber.length > 0) {
+            console.log("Plate number:", plateNumber);
+            (0, $940a411301273780$export$a716ac162dff6323)(plateNumber).then((response)=>{
+                console.log("Car response:", response);
+                (0, $02e46d9ff778ee32$export$a212451ed6854bb0)(f.txtMake, response.mark);
+                (0, $02e46d9ff778ee32$export$a212451ed6854bb0)(f.txtModel, response.model);
+            }).catch((error)=>{
+                console.error("Car error:", error);
+                (0, $02e46d9ff778ee32$export$c76514939c3de41d)(f.msgError, "Car not found!");
+            });
+        } else (0, $02e46d9ff778ee32$export$c76514939c3de41d)(f.msgError, "Plate number must be filled!");
+    };
+const $46808a7dabd6e18e$var$handleSubmitVehicle = (f)=>(e)=>{
+        console.log("Form submitted", e.target);
+        const make = (0, $02e46d9ff778ee32$export$7c112ceec8941e67)(f.txtMake)?.value;
+        const model = (0, $02e46d9ff778ee32$export$7c112ceec8941e67)(f.txtModel)?.value;
+        console.log(`Submitted: make=${make}, model=${model}`);
+    };
+const $46808a7dabd6e18e$export$2cd8252107eb640b = (conf)=>{
     console.log("Initializing...");
     (0, $940a411301273780$export$7d7650bf4871ff57)().then((client)=>{
         console.log("Client", client);
-        (0, $02e46d9ff778ee32$export$52987f4b88db0f2)(conf.elements.stepClient.form, $46808a7dabd6e18e$var$handleSubmitClient(conf));
+        (0, $02e46d9ff778ee32$export$52987f4b88db0f2)(conf.elements.stepClient.form, $46808a7dabd6e18e$var$handleSubmitClient(conf.stepper, conf.elements.stepClient));
+        (0, $02e46d9ff778ee32$export$52987f4b88db0f2)(conf.elements.stepVehicle.plateNumber.form, $46808a7dabd6e18e$var$handleSubmitSearchVehicle(conf.elements.stepVehicle));
+        (0, $02e46d9ff778ee32$export$52987f4b88db0f2)(conf.elements.stepVehicle.form, $46808a7dabd6e18e$var$handleSubmitVehicle(conf.elements.stepVehicle));
     });
 //dom.setupFormHandler(conf.stepVehicle, handleSubmitSearch(dom))
 //dom.setupFormHandler(idFormVehicle, handleSubmitVehicle(dom))

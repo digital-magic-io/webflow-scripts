@@ -8,9 +8,13 @@ type WfElements = {
         btnSubmit: string;
     };
     stepVehicle: {
+        plateNumber: {
+            form: string;
+            txtPlateNumber: string;
+            btnSubmit: string;
+        };
         form: string;
         msgError: string;
-        txtPlateNumber: string;
         txtMake: string;
         txtModel: string;
         btnSubmit: string;
@@ -25,6 +29,6 @@ type WfConfiguration = {
     };
     elements: WfElements;
 };
-export const init: (conf: WfConfiguration) => Promise<void>;
+export const init: (conf: WfConfiguration) => void;
 
 //# sourceMappingURL=types.d.ts.map
