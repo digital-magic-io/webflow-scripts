@@ -6,9 +6,16 @@ function $parcel$export(e, n, v, s) {
 $parcel$export(module.exports, "init", function () { return $46808a7dabd6e18e$export$2cd8252107eb640b; });
 const $940a411301273780$var$lookupCarRegistryUrl = (plateNumber)=>`https://test.carprof.ee/api/v1/cars/mnt/${plateNumber}`;
 const $940a411301273780$var$clientUrl = "https://test.carprof.ee/api/v1/forms/client";
-const $940a411301273780$var$fetchTyped = async (url, init = {})=>{
+const $940a411301273780$var$fetchTyped = async (url, init = {
+    method: "GET"
+})=>{
     const response = await fetch(url, init);
-    return await response.json();
+    if (!response.ok) throw new Error(`Failed to fetch ${init.method} ${url}: ${response.status} ${response.statusText}`);
+    else {
+        const responseText = await response.text();
+        if (!responseText || responseText.length === 0) return undefined;
+        else return JSON.parse(responseText);
+    }
 };
 const $940a411301273780$var$getTyped = async (url)=>$940a411301273780$var$fetchTyped(url);
 const $940a411301273780$var$postTyped = async (url, body)=>$940a411301273780$var$fetchTyped(url, {
@@ -93,12 +100,10 @@ const handleSubmitSearch = (dom: DomUtils) => (e: Event): void => {
             phoneNumber: (0, $02e46d9ff778ee32$export$7c112ceec8941e67)(conf.elements.stepClient.txtPhone)?.value ?? "",
             language: "et"
         };
-        if (client.name && client.email && client.phoneNumber) (0, $940a411301273780$export$3e93138bfea324f5)(client).then((r)=>{
-            if (r.status < 299) conf.stepper.nextStepFn(1);
-            else throw new Error("Unable to send client data");
+        if (client.name && client.email && client.phoneNumber) (0, $940a411301273780$export$3e93138bfea324f5)(client).then(()=>{
+            conf.stepper.nextStepFn(1);
         }).catch((error)=>{
-            console.error("Client error:", error);
-            // TODO: Create utility for it
+            console.error("API error:", error);
             (0, $02e46d9ff778ee32$export$c76514939c3de41d)(conf.elements.stepClient.msgError, "Unable to send client data!");
         });
         else (0, $02e46d9ff778ee32$export$c76514939c3de41d)(conf.elements.stepClient.msgError, "All fields must be filled!");

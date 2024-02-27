@@ -1,8 +1,15 @@
 const $1f0b5237e50658ba$var$lookupCarRegistryUrl = (plateNumber)=>`https://test.carprof.ee/api/v1/cars/mnt/${plateNumber}`;
 const $1f0b5237e50658ba$var$clientUrl = "https://test.carprof.ee/api/v1/forms/client";
-const $1f0b5237e50658ba$var$fetchTyped = async (url, init = {})=>{
+const $1f0b5237e50658ba$var$fetchTyped = async (url, init = {
+    method: "GET"
+})=>{
     const response = await fetch(url, init);
-    return await response.json();
+    if (!response.ok) throw new Error(`Failed to fetch ${init.method} ${url}: ${response.status} ${response.statusText}`);
+    else {
+        const responseText = await response.text();
+        if (!responseText || responseText.length === 0) return undefined;
+        else return JSON.parse(responseText);
+    }
 };
 const $1f0b5237e50658ba$var$getTyped = async (url)=>$1f0b5237e50658ba$var$fetchTyped(url);
 const $1f0b5237e50658ba$var$postTyped = async (url, body)=>$1f0b5237e50658ba$var$fetchTyped(url, {
@@ -87,12 +94,10 @@ const handleSubmitSearch = (dom: DomUtils) => (e: Event): void => {
             phoneNumber: (0, $ed94571e78be955b$export$7c112ceec8941e67)(conf.elements.stepClient.txtPhone)?.value ?? "",
             language: "et"
         };
-        if (client.name && client.email && client.phoneNumber) (0, $1f0b5237e50658ba$export$3e93138bfea324f5)(client).then((r)=>{
-            if (r.status < 299) conf.stepper.nextStepFn(1);
-            else throw new Error("Unable to send client data");
+        if (client.name && client.email && client.phoneNumber) (0, $1f0b5237e50658ba$export$3e93138bfea324f5)(client).then(()=>{
+            conf.stepper.nextStepFn(1);
         }).catch((error)=>{
-            console.error("Client error:", error);
-            // TODO: Create utility for it
+            console.error("API error:", error);
             (0, $ed94571e78be955b$export$c76514939c3de41d)(conf.elements.stepClient.msgError, "Unable to send client data!");
         });
         else (0, $ed94571e78be955b$export$c76514939c3de41d)(conf.elements.stepClient.msgError, "All fields must be filled!");
