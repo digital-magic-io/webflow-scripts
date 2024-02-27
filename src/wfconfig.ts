@@ -18,6 +18,11 @@ export type WfElements = {
     msgError: string
     txtMake: string
     txtModel: string
+    txtYear: string
+    txtMileage: string
+    txtLocation: string
+    txtPrice: string
+    txtMessage: string
     btnSubmit: string
   }
   stepFiles: {
