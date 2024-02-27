@@ -40,6 +40,12 @@
               txtMake: '[wf_id="vehicle"] [name="make"]',
               txtModel: '[wf_id="vehicle"] [name="model"]',
               btnSubmit: '[wf_id="vehicle"] [name="submit"]'
+            },
+            stepFiles: {
+              form: '[wf_id="files"]',
+              msgError: '[wf_id="files"] [wf_name="error-message"]',
+              inputFiles: '[wf_id="files"] [name="files"]',
+              btnSubmit: '[wf_id="files"] [wf_name="submit"]'
             }
           }
         });
@@ -91,6 +97,19 @@
         <div>
           <label for="model">Model:</label>
           <input type="text" id="model" name="model" value="" />
+        </div>
+        <div>
+          <em wf_name="error-message" style="color: red"></em>
+        </div>
+        <div>
+          <button type="submit" wf_name="submit">Submit</button>
+        </div>
+      </form>
+      <hr />
+      <form wf_id="files">
+        <div>
+          <label for="files">Upload files:</label>
+          <input type="file" id="files" name="files" />
         </div>
         <div>
           <em wf_name="error-message" style="color: red"></em>

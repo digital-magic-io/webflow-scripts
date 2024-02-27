@@ -106,6 +106,13 @@ const $46808a7dabd6e18e$var$handleSubmitVehicle = (f)=>(e)=>{
         if (make && model) console.log(`Submitted: make=${make}, model=${model}`);
         else (0, $02e46d9ff778ee32$export$c76514939c3de41d)(f.msgError, "Make and model must be filled!");
     };
+const $46808a7dabd6e18e$var$handleSubmitFiles = (f)=>(e)=>{
+        console.log("Form submitted", e.target);
+        const files = (0, $02e46d9ff778ee32$export$7c112ceec8941e67)(f.inputFiles)?.files;
+        if (files && files.length > 0) console.log("Files:", files);
+        else if (files && files.length > 10) (0, $02e46d9ff778ee32$export$c76514939c3de41d)(f.msgError, "Too many files selected!");
+        else (0, $02e46d9ff778ee32$export$c76514939c3de41d)(f.msgError, "Files must be selected!");
+    };
 const $46808a7dabd6e18e$export$2cd8252107eb640b = (conf)=>{
     console.log("Initializing...", conf);
     (0, $940a411301273780$export$7d7650bf4871ff57)().then((client)=>{
@@ -113,6 +120,7 @@ const $46808a7dabd6e18e$export$2cd8252107eb640b = (conf)=>{
         (0, $02e46d9ff778ee32$export$52987f4b88db0f2)(conf.elements.stepClient.form, $46808a7dabd6e18e$var$handleSubmitClient(conf.stepper, conf.elements.stepClient));
         (0, $02e46d9ff778ee32$export$52987f4b88db0f2)(conf.elements.stepVehicle.plateNumber.form, $46808a7dabd6e18e$var$handleSubmitSearchVehicle(conf.elements.stepVehicle));
         (0, $02e46d9ff778ee32$export$52987f4b88db0f2)(conf.elements.stepVehicle.form, $46808a7dabd6e18e$var$handleSubmitVehicle(conf.elements.stepVehicle));
+        (0, $02e46d9ff778ee32$export$52987f4b88db0f2)(conf.elements.stepFiles.form, $46808a7dabd6e18e$var$handleSubmitFiles(conf.elements.stepFiles));
     });
 //dom.setupFormHandler(conf.stepVehicle, handleSubmitSearch(dom))
 //dom.setupFormHandler(idFormVehicle, handleSubmitVehicle(dom))
