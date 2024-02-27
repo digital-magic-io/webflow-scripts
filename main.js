@@ -6,23 +6,21 @@ function $parcel$export(e, n, v, s) {
 $parcel$export(module.exports, "init", function () { return $46808a7dabd6e18e$export$2cd8252107eb640b; });
 const $940a411301273780$var$lookupCarRegistryUrl = (plateNumber)=>`https://test.carprof.ee/api/v1/cars/mnt/${plateNumber}`;
 const $940a411301273780$var$clientUrl = "https://test.carprof.ee/api/v1/forms/client";
-const $940a411301273780$var$fetchTyped = async (url)=>{
-    const response = await fetch(url, {
-        credentials: "include"
-    });
+const $940a411301273780$var$fetchTyped = async (url, init = {})=>{
+    const response = await fetch(url, init);
     return await response.json();
 };
-const $940a411301273780$export$a716ac162dff6323 = (plateNumber)=>$940a411301273780$var$fetchTyped($940a411301273780$var$lookupCarRegistryUrl(plateNumber));
-const $940a411301273780$export$7d7650bf4871ff57 = ()=>$940a411301273780$var$fetchTyped($940a411301273780$var$clientUrl);
-const $940a411301273780$export$3e93138bfea324f5 = (client)=>// Cross domain headers must be added
-    fetch($940a411301273780$var$clientUrl, {
+const $940a411301273780$var$getTyped = async (url)=>$940a411301273780$var$fetchTyped(url);
+const $940a411301273780$var$postTyped = async (url, body)=>$940a411301273780$var$fetchTyped(url, {
         method: "POST",
-        body: JSON.stringify(client),
-        credentials: "include",
+        body: JSON.stringify(body),
         headers: {
             "Content-Type": "application/json"
         }
     });
+const $940a411301273780$export$a716ac162dff6323 = (plateNumber)=>$940a411301273780$var$getTyped($940a411301273780$var$lookupCarRegistryUrl(plateNumber));
+const $940a411301273780$export$7d7650bf4871ff57 = ()=>$940a411301273780$var$getTyped($940a411301273780$var$clientUrl);
+const $940a411301273780$export$3e93138bfea324f5 = (client)=>$940a411301273780$var$postTyped($940a411301273780$var$clientUrl, client);
 
 
 const $02e46d9ff778ee32$export$d16800b7e59a8051 = (path)=>{
