@@ -62,6 +62,20 @@ const handleSubmitVehicle =
     }
   }
 
+const handleSubmitFiles =
+  (f: WfConfiguration['elements']['stepFiles']) =>
+  (e: Event): void => {
+    console.log('Form submitted', e.target)
+    const files = getInput(f.inputFiles)?.files
+    if (files && files.length > 0) {
+      console.log('Files:', files)
+    } else if (files && files.length > 10) {
+      setErrorMsg(f.msgError, 'Too many files selected!')
+    } else {
+      setErrorMsg(f.msgError, 'Files must be selected!')
+    }
+  }
+
 export const init = (conf: WfConfiguration): void => {
   console.log('Initializing...', conf)
   void apiGetClient().then((client) => {
@@ -69,6 +83,7 @@ export const init = (conf: WfConfiguration): void => {
     setupFormHandler(conf.elements.stepClient.form, handleSubmitClient(conf.stepper, conf.elements.stepClient))
     setupFormHandler(conf.elements.stepVehicle.plateNumber.form, handleSubmitSearchVehicle(conf.elements.stepVehicle))
     setupFormHandler(conf.elements.stepVehicle.form, handleSubmitVehicle(conf.elements.stepVehicle))
+    setupFormHandler(conf.elements.stepFiles.form, handleSubmitFiles(conf.elements.stepFiles))
   })
 
   //dom.setupFormHandler(conf.stepVehicle, handleSubmitSearch(dom))

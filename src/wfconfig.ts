@@ -20,6 +20,12 @@ export type WfElements = {
     txtModel: string
     btnSubmit: string
   }
+  stepFiles: {
+    form: string
+    msgError: string
+    inputFiles: string
+    btnSubmit: string
+  }
   msgSuccess: string
 }
 
