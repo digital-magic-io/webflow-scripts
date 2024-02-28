@@ -63,7 +63,7 @@ const buyoutUrl = `${formsUrl}/buyout`
 const lookupCarRegistryUrl = (plateNumber: string): string => `${apiUrl}/cars/mnt/${plateNumber}`
 
 const fetchTyped = async <T>(url: string, init: RequestInit = { method: 'GET' }): Promise<T> => {
-  const response = await fetch(url, init)
+  const response = await fetch(url, { credentials: 'include', ...init })
   if (!response.ok) {
     throw new Error(`Failed to fetch ${init.method} ${url}: ${response.status} ${response.statusText}`)
   } else {
