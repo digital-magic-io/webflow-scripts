@@ -153,7 +153,7 @@ const $15451612c40a4a0c$var$handleSubmitVehicle = (stepper, f)=>(e)=>{
         const price = (0, $d5a221d013e48634$export$7c112ceec8941e67)(f.txtPrice)?.value;
         const message = (0, $d5a221d013e48634$export$7c112ceec8941e67)(f.txtMessage)?.value;
         const plateNumber = (0, $d5a221d013e48634$export$7c112ceec8941e67)(f.plateNumber.txtPlateNumber)?.value;
-        if (make && model && year && price && plateNumber) {
+        if (make && model && year && mileage && price && plateNumber) {
             const request = {
                 registrationNumber: plateNumber,
                 fuelId: 1,
