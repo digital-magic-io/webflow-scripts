@@ -7,7 +7,10 @@ const $a8cec6fe269f4471$var$lookupCarRegistryUrl = (plateNumber)=>`${$a8cec6fe26
 const $a8cec6fe269f4471$var$fetchTyped = async (url, init = {
     method: "GET"
 })=>{
-    const response = await fetch(url, init);
+    const response = await fetch(url, {
+        credentials: "include",
+        ...init
+    });
     if (!response.ok) throw new Error(`Failed to fetch ${init.method} ${url}: ${response.status} ${response.statusText}`);
     else {
         const responseText = await response.text();
