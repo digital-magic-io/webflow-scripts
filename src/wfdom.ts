@@ -17,7 +17,7 @@ export const setInput = (path: string, value: string): void => {
 
 export const getForm = (path: string): HTMLFormElement | undefined => getElement<HTMLFormElement>(path)
 
-export const setErrorMsg = (path: string, msg: string): void => {
+export const setMsg = (path: string, msg: string): void => {
   const el = getElement(path)
   if (el) {
     el.innerHTML = msg

@@ -40,7 +40,7 @@
               txtMake: '[wf_id="vehicle"] [name="make"]',
               txtModel: '[wf_id="vehicle"] [name="model"]',
               txtYear: '[wf_id="vehicle"] [name="year"]',
-              txtMilage: '[wf_id="vehicle"] [name="milage"]',
+              txtMileage: '[wf_id="vehicle"] [name="mileage"]',
               txtLocation: '[wf_id="vehicle"] [name="location"]',
               txtPrice: '[wf_id="vehicle"] [name="price"]',
               txtMessage: '[wf_id="vehicle"] [name="message"]',
@@ -102,6 +102,24 @@
         <div>
           <label for="model">Model:</label>
           <input type="text" id="model" name="model" value="" />
+        </div>
+        <label for="year">Year:</label>
+        <input type="text" id="year" name="year" value="" />
+        <div>
+          <label for="mileage">Mileage:</label>
+          <input type="text" id="mileage" name="mileage" value="" />
+        </div>
+        <div>
+          <label for="location">Location:</label>
+          <input type="text" id="location" name="location" value="" />
+        </div>
+        <div>
+          <label for="price">Price:</label>
+          <input type="text" id="price" name="price" value="" />
+        </div>
+        <div>
+          <label for="message">Message:</label>
+          <textarea id="message" name="message" cols="40" rows="5"></textarea>
         </div>
         <div>
           <em wf_name="error-message" style="color: red"></em>
