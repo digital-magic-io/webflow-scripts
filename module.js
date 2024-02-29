@@ -1,16 +1,14 @@
 const $a8cec6fe269f4471$var$apiUrl = "https://test.carprof.ee/api/v1";
 const $a8cec6fe269f4471$var$formsUrl = `${$a8cec6fe269f4471$var$apiUrl}/forms`;
+const $a8cec6fe269f4471$var$externalUrl = `${$a8cec6fe269f4471$var$apiUrl}/external`;
 const $a8cec6fe269f4471$var$fileUrl = `${$a8cec6fe269f4471$var$formsUrl}/file`;
-const $a8cec6fe269f4471$var$clientUrl = `${$a8cec6fe269f4471$var$formsUrl}/client`;
-const $a8cec6fe269f4471$var$buyoutUrl = `${$a8cec6fe269f4471$var$formsUrl}/buyout`;
+const $a8cec6fe269f4471$var$clientUrl = `${$a8cec6fe269f4471$var$externalUrl}/personal-data`;
+const $a8cec6fe269f4471$var$buyoutUrl = (formId)=>`${$a8cec6fe269f4471$var$externalUrl}/buyout/${formId}`;
 const $a8cec6fe269f4471$var$lookupCarRegistryUrl = (plateNumber)=>`${$a8cec6fe269f4471$var$apiUrl}/cars/mnt/${plateNumber}`;
 const $a8cec6fe269f4471$var$fetchTyped = async (url, init = {
     method: "GET"
 })=>{
-    const response = await fetch(url, {
-        credentials: "include",
-        ...init
-    });
+    const response = await fetch(url, init);
     if (!response.ok) throw new Error(`Failed to fetch ${init.method} ${url}: ${response.status} ${response.statusText}`);
     else {
         const responseText = await response.text();
@@ -36,7 +34,7 @@ const $a8cec6fe269f4471$export$30f6785ef4f50942 = (file)=>{
         body: data
     });
 };
-const $a8cec6fe269f4471$export$ad2c850047bf833d = (request)=>$a8cec6fe269f4471$var$postTyped($a8cec6fe269f4471$var$buyoutUrl, request);
+const $a8cec6fe269f4471$export$ad2c850047bf833d = (formId, request)=>$a8cec6fe269f4471$var$postTyped($a8cec6fe269f4471$var$buyoutUrl(formId), request);
 const $a8cec6fe269f4471$export$a716ac162dff6323 = (plateNumber)=>$a8cec6fe269f4471$var$getTyped($a8cec6fe269f4471$var$lookupCarRegistryUrl(plateNumber));
 const $a8cec6fe269f4471$export$dd1bc94b04021eeb = (value)=>value === null || value === undefined;
 const $a8cec6fe269f4471$export$96bdbc84526f3739 = (value)=>!$a8cec6fe269f4471$export$dd1bc94b04021eeb(value);
@@ -95,6 +93,7 @@ const $02ee45712bdfc733$export$89a6f6b18f17322b = (path, handler)=>{
 
 // TODO: Use functional State pattern
 const $b3a133cf85b0ceb6$var$state = {
+    formId: "",
     form: {}
 };
 const $b3a133cf85b0ceb6$var$handleSubmitClient = (stepper, f)=>(e)=>{
@@ -177,7 +176,7 @@ const $b3a133cf85b0ceb6$var$handleSubmitFiles = (f, msgSuccess)=>(e)=>{
             uploadFiles((0, $a8cec6fe269f4471$export$bc226234bbb4652f)(files)).then((response)=>{
                 $b3a133cf85b0ceb6$var$state.form.imageIds = response.map((v)=>v.fileId);
                 console.log(`State updated: ${JSON.stringify($b3a133cf85b0ceb6$var$state)}`);
-                (0, $a8cec6fe269f4471$export$ad2c850047bf833d)($b3a133cf85b0ceb6$var$state.form).then(()=>{
+                (0, $a8cec6fe269f4471$export$ad2c850047bf833d)($b3a133cf85b0ceb6$var$state.formId, $b3a133cf85b0ceb6$var$state.form).then(()=>{
                     console.log("Success!");
                     (0, $02ee45712bdfc733$export$ddf018cf7a99d36f)(msgSuccess, "Great success!");
                 });
@@ -187,13 +186,13 @@ const $b3a133cf85b0ceb6$var$handleSubmitFiles = (f, msgSuccess)=>(e)=>{
     };
 const $b3a133cf85b0ceb6$export$2cd8252107eb640b = (conf)=>{
     console.log("Initializing...", conf);
-    (0, $a8cec6fe269f4471$export$7d7650bf4871ff57)().then((client)=>{
-        console.log("Client", client);
-        (0, $02ee45712bdfc733$export$52987f4b88db0f2)(conf.elements.stepClient.form, $b3a133cf85b0ceb6$var$handleSubmitClient(conf.stepper, conf.elements.stepClient));
-        (0, $02ee45712bdfc733$export$52987f4b88db0f2)(conf.elements.stepVehicle.plateNumber.form, $b3a133cf85b0ceb6$var$handleSubmitSearchVehicle(conf.elements.stepVehicle));
-        (0, $02ee45712bdfc733$export$52987f4b88db0f2)(conf.elements.stepVehicle.form, $b3a133cf85b0ceb6$var$handleSubmitVehicle(conf.stepper, conf.elements.stepVehicle));
-        (0, $02ee45712bdfc733$export$52987f4b88db0f2)(conf.elements.stepFiles.form, $b3a133cf85b0ceb6$var$handleSubmitFiles(conf.elements.stepFiles, conf.elements.msgSuccess));
-    });
+    //void apiGetClient().then((client) => {
+    //  console.log('Client', client)
+    (0, $02ee45712bdfc733$export$52987f4b88db0f2)(conf.elements.stepClient.form, $b3a133cf85b0ceb6$var$handleSubmitClient(conf.stepper, conf.elements.stepClient));
+    (0, $02ee45712bdfc733$export$52987f4b88db0f2)(conf.elements.stepVehicle.plateNumber.form, $b3a133cf85b0ceb6$var$handleSubmitSearchVehicle(conf.elements.stepVehicle));
+    (0, $02ee45712bdfc733$export$52987f4b88db0f2)(conf.elements.stepVehicle.form, $b3a133cf85b0ceb6$var$handleSubmitVehicle(conf.stepper, conf.elements.stepVehicle));
+    (0, $02ee45712bdfc733$export$52987f4b88db0f2)(conf.elements.stepFiles.form, $b3a133cf85b0ceb6$var$handleSubmitFiles(conf.elements.stepFiles, conf.elements.msgSuccess));
+//})
 };
 
 

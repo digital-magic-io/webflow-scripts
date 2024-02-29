@@ -6,17 +6,15 @@ function $parcel$export(e, n, v, s) {
 $parcel$export(module.exports, "init", function () { return $15451612c40a4a0c$export$2cd8252107eb640b; });
 const $542eefcd7729cbce$var$apiUrl = "https://test.carprof.ee/api/v1";
 const $542eefcd7729cbce$var$formsUrl = `${$542eefcd7729cbce$var$apiUrl}/forms`;
+const $542eefcd7729cbce$var$externalUrl = `${$542eefcd7729cbce$var$apiUrl}/external`;
 const $542eefcd7729cbce$var$fileUrl = `${$542eefcd7729cbce$var$formsUrl}/file`;
-const $542eefcd7729cbce$var$clientUrl = `${$542eefcd7729cbce$var$formsUrl}/client`;
-const $542eefcd7729cbce$var$buyoutUrl = `${$542eefcd7729cbce$var$formsUrl}/buyout`;
+const $542eefcd7729cbce$var$clientUrl = `${$542eefcd7729cbce$var$externalUrl}/personal-data`;
+const $542eefcd7729cbce$var$buyoutUrl = (formId)=>`${$542eefcd7729cbce$var$externalUrl}/buyout/${formId}`;
 const $542eefcd7729cbce$var$lookupCarRegistryUrl = (plateNumber)=>`${$542eefcd7729cbce$var$apiUrl}/cars/mnt/${plateNumber}`;
 const $542eefcd7729cbce$var$fetchTyped = async (url, init = {
     method: "GET"
 })=>{
-    const response = await fetch(url, {
-        credentials: "include",
-        ...init
-    });
+    const response = await fetch(url, init);
     if (!response.ok) throw new Error(`Failed to fetch ${init.method} ${url}: ${response.status} ${response.statusText}`);
     else {
         const responseText = await response.text();
@@ -42,7 +40,7 @@ const $542eefcd7729cbce$export$30f6785ef4f50942 = (file)=>{
         body: data
     });
 };
-const $542eefcd7729cbce$export$ad2c850047bf833d = (request)=>$542eefcd7729cbce$var$postTyped($542eefcd7729cbce$var$buyoutUrl, request);
+const $542eefcd7729cbce$export$ad2c850047bf833d = (formId, request)=>$542eefcd7729cbce$var$postTyped($542eefcd7729cbce$var$buyoutUrl(formId), request);
 const $542eefcd7729cbce$export$a716ac162dff6323 = (plateNumber)=>$542eefcd7729cbce$var$getTyped($542eefcd7729cbce$var$lookupCarRegistryUrl(plateNumber));
 const $542eefcd7729cbce$export$dd1bc94b04021eeb = (value)=>value === null || value === undefined;
 const $542eefcd7729cbce$export$96bdbc84526f3739 = (value)=>!$542eefcd7729cbce$export$dd1bc94b04021eeb(value);
@@ -101,6 +99,7 @@ const $d5a221d013e48634$export$89a6f6b18f17322b = (path, handler)=>{
 
 // TODO: Use functional State pattern
 const $15451612c40a4a0c$var$state = {
+    formId: "",
     form: {}
 };
 const $15451612c40a4a0c$var$handleSubmitClient = (stepper, f)=>(e)=>{
@@ -183,7 +182,7 @@ const $15451612c40a4a0c$var$handleSubmitFiles = (f, msgSuccess)=>(e)=>{
             uploadFiles((0, $542eefcd7729cbce$export$bc226234bbb4652f)(files)).then((response)=>{
                 $15451612c40a4a0c$var$state.form.imageIds = response.map((v)=>v.fileId);
                 console.log(`State updated: ${JSON.stringify($15451612c40a4a0c$var$state)}`);
-                (0, $542eefcd7729cbce$export$ad2c850047bf833d)($15451612c40a4a0c$var$state.form).then(()=>{
+                (0, $542eefcd7729cbce$export$ad2c850047bf833d)($15451612c40a4a0c$var$state.formId, $15451612c40a4a0c$var$state.form).then(()=>{
                     console.log("Success!");
                     (0, $d5a221d013e48634$export$ddf018cf7a99d36f)(msgSuccess, "Great success!");
                 });
@@ -193,13 +192,13 @@ const $15451612c40a4a0c$var$handleSubmitFiles = (f, msgSuccess)=>(e)=>{
     };
 const $15451612c40a4a0c$export$2cd8252107eb640b = (conf)=>{
     console.log("Initializing...", conf);
-    (0, $542eefcd7729cbce$export$7d7650bf4871ff57)().then((client)=>{
-        console.log("Client", client);
-        (0, $d5a221d013e48634$export$52987f4b88db0f2)(conf.elements.stepClient.form, $15451612c40a4a0c$var$handleSubmitClient(conf.stepper, conf.elements.stepClient));
-        (0, $d5a221d013e48634$export$52987f4b88db0f2)(conf.elements.stepVehicle.plateNumber.form, $15451612c40a4a0c$var$handleSubmitSearchVehicle(conf.elements.stepVehicle));
-        (0, $d5a221d013e48634$export$52987f4b88db0f2)(conf.elements.stepVehicle.form, $15451612c40a4a0c$var$handleSubmitVehicle(conf.stepper, conf.elements.stepVehicle));
-        (0, $d5a221d013e48634$export$52987f4b88db0f2)(conf.elements.stepFiles.form, $15451612c40a4a0c$var$handleSubmitFiles(conf.elements.stepFiles, conf.elements.msgSuccess));
-    });
+    //void apiGetClient().then((client) => {
+    //  console.log('Client', client)
+    (0, $d5a221d013e48634$export$52987f4b88db0f2)(conf.elements.stepClient.form, $15451612c40a4a0c$var$handleSubmitClient(conf.stepper, conf.elements.stepClient));
+    (0, $d5a221d013e48634$export$52987f4b88db0f2)(conf.elements.stepVehicle.plateNumber.form, $15451612c40a4a0c$var$handleSubmitSearchVehicle(conf.elements.stepVehicle));
+    (0, $d5a221d013e48634$export$52987f4b88db0f2)(conf.elements.stepVehicle.form, $15451612c40a4a0c$var$handleSubmitVehicle(conf.stepper, conf.elements.stepVehicle));
+    (0, $d5a221d013e48634$export$52987f4b88db0f2)(conf.elements.stepFiles.form, $15451612c40a4a0c$var$handleSubmitFiles(conf.elements.stepFiles, conf.elements.msgSuccess));
+//})
 };
 
 
