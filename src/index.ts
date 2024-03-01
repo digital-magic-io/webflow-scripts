@@ -1,11 +1,11 @@
 import {
   apiGetCar,
-  apiGetClient,
   apiPostBuyout,
   apiPostClient,
   apiUploadFile,
   BuyoutRequest,
   ClientRequest,
+  ClientResponse,
   fromFileList,
   uploadFilesList
 } from './api'
@@ -13,11 +13,13 @@ import { getInput, setMsg, setInput, setupFormHandler } from './wfdom'
 import { WfConfiguration } from './wfconfig'
 
 type State = {
+  client: ClientResponse | undefined
   form: Partial<BuyoutRequest>
 }
 
 // TODO: Use functional State pattern
 const state: State = {
+  client: undefined,
   form: {}
 }
 
@@ -35,7 +37,9 @@ const handleSubmitClient =
     }
     if (client.name && client.email && client.phoneNumber) {
       void apiPostClient(client)
-        .then(() => {
+        .then((resp) => {
+          state.client = resp
+          console.log(`State updated: ${JSON.stringify(state)}`)
           stepper.nextStepFn(1)
         })
         .catch((error) => {
@@ -115,7 +119,9 @@ const handleSubmitFiles =
   (f: WfConfiguration['elements']['stepFiles'], msgSuccess: string) =>
   (e: Event): void => {
     console.log('Form submitted', e.target)
+
     setMsg(f.msgError, '')
+
     const files = getInput(f.inputFiles)?.files
     if (files && files.length > 0) {
       console.log('Files:', files)
@@ -123,10 +129,14 @@ const handleSubmitFiles =
       void uploadFiles(fromFileList(files)).then((response) => {
         state.form.imageIds = response.map((v) => v.fileId)
         console.log(`State updated: ${JSON.stringify(state)}`)
-        void apiPostBuyout(state.form as BuyoutRequest).then(() => {
-          console.log('Success!')
-          setMsg(msgSuccess, 'Great success!')
-        })
+        if (state.client) {
+          void apiPostBuyout(state.client.personalDataId, state.form as BuyoutRequest).then(() => {
+            console.log('Success!')
+            setMsg(msgSuccess, 'Great success!')
+          })
+        } else {
+          setMsg(f.msgError, 'client is not set!')
+        }
       })
     } else if (files && files.length > 10) {
       setMsg(f.msgError, 'Too many files selected!')
@@ -137,11 +147,9 @@ const handleSubmitFiles =
 
 export const init = (conf: WfConfiguration): void => {
   console.log('Initializing...', conf)
-  void apiGetClient().then((client) => {
-    console.log('Client', client)
-    setupFormHandler(conf.elements.stepClient.form, handleSubmitClient(conf.stepper, conf.elements.stepClient))
-    setupFormHandler(conf.elements.stepVehicle.plateNumber.form, handleSubmitSearchVehicle(conf.elements.stepVehicle))
-    setupFormHandler(conf.elements.stepVehicle.form, handleSubmitVehicle(conf.stepper, conf.elements.stepVehicle))
-    setupFormHandler(conf.elements.stepFiles.form, handleSubmitFiles(conf.elements.stepFiles, conf.elements.msgSuccess))
-  })
+
+  setupFormHandler(conf.elements.stepClient.form, handleSubmitClient(conf.stepper, conf.elements.stepClient))
+  setupFormHandler(conf.elements.stepVehicle.plateNumber.form, handleSubmitSearchVehicle(conf.elements.stepVehicle))
+  setupFormHandler(conf.elements.stepVehicle.form, handleSubmitVehicle(conf.stepper, conf.elements.stepVehicle))
+  setupFormHandler(conf.elements.stepFiles.form, handleSubmitFiles(conf.elements.stepFiles, conf.elements.msgSuccess))
 }

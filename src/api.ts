@@ -13,6 +13,10 @@ export type ClientRequest = {
   formType: FormType
 } & ClientPersonalData
 
+export type ClientResponse = {
+  personalDataId: string
+}
+
 export type FileUploadResponse = {
   fileId: string
 }
@@ -56,14 +60,15 @@ export type BuyoutRequest = {
 
 const apiUrl = 'https://test.carprof.ee/api/v1'
 const formsUrl = `${apiUrl}/forms`
+const externalUrl = `${apiUrl}/external`
 
 const fileUrl = `${formsUrl}/file`
-const clientUrl = `${formsUrl}/client`
-const buyoutUrl = `${formsUrl}/buyout`
+const clientUrl = `${externalUrl}/personal-data`
+const buyoutUrl = (formId: string): string => `${externalUrl}/buyout/${formId}`
 const lookupCarRegistryUrl = (plateNumber: string): string => `${apiUrl}/cars/mnt/${plateNumber}`
 
 const fetchTyped = async <T>(url: string, init: RequestInit = { method: 'GET' }): Promise<T> => {
-  const response = await fetch(url, { credentials: 'include', ...init })
+  const response = await fetch(url, init)
   if (!response.ok) {
     throw new Error(`Failed to fetch ${init.method} ${url}: ${response.status} ${response.statusText}`)
   } else {
@@ -87,7 +92,7 @@ const postTyped = async <T, R>(url: string, body: T): Promise<R> =>
   })
 
 export const apiGetClient = (): Promise<ClientPersonalData> => getTyped(clientUrl)
-export const apiPostClient = (request: ClientRequest): Promise<Response> => postTyped(clientUrl, request)
+export const apiPostClient = (request: ClientRequest): Promise<ClientResponse> => postTyped(clientUrl, request)
 
 export const apiUploadFile = (file: File): Promise<FileUploadResponse> => {
   const data = new FormData()
@@ -99,7 +104,8 @@ export const apiUploadFile = (file: File): Promise<FileUploadResponse> => {
   })
 }
 
-export const apiPostBuyout = (request: BuyoutRequest): Promise<Response> => postTyped(buyoutUrl, request)
+export const apiPostBuyout = (formId: string, request: BuyoutRequest): Promise<Response> =>
+  postTyped(buyoutUrl(formId), request)
 
 export const apiGetCar = (plateNumber: string): Promise<VehicleMntSearchResponse> =>
   getTyped(lookupCarRegistryUrl(plateNumber))
