@@ -99,7 +99,7 @@ const $d5a221d013e48634$export$89a6f6b18f17322b = (path, handler)=>{
 
 // TODO: Use functional State pattern
 const $15451612c40a4a0c$var$state = {
-    formId: "",
+    client: undefined,
     form: {}
 };
 const $15451612c40a4a0c$var$handleSubmitClient = (stepper, f)=>(e)=>{
@@ -112,7 +112,9 @@ const $15451612c40a4a0c$var$handleSubmitClient = (stepper, f)=>(e)=>{
             phoneNumber: (0, $d5a221d013e48634$export$7c112ceec8941e67)(f.txtPhone)?.value ?? "",
             language: "et"
         };
-        if (client.name && client.email && client.phoneNumber) (0, $542eefcd7729cbce$export$3e93138bfea324f5)(client).then(()=>{
+        if (client.name && client.email && client.phoneNumber) (0, $542eefcd7729cbce$export$3e93138bfea324f5)(client).then((resp)=>{
+            $15451612c40a4a0c$var$state.client = resp;
+            console.log(`State updated: ${JSON.stringify($15451612c40a4a0c$var$state)}`);
             stepper.nextStepFn(1);
         }).catch((error)=>{
             console.error("API error:", error);
@@ -182,23 +184,21 @@ const $15451612c40a4a0c$var$handleSubmitFiles = (f, msgSuccess)=>(e)=>{
             uploadFiles((0, $542eefcd7729cbce$export$bc226234bbb4652f)(files)).then((response)=>{
                 $15451612c40a4a0c$var$state.form.imageIds = response.map((v)=>v.fileId);
                 console.log(`State updated: ${JSON.stringify($15451612c40a4a0c$var$state)}`);
-                (0, $542eefcd7729cbce$export$ad2c850047bf833d)($15451612c40a4a0c$var$state.formId, $15451612c40a4a0c$var$state.form).then(()=>{
+                if ($15451612c40a4a0c$var$state.client) (0, $542eefcd7729cbce$export$ad2c850047bf833d)($15451612c40a4a0c$var$state.client.personalDataId, $15451612c40a4a0c$var$state.form).then(()=>{
                     console.log("Success!");
                     (0, $d5a221d013e48634$export$ddf018cf7a99d36f)(msgSuccess, "Great success!");
                 });
+                else (0, $d5a221d013e48634$export$ddf018cf7a99d36f)(f.msgError, "client is not set!");
             });
         } else if (files && files.length > 10) (0, $d5a221d013e48634$export$ddf018cf7a99d36f)(f.msgError, "Too many files selected!");
         else (0, $d5a221d013e48634$export$ddf018cf7a99d36f)(f.msgError, "Files must be selected!");
     };
 const $15451612c40a4a0c$export$2cd8252107eb640b = (conf)=>{
     console.log("Initializing...", conf);
-    //void apiGetClient().then((client) => {
-    //  console.log('Client', client)
     (0, $d5a221d013e48634$export$52987f4b88db0f2)(conf.elements.stepClient.form, $15451612c40a4a0c$var$handleSubmitClient(conf.stepper, conf.elements.stepClient));
     (0, $d5a221d013e48634$export$52987f4b88db0f2)(conf.elements.stepVehicle.plateNumber.form, $15451612c40a4a0c$var$handleSubmitSearchVehicle(conf.elements.stepVehicle));
     (0, $d5a221d013e48634$export$52987f4b88db0f2)(conf.elements.stepVehicle.form, $15451612c40a4a0c$var$handleSubmitVehicle(conf.stepper, conf.elements.stepVehicle));
     (0, $d5a221d013e48634$export$52987f4b88db0f2)(conf.elements.stepFiles.form, $15451612c40a4a0c$var$handleSubmitFiles(conf.elements.stepFiles, conf.elements.msgSuccess));
-//})
 };
 
 
