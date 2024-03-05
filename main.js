@@ -95,6 +95,10 @@ const $d5a221d013e48634$export$89a6f6b18f17322b = (path, handler)=>{
     if (btn) btn.onclick = handler;
     else console.error(`Unable to find button with id "${path}"`);
 };
+const $d5a221d013e48634$export$998191bfdf710c72 = (path)=>{
+    const el = $d5a221d013e48634$export$d16800b7e59a8051(path);
+    if (el) el.style.display = "unset";
+};
 
 
 // TODO: Use functional State pattern
@@ -133,10 +137,11 @@ const $15451612c40a4a0c$var$handleSubmitSearchVehicle = (f)=>(e)=>{
                 (0, $d5a221d013e48634$export$a212451ed6854bb0)(f.txtMake, response.mark);
                 (0, $d5a221d013e48634$export$a212451ed6854bb0)(f.txtModel, response.model);
                 (0, $d5a221d013e48634$export$a212451ed6854bb0)(f.txtYear, String(response.firstRegYear));
-            //setInput(f.txtMileage, )
-            //setInput(f.txtLocation, )
-            //setInput(f.txtPrice)
-            //setInput()
+                //setInput(f.txtMileage, )
+                //setInput(f.txtLocation, )
+                //setInput(f.txtPrice)
+                //setInput()
+                (0, $d5a221d013e48634$export$998191bfdf710c72)(f.form);
             }).catch((error)=>{
                 console.error("Car error:", error);
                 (0, $d5a221d013e48634$export$ddf018cf7a99d36f)(f.plateNumber.msgError, "Car not found!");
