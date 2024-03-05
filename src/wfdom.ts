@@ -48,3 +48,10 @@ export const setupBtnHandler = (path: string, handler: (e: Event) => void): void
     console.error(`Unable to find button with id "${path}"`)
   }
 }
+
+export const showElement = (path: string): void => {
+  const el = getElement(path)
+  if (el) {
+    el.style.display = 'unset'
+  }
+}

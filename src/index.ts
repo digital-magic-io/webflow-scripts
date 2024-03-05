@@ -9,7 +9,7 @@ import {
   fromFileList,
   uploadFilesList
 } from './api'
-import { getInput, setMsg, setInput, setupFormHandler } from './wfdom'
+import { getInput, setMsg, setInput, setupFormHandler, showElement } from './wfdom'
 import { WfConfiguration } from './wfconfig'
 
 type State = {
@@ -69,6 +69,7 @@ const handleSubmitSearchVehicle =
           //setInput(f.txtLocation, )
           //setInput(f.txtPrice)
           //setInput()
+          showElement(f.form)
         })
         .catch((error) => {
           console.error('Car error:', error)
