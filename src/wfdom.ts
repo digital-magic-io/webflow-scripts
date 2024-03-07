@@ -52,6 +52,6 @@ export const setupBtnHandler = (path: string, handler: (e: Event) => void): void
 export const showElement = (path: string): void => {
   const el = getElement(path)
   if (el) {
-    el.style.display = 'unset'
+    el.style.display = 'block'
   }
 }

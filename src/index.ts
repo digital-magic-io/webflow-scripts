@@ -95,17 +95,15 @@ const handleSubmitVehicle =
     const plateNumber = getInput(f.plateNumber.txtPlateNumber)?.value
     if (make && model && year && mileage && price && plateNumber) {
       const request: BuyoutRequest = {
-        registrationNumber: plateNumber,
-        fuelId: 1,
-        transmissionId: 1,
-        imageIds: [],
+        plateNumber,
         make,
         model,
         year: Number(year), // TODO: Use safe parse
         mileage: Number(mileage),
         location,
-        requestedPrice: Number(price),
-        additionalInfo: message
+        price: Number(price),
+        additionalInfo: message,
+        photoIds: []
       }
       console.log(`Submitted: request=${JSON.stringify(request)}`)
       state.form = request
@@ -117,7 +115,7 @@ const handleSubmitVehicle =
   }
 
 const handleSubmitFiles =
-  (f: WfConfiguration['elements']['stepFiles'], msgSuccess: string) =>
+  (stepper: WfConfiguration['stepper'], f: WfConfiguration['elements']['stepFiles']) =>
   (e: Event): void => {
     console.log('Form submitted', e.target)
 
@@ -128,12 +126,12 @@ const handleSubmitFiles =
       console.log('Files:', files)
       const uploadFiles = uploadFilesList(apiUploadFile)
       void uploadFiles(fromFileList(files)).then((response) => {
-        state.form.imageIds = response.map((v) => v.fileId)
+        state.form.photoIds = response.map((v) => v.fileId)
         console.log(`State updated: ${JSON.stringify(state)}`)
         if (state.client) {
           void apiPostBuyout(state.client.personalDataId, state.form as BuyoutRequest).then(() => {
             console.log('Success!')
-            setMsg(msgSuccess, 'Great success!')
+            stepper.nextStepFn(3)
           })
         } else {
           setMsg(f.msgError, 'client is not set!')
@@ -152,5 +150,5 @@ export const init = (conf: WfConfiguration): void => {
   setupFormHandler(conf.elements.stepClient.form, handleSubmitClient(conf.stepper, conf.elements.stepClient))
   setupFormHandler(conf.elements.stepVehicle.plateNumber.form, handleSubmitSearchVehicle(conf.elements.stepVehicle))
   setupFormHandler(conf.elements.stepVehicle.form, handleSubmitVehicle(conf.stepper, conf.elements.stepVehicle))
-  setupFormHandler(conf.elements.stepFiles.form, handleSubmitFiles(conf.elements.stepFiles, conf.elements.msgSuccess))
+  setupFormHandler(conf.elements.stepFiles.form, handleSubmitFiles(conf.stepper, conf.elements.stepFiles))
 }

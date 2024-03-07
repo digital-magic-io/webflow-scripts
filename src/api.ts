@@ -39,23 +39,16 @@ export type VehicleMntSearchResponse = {
   registrationNumber?: string
 }
 
-export type TranslationValueId = number
-
 export type BuyoutRequest = {
-  registrationNumber: string
-  fuelId: TranslationValueId
-  engineVolCm3?: number
-  engineKw?: number
-  imageIds: Array<string>
+  plateNumber: string
   make: string
   model: string
-  mileage: number
-  requestedPrice: number
-  transmissionId: TranslationValueId
-  nextInspectionDate?: string
   year: number
+  mileage: number
   location?: string
+  price: number
   additionalInfo?: string
+  photoIds: Array<string>
 }
 
 const apiUrl = 'https://test.carprof.ee/api/v1'
