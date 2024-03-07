@@ -97,7 +97,7 @@ const $d5a221d013e48634$export$89a6f6b18f17322b = (path, handler)=>{
 };
 const $d5a221d013e48634$export$998191bfdf710c72 = (path)=>{
     const el = $d5a221d013e48634$export$d16800b7e59a8051(path);
-    if (el) el.style.display = "unset";
+    if (el) el.style.display = "block";
 };
 
 
@@ -161,17 +161,15 @@ const $15451612c40a4a0c$var$handleSubmitVehicle = (stepper, f)=>(e)=>{
         const plateNumber = (0, $d5a221d013e48634$export$7c112ceec8941e67)(f.plateNumber.txtPlateNumber)?.value;
         if (make && model && year && mileage && price && plateNumber) {
             const request = {
-                registrationNumber: plateNumber,
-                fuelId: 1,
-                transmissionId: 1,
-                imageIds: [],
+                plateNumber: plateNumber,
                 make: make,
                 model: model,
                 year: Number(year),
                 mileage: Number(mileage),
                 location: location,
-                requestedPrice: Number(price),
-                additionalInfo: message
+                price: Number(price),
+                additionalInfo: message,
+                photoIds: []
             };
             console.log(`Submitted: request=${JSON.stringify(request)}`);
             $15451612c40a4a0c$var$state.form = request;
@@ -179,7 +177,7 @@ const $15451612c40a4a0c$var$handleSubmitVehicle = (stepper, f)=>(e)=>{
             stepper.nextStepFn(2);
         } else (0, $d5a221d013e48634$export$ddf018cf7a99d36f)(f.msgError, "All vehicle fields must be filled except message!");
     };
-const $15451612c40a4a0c$var$handleSubmitFiles = (f, msgSuccess)=>(e)=>{
+const $15451612c40a4a0c$var$handleSubmitFiles = (stepper, f)=>(e)=>{
         console.log("Form submitted", e.target);
         (0, $d5a221d013e48634$export$ddf018cf7a99d36f)(f.msgError, "");
         const files = (0, $d5a221d013e48634$export$7c112ceec8941e67)(f.inputFiles)?.files;
@@ -187,11 +185,11 @@ const $15451612c40a4a0c$var$handleSubmitFiles = (f, msgSuccess)=>(e)=>{
             console.log("Files:", files);
             const uploadFiles = (0, $542eefcd7729cbce$export$7b64c937225679ee)((0, $542eefcd7729cbce$export$30f6785ef4f50942));
             uploadFiles((0, $542eefcd7729cbce$export$bc226234bbb4652f)(files)).then((response)=>{
-                $15451612c40a4a0c$var$state.form.imageIds = response.map((v)=>v.fileId);
+                $15451612c40a4a0c$var$state.form.photoIds = response.map((v)=>v.fileId);
                 console.log(`State updated: ${JSON.stringify($15451612c40a4a0c$var$state)}`);
                 if ($15451612c40a4a0c$var$state.client) (0, $542eefcd7729cbce$export$ad2c850047bf833d)($15451612c40a4a0c$var$state.client.personalDataId, $15451612c40a4a0c$var$state.form).then(()=>{
                     console.log("Success!");
-                    (0, $d5a221d013e48634$export$ddf018cf7a99d36f)(msgSuccess, "Great success!");
+                    stepper.nextStepFn(3);
                 });
                 else (0, $d5a221d013e48634$export$ddf018cf7a99d36f)(f.msgError, "client is not set!");
             });
@@ -203,7 +201,7 @@ const $15451612c40a4a0c$export$2cd8252107eb640b = (conf)=>{
     (0, $d5a221d013e48634$export$52987f4b88db0f2)(conf.elements.stepClient.form, $15451612c40a4a0c$var$handleSubmitClient(conf.stepper, conf.elements.stepClient));
     (0, $d5a221d013e48634$export$52987f4b88db0f2)(conf.elements.stepVehicle.plateNumber.form, $15451612c40a4a0c$var$handleSubmitSearchVehicle(conf.elements.stepVehicle));
     (0, $d5a221d013e48634$export$52987f4b88db0f2)(conf.elements.stepVehicle.form, $15451612c40a4a0c$var$handleSubmitVehicle(conf.stepper, conf.elements.stepVehicle));
-    (0, $d5a221d013e48634$export$52987f4b88db0f2)(conf.elements.stepFiles.form, $15451612c40a4a0c$var$handleSubmitFiles(conf.elements.stepFiles, conf.elements.msgSuccess));
+    (0, $d5a221d013e48634$export$52987f4b88db0f2)(conf.elements.stepFiles.form, $15451612c40a4a0c$var$handleSubmitFiles(conf.stepper, conf.elements.stepFiles));
 };
 
 
