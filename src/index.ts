@@ -1,16 +1,8 @@
-import {
-  apiGetCar,
-  apiPostBuyout,
-  apiPostClient,
-  apiUploadFile,
-  BuyoutRequest,
-  ClientRequest,
-  ClientResponse,
-  fromFileList,
-  uploadFilesList
-} from './api'
-import { getInput, setMsg, setInput, setupFormHandler, showElement } from './wfdom'
-import { WfConfiguration } from './wfconfig'
+import { DmConfig } from './dmconfig'
+import { apiGetCar, apiPostClient, BuyoutRequest, ClientRequest, ClientResponse } from './api'
+import { getForm } from './dmdom'
+import { validateEmail, validateNonEmpty } from './validators'
+import { createFormInstance, DmFormInstance } from './dmform'
 
 type State = {
   client: ClientResponse | undefined
@@ -23,132 +15,100 @@ const state: State = {
   form: {}
 }
 
+type ClientFormInstance = DmFormInstance<'name' | 'email' | 'phone'>
+type FindVehicleFormInstance = DmFormInstance<'plateNumber'>
+type VehicleFormInstance = DmFormInstance<'make' | 'model' | 'year' | 'mileage' | 'location' | 'price'>
+
 const handleSubmitClient =
-  (stepper: WfConfiguration['stepper'], f: WfConfiguration['elements']['stepClient']) =>
+  (conf: DmConfig, form: ClientFormInstance) =>
   (e: Event): void => {
     console.log('Form submitted', e.target)
-    setMsg(f.msgError, '')
+    form.clearAllErrors()
+    const name = validateNonEmpty(form.fields.name)
+    const email = validateEmail(form.fields.email)
+    const phoneNumber = validateNonEmpty(form.fields.phone)
+
+    if (!name || !email || !phoneNumber) {
+      return
+    }
+
     const client: ClientRequest = {
       formType: 'BUYOUT',
-      name: getInput(f.txtName)?.value ?? '',
-      email: getInput(f.txtEmail)?.value ?? '',
-      phoneNumber: getInput(f.txtPhone)?.value ?? '',
+      name,
+      email,
+      phoneNumber,
       language: 'et'
     }
-    if (client.name && client.email && client.phoneNumber) {
-      void apiPostClient(client)
-        .then((resp) => {
-          state.client = resp
-          console.log(`State updated: ${JSON.stringify(state)}`)
-          stepper.nextStepFn(1)
-        })
-        .catch((error) => {
-          console.error('API error:', error)
-          setMsg(f.msgError, 'Unable to send client data!')
-        })
-    } else {
-      setMsg(f.msgError, 'All fields must be filled!')
-    }
+
+    void apiPostClient(client)
+      .then((resp) => {
+        state.client = resp
+        console.log(`State updated: ${JSON.stringify(state)}`)
+        conf.stepper.nextStepFn(1)
+      })
+      .catch((error) => {
+        console.error('API error:', error)
+        form.setError('Unable to send client data!')
+      })
   }
 
 const handleSubmitSearchVehicle =
-  (f: WfConfiguration['elements']['stepVehicle']) =>
+  (form: FindVehicleFormInstance, vehicleForm: VehicleFormInstance) =>
   (e: Event): void => {
     console.log('Form submitted', e.target)
-    setMsg(f.plateNumber.msgError, '')
-    const plateNumber = getInput(f.plateNumber.txtPlateNumber)?.value
-    if (plateNumber && plateNumber.length > 0) {
-      console.log('Plate number:', plateNumber)
-      apiGetCar(plateNumber)
-        .then((response) => {
-          console.log('Car response:', response)
-          setInput(f.txtMake, response.mark)
-          setInput(f.txtModel, response.model)
-          setInput(f.txtYear, String(response.firstRegYear))
-          //setInput(f.txtMileage, )
-          //setInput(f.txtLocation, )
-          //setInput(f.txtPrice)
-          //setInput()
-          showElement(f.form)
-        })
-        .catch((error) => {
-          console.error('Car error:', error)
-          setMsg(f.plateNumber.msgError, 'Car not found!')
-        })
-    } else {
-      setMsg(f.plateNumber.msgError, 'Plate number must be filled!')
+    form.clearAllErrors()
+    const plateNumber = validateNonEmpty(form.fields.plateNumber)
+
+    if (!plateNumber) {
+      return
     }
-  }
 
-const handleSubmitVehicle =
-  (stepper: WfConfiguration['stepper'], f: WfConfiguration['elements']['stepVehicle']) =>
-  (e: Event): void => {
-    console.log('Form submitted', e.target)
-    setMsg(f.msgError, '')
-    const make = getInput(f.txtMake)?.value
-    const model = getInput(f.txtModel)?.value
-    const year = getInput(f.txtYear)?.value
-    const mileage = getInput(f.txtMileage)?.value
-    const location = getInput(f.txtLocation)?.value
-    const price = getInput(f.txtPrice)?.value
-    const message = getInput(f.txtMessage)?.value
-    const plateNumber = getInput(f.plateNumber.txtPlateNumber)?.value
-    if (make && model && year && mileage && price && plateNumber) {
-      const request: BuyoutRequest = {
-        plateNumber,
-        make,
-        model,
-        year: Number(year), // TODO: Use safe parse
-        mileage: Number(mileage),
-        location,
-        price: Number(price),
-        additionalInfo: message,
-        photoIds: []
-      }
-      console.log(`Submitted: request=${JSON.stringify(request)}`)
-      state.form = request
-      console.log(`State updated: ${JSON.stringify(state)}`)
-      stepper.nextStepFn(2)
-    } else {
-      setMsg(f.msgError, 'All vehicle fields must be filled except message!')
-    }
-  }
+    console.log('Plate number:', plateNumber)
 
-const handleSubmitFiles =
-  (stepper: WfConfiguration['stepper'], f: WfConfiguration['elements']['stepFiles']) =>
-  (e: Event): void => {
-    console.log('Form submitted', e.target)
-
-    setMsg(f.msgError, '')
-
-    const files = getInput(f.inputFiles)?.files
-    if (files && files.length > 0) {
-      console.log('Files:', files)
-      const uploadFiles = uploadFilesList(apiUploadFile)
-      void uploadFiles(fromFileList(files)).then((response) => {
-        state.form.photoIds = response.map((v) => v.fileId)
-        console.log(`State updated: ${JSON.stringify(state)}`)
-        if (state.client) {
-          void apiPostBuyout(state.client.personalDataId, state.form as BuyoutRequest).then(() => {
-            console.log('Success!')
-            stepper.nextStepFn(3)
-          })
-        } else {
-          setMsg(f.msgError, 'client is not set!')
-        }
+    apiGetCar(plateNumber)
+      .then((response) => {
+        console.log('Car response:', response)
+        vehicleForm.fields.make.setInputValue(response.mark)
+        vehicleForm.fields.model.setInputValue(response.model)
+        vehicleForm.fields.year.setInputValue(String(response.firstRegYear))
+        vehicleForm.show()
       })
-    } else if (files && files.length > 10) {
-      setMsg(f.msgError, 'Too many files selected!')
-    } else {
-      setMsg(f.msgError, 'Files must be selected!')
-    }
+      .catch((error) => {
+        console.error('Car error:', error)
+        form.fields.plateNumber.setError('Car not found!')
+      })
   }
 
-export const init = (conf: WfConfiguration): void => {
-  console.log('Initializing...', conf)
+const initForm = <T extends string>(name: string, fieldNames: Array<T>): DmFormInstance<T> | undefined => {
+  const form = getForm(name)
+  if (form) {
+    //form.setOnSubmit(handler(form))
+    return createFormInstance(form, fieldNames)
+  } else {
+    // eslint-disable-next-line no-console
+    console.error('Client form not found!')
+    return undefined
+  }
+}
 
-  setupFormHandler(conf.elements.stepClient.form, handleSubmitClient(conf.stepper, conf.elements.stepClient))
-  setupFormHandler(conf.elements.stepVehicle.plateNumber.form, handleSubmitSearchVehicle(conf.elements.stepVehicle))
-  setupFormHandler(conf.elements.stepVehicle.form, handleSubmitVehicle(conf.stepper, conf.elements.stepVehicle))
-  setupFormHandler(conf.elements.stepFiles.form, handleSubmitFiles(conf.stepper, conf.elements.stepFiles))
+export const init = (conf: DmConfig): void => {
+  console.log('Initializing...', conf)
+  //const { dom, stepper, forms } = conf
+
+  const clientForm: ClientFormInstance = initForm(conf.forms.client, ['name', 'email', 'phone'])
+  const findVehicleForm: FindVehicleFormInstance = initForm(conf.forms.findVehicle, ['plateNumber'])
+  const vehicleForm: VehicleFormInstance = initForm(conf.forms.vehicle, [
+    'make',
+    'model',
+    'year',
+    'mileage',
+    'location',
+    'price'
+  ])
+  if (!clientForm || !findVehicleForm || !vehicleForm) {
+    throw new Error('Not all forms are found!')
+  }
+  clientForm.setOnSubmit(handleSubmitClient(conf, clientForm))
+
+  findVehicleForm.setOnSubmit(handleSubmitSearchVehicle(findVehicleForm, vehicleForm))
 }

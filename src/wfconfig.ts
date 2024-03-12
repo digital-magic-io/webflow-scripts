@@ -1,3 +1,21 @@
+export type WfContainer = {
+  wfId: string
+}
+
+export type WfInput = {
+  wfName: string
+}
+
+// input.label
+// input.control
+// input.error
+// input.value
+
+export type WfForm = WfContainer & {
+  msgError: string
+  inputs: Array<WfInput>
+}
+
 export type WfElements = {
   stepClient: {
     form: string

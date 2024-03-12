@@ -1,0 +1,154 @@
+import {
+  apiGetCar,
+  apiPostBuyout,
+  apiPostClient,
+  apiUploadFile,
+  BuyoutRequest,
+  ClientRequest,
+  ClientResponse,
+  fromFileList,
+  uploadFilesList
+} from './api'
+import { getInput, setMsg, setInput, setupFormHandler, showElement } from './wfdom'
+import { WfConfiguration } from './wfconfig'
+
+type State = {
+  client: ClientResponse | undefined
+  form: Partial<BuyoutRequest>
+}
+
+// TODO: Use functional State pattern
+const state: State = {
+  client: undefined,
+  form: {}
+}
+
+const handleSubmitClient =
+  (stepper: WfConfiguration['stepper'], f: WfConfiguration['elements']['stepClient']) =>
+  (e: Event): void => {
+    console.log('Form submitted', e.target)
+    setMsg(f.msgError, '')
+    const client: ClientRequest = {
+      formType: 'BUYOUT',
+      name: getInput(f.txtName)?.value ?? '',
+      email: getInput(f.txtEmail)?.value ?? '',
+      phoneNumber: getInput(f.txtPhone)?.value ?? '',
+      language: 'et'
+    }
+    if (client.name && client.email && client.phoneNumber) {
+      void apiPostClient(client)
+        .then((resp) => {
+          state.client = resp
+          console.log(`State updated: ${JSON.stringify(state)}`)
+          stepper.nextStepFn(1)
+        })
+        .catch((error) => {
+          console.error('API error:', error)
+          setMsg(f.msgError, 'Unable to send client data!')
+        })
+    } else {
+      setMsg(f.msgError, 'All fields must be filled!')
+    }
+  }
+
+const handleSubmitSearchVehicle =
+  (f: WfConfiguration['elements']['stepVehicle']) =>
+  (e: Event): void => {
+    console.log('Form submitted', e.target)
+    setMsg(f.plateNumber.msgError, '')
+    const plateNumber = getInput(f.plateNumber.txtPlateNumber)?.value
+    if (plateNumber && plateNumber.length > 0) {
+      console.log('Plate number:', plateNumber)
+      apiGetCar(plateNumber)
+        .then((response) => {
+          console.log('Car response:', response)
+          setInput(f.txtMake, response.mark)
+          setInput(f.txtModel, response.model)
+          setInput(f.txtYear, String(response.firstRegYear))
+          //setInput(f.txtMileage, )
+          //setInput(f.txtLocation, )
+          //setInput(f.txtPrice)
+          //setInput()
+          showElement(f.form)
+        })
+        .catch((error) => {
+          console.error('Car error:', error)
+          setMsg(f.plateNumber.msgError, 'Car not found!')
+        })
+    } else {
+      setMsg(f.plateNumber.msgError, 'Plate number must be filled!')
+    }
+  }
+
+const handleSubmitVehicle =
+  (stepper: WfConfiguration['stepper'], f: WfConfiguration['elements']['stepVehicle']) =>
+  (e: Event): void => {
+    console.log('Form submitted', e.target)
+    setMsg(f.msgError, '')
+    const make = getInput(f.txtMake)?.value
+    const model = getInput(f.txtModel)?.value
+    const year = getInput(f.txtYear)?.value
+    const mileage = getInput(f.txtMileage)?.value
+    const location = getInput(f.txtLocation)?.value
+    const price = getInput(f.txtPrice)?.value
+    const message = getInput(f.txtMessage)?.value
+    const plateNumber = getInput(f.plateNumber.txtPlateNumber)?.value
+    if (make && model && year && mileage && price && plateNumber) {
+      const request: BuyoutRequest = {
+        plateNumber,
+        make,
+        model,
+        year: Number(year), // TODO: Use safe parse
+        mileage: Number(mileage),
+        location,
+        price: Number(price),
+        additionalInfo: message,
+        photoIds: []
+      }
+      console.log(`Submitted: request=${JSON.stringify(request)}`)
+      state.form = request
+      console.log(`State updated: ${JSON.stringify(state)}`)
+      stepper.nextStepFn(2)
+    } else {
+      setMsg(f.msgError, 'All vehicle fields must be filled except message!')
+    }
+  }
+
+const handleSubmitFiles =
+  (stepper: WfConfiguration['stepper'], f: WfConfiguration['elements']['stepFiles']) =>
+  (e: Event): void => {
+    console.log('Form submitted', e.target)
+
+    setMsg(f.msgError, '')
+
+    const files = getInput(f.inputFiles)?.files
+    if (files && files.length > 0) {
+      console.log('Files:', files)
+      const uploadFiles = uploadFilesList(apiUploadFile)
+      void uploadFiles(fromFileList(files)).then((response) => {
+        state.form.photoIds = response.map((v) => v.fileId)
+        console.log(`State updated: ${JSON.stringify(state)}`)
+        if (state.client) {
+          void apiPostBuyout(state.client.personalDataId, state.form as BuyoutRequest).then(() => {
+            console.log('Success!')
+            stepper.nextStepFn(3)
+          })
+        } else {
+          setMsg(f.msgError, 'client is not set!')
+        }
+      })
+    } else if (files && files.length > 10) {
+      setMsg(f.msgError, 'Too many files selected!')
+    } else {
+      setMsg(f.msgError, 'Files must be selected!')
+    }
+  }
+
+export const init = (conf: WfConfiguration): void => {
+  console.log('Initializing...', conf)
+
+  setupFormHandler(conf.elements.stepClient.form, handleSubmitClient(conf.stepper, conf.elements.stepClient))
+  setupFormHandler(conf.elements.stepVehicle.plateNumber.form, handleSubmitSearchVehicle(conf.elements.stepVehicle))
+  setupFormHandler(conf.elements.stepVehicle.form, handleSubmitVehicle(conf.stepper, conf.elements.stepVehicle))
+  setupFormHandler(conf.elements.stepFiles.form, handleSubmitFiles(conf.stepper, conf.elements.stepFiles))
+}
