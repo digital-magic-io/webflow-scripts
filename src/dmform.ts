@@ -11,7 +11,7 @@ export type DmFieldInstance = DmElement<HTMLElement> & {
   setInputValue: (value: string) => void
 }
 
-export type DmFormInstance<T> = DmElement<HTMLElement> & {
+export type DmFormInstance<T extends string> = DmElement<HTMLElement> & {
   fields: Record<T, DmFieldInstance>
   error: DmElement<HTMLElement>
   clearError: () => void
@@ -72,6 +72,11 @@ export const createFormInstance = <T extends string>(form: DmForm, fieldNames: R
     } satisfies DmFieldInstance
   })
 
+  const error = form.getError()
+  if (!error) {
+    console.error('Form must have error element!', form.el)
+    throw new Error('Form must have error element!')
+  }
   return {
     id: form.id,
     name: form.name,
@@ -80,7 +85,7 @@ export const createFormInstance = <T extends string>(form: DmForm, fieldNames: R
     show: () => form.show(),
     hide: () => form.hide(),
     fields: createRecord(fieldInstances, 'name'),
-    error: form.getError() ?? { el: document.createElement('div') },
+    error: error,
     clearError: () => form.clearError(),
     clearAllErrors: () => {
       form.clearError()

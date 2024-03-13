@@ -1,26 +1,34 @@
 import { DmConfig } from './dmconfig'
-import { apiGetCar, apiPostClient, BuyoutRequest, ClientRequest, ClientResponse } from './api'
+import {
+  apiGetCar,
+  apiPostBuyout,
+  apiPostClient,
+  apiUploadFile,
+  BuyoutRequest,
+  ClientRequest,
+  ClientResponse,
+  fromFileList,
+  uploadFilesList
+} from './api'
 import { getForm } from './dmdom'
 import { validateEmail, validateNonEmpty } from './validators'
 import { createFormInstance, DmFormInstance } from './dmform'
+import { StateStorage } from './dmtypes'
 
-type State = {
+type State = Readonly<{
   client: ClientResponse | undefined
   form: Partial<BuyoutRequest>
-}
+}>
 
-// TODO: Use functional State pattern
-const state: State = {
-  client: undefined,
-  form: {}
-}
+type AppStateStorage = StateStorage<State>
 
 type ClientFormInstance = DmFormInstance<'name' | 'email' | 'phone'>
 type FindVehicleFormInstance = DmFormInstance<'plateNumber'>
-type VehicleFormInstance = DmFormInstance<'make' | 'model' | 'year' | 'mileage' | 'location' | 'price'>
+type VehicleFormInstance = DmFormInstance<'make' | 'model' | 'year' | 'mileage' | 'location' | 'price' | 'message'>
+type FilesFormInstance = DmFormInstance<'files'>
 
 const handleSubmitClient =
-  (conf: DmConfig, form: ClientFormInstance) =>
+  (conf: DmConfig, storage: AppStateStorage, form: ClientFormInstance) =>
   (e: Event): void => {
     console.log('Form submitted', e.target)
     form.clearAllErrors()
@@ -42,8 +50,8 @@ const handleSubmitClient =
 
     void apiPostClient(client)
       .then((resp) => {
-        state.client = resp
-        console.log(`State updated: ${JSON.stringify(state)}`)
+        storage.setState({ ...storage.state, client: resp })
+        console.log(`State updated: ${JSON.stringify(storage)}`)
         conf.stepper.nextStepFn(1)
       })
       .catch((error) => {
@@ -79,6 +87,75 @@ const handleSubmitSearchVehicle =
       })
   }
 
+const handleSubmitVehicle =
+  (conf: DmConfig, form: VehicleFormInstance, storage: AppStateStorage) =>
+  (e: Event): void => {
+    console.log('Form submitted', e.target)
+    form.clearAllErrors()
+    const make = validateNonEmpty(form.fields.make)
+    const model = validateNonEmpty(form.fields.model)
+    const year = validateNonEmpty(form.fields.year)
+    const mileage = validateNonEmpty(form.fields.mileage)
+    const location = form.fields.location?.input.el.value
+    const price = validateNonEmpty(form.fields.price)
+    const message = form.fields.message?.input.el.value
+
+    if (!make || !model || !year || !mileage || !price) {
+      return
+    }
+
+    if (storage.state.form.plateNumber === undefined) {
+      throw new Error('Plate number is not set!')
+    }
+
+    const request: BuyoutRequest = {
+      plateNumber: storage.state.form.plateNumber,
+      make,
+      model,
+      year: Number(year),
+      mileage: Number(mileage),
+      location,
+      price: Number(price),
+      additionalInfo: message,
+      photoIds: []
+    }
+    console.log(`Submitted: request=${JSON.stringify(request)}`)
+    console.log(`State updated: ${JSON.stringify(storage)}`)
+    conf.stepper.nextStepFn(2)
+  }
+
+const handleSubmitFiles =
+  (conf: DmConfig, storage: AppStateStorage, form: FilesFormInstance) =>
+  (e: Event): void => {
+    console.log('Form submitted', e.target)
+    form.clearAllErrors()
+    const files = form.fields.files.input.el.files
+
+    if (!files || files.length === 0) {
+      form.fields.files.setError('Files must be selected!')
+      return
+    } else if (files && files.length > 10) {
+      form.fields.files.setError('Maximum 10 files allowed!')
+      return
+    }
+
+    console.log('Files:', files)
+    const uploadFiles = uploadFilesList(apiUploadFile)
+    void uploadFiles(fromFileList(files)).then((response) => {
+      const photoIds = response.map((v) => v.fileId)
+      storage.setState({ ...storage.state, form: { ...storage.state.form, photoIds } })
+      console.log(`State updated: ${JSON.stringify(storage)}`)
+      if (storage.state.client) {
+        void apiPostBuyout(storage.state.client.personalDataId, storage.state.form as BuyoutRequest).then(() => {
+          console.log('Success!')
+          conf.stepper.nextStepFn(3)
+        })
+      } else {
+        form.setError('Client is not set!')
+      }
+    })
+  }
+
 const initForm = <T extends string>(name: string, fieldNames: Array<T>): DmFormInstance<T> | undefined => {
   const form = getForm(name)
   if (form) {
@@ -93,22 +170,36 @@ const initForm = <T extends string>(name: string, fieldNames: Array<T>): DmFormI
 
 export const init = (conf: DmConfig): void => {
   console.log('Initializing...', conf)
-  //const { dom, stepper, forms } = conf
 
-  const clientForm: ClientFormInstance = initForm(conf.forms.client, ['name', 'email', 'phone'])
-  const findVehicleForm: FindVehicleFormInstance = initForm(conf.forms.findVehicle, ['plateNumber'])
-  const vehicleForm: VehicleFormInstance = initForm(conf.forms.vehicle, [
+  const storage: AppStateStorage = {
+    state: {
+      client: undefined,
+      form: {}
+    },
+    setState(value: State): void {
+      storage.state = value
+    }
+  }
+
+  const clientForm: ClientFormInstance | undefined = initForm(conf.forms.client, ['name', 'email', 'phone'])
+  const findVehicleForm: FindVehicleFormInstance | undefined = initForm(conf.forms.findVehicle, ['plateNumber'])
+  const vehicleForm: VehicleFormInstance | undefined = initForm(conf.forms.vehicle, [
     'make',
     'model',
     'year',
     'mileage',
     'location',
-    'price'
+    'price',
+    'message'
   ])
-  if (!clientForm || !findVehicleForm || !vehicleForm) {
+  const filesForm: FilesFormInstance | undefined = initForm(conf.forms.files, ['files'])
+
+  if (!clientForm || !findVehicleForm || !vehicleForm || !filesForm) {
     throw new Error('Not all forms are found!')
   }
-  clientForm.setOnSubmit(handleSubmitClient(conf, clientForm))
 
+  clientForm.setOnSubmit(handleSubmitClient(conf, storage, clientForm))
   findVehicleForm.setOnSubmit(handleSubmitSearchVehicle(findVehicleForm, vehicleForm))
+  vehicleForm.setOnSubmit(handleSubmitVehicle(conf, vehicleForm, storage))
+  filesForm.setOnSubmit(handleSubmitFiles(conf, storage, filesForm))
 }
