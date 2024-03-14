@@ -54,148 +54,357 @@ const $a8cec6fe269f4471$export$7b64c937225679ee = (upload, onFileUploadSuccess, 
             }))).then((result)=>result.filter($a8cec6fe269f4471$export$96bdbc84526f3739));
 
 
-const $02ee45712bdfc733$export$d16800b7e59a8051 = (path)=>{
+const $88a503c130ee9998$export$de8d8c292714e7f9 = [
+    "control",
+    "label",
+    "error",
+    "input"
+];
+const $88a503c130ee9998$export$15bcbdcbe1072762 = [
+    "error",
+    "success",
+    "default"
+];
+
+
+const $1b4bcbb7f8d5210f$var$getElement = (path)=>{
     const el = document.querySelector(path);
     if (el === null) {
         console.error(`Element not found by path: ${path}.`);
         return undefined;
     } else return el;
 };
-const $02ee45712bdfc733$export$7c112ceec8941e67 = (path)=>$02ee45712bdfc733$export$d16800b7e59a8051(path);
-const $02ee45712bdfc733$export$a212451ed6854bb0 = (path, value)=>{
-    const input = $02ee45712bdfc733$export$7c112ceec8941e67(path);
-    if (input) input.value = value;
+const $1b4bcbb7f8d5210f$var$createDmElement = (el, name)=>{
+    return {
+        el: el,
+        id: el.attributes.getNamedItem("data-dm-id")?.value,
+        name: name ?? el.attributes.getNamedItem("data-dm-name")?.value,
+        type: el.attributes.getNamedItem("data-dm-type")?.value,
+        show: ()=>{
+            el.style.display = "block";
+        },
+        hide: ()=>{
+            el.style.display = "none";
+        }
+    };
 };
-const $02ee45712bdfc733$export$830c804e8d921bba = (path)=>$02ee45712bdfc733$export$d16800b7e59a8051(path);
-const $02ee45712bdfc733$export$ddf018cf7a99d36f = (path, msg)=>{
-    const el = $02ee45712bdfc733$export$d16800b7e59a8051(path);
-    if (el) el.innerHTML = msg;
+const $1b4bcbb7f8d5210f$var$createDmElementOpt = (el, name)=>el ? $1b4bcbb7f8d5210f$var$createDmElement(el, name) : undefined;
+const $1b4bcbb7f8d5210f$export$83595b84fc78b9b4 = (id)=>$1b4bcbb7f8d5210f$var$getElement(`[data-dm-id="${id}"]`);
+const $1b4bcbb7f8d5210f$var$getElementChildByType = (name, type)=>$1b4bcbb7f8d5210f$var$getElement(`[data-dm-name="${name}"] [data-dm-type="${type}"]`);
+const $1b4bcbb7f8d5210f$var$getElementChildByName = (id, name)=>$1b4bcbb7f8d5210f$var$getElement(`[data-dm-id="${id}"] [data-dm-name="${name}"]`);
+const $1b4bcbb7f8d5210f$var$getField = (name)=>{
+    const field = $1b4bcbb7f8d5210f$var$getElement(`[data-dm-name="${name}"]`);
+    const getErrorEl = ()=>$1b4bcbb7f8d5210f$var$getElementChildByType(name, "error");
+    const setState = (state)=>{
+        const el = getErrorEl();
+        if (el) {
+            (0, $88a503c130ee9998$export$15bcbdcbe1072762).map((s)=>`field-state-${s}`).filter((v)=>el.classList.contains(v)).forEach((s)=>el.classList.remove(s));
+            el.classList.add(`field-state-${state}`);
+        }
+    };
+    if (field) return {
+        ...$1b4bcbb7f8d5210f$var$createDmElement(field, name),
+        getLabel: ()=>$1b4bcbb7f8d5210f$var$createDmElementOpt($1b4bcbb7f8d5210f$var$getElementChildByType(name, "label")),
+        getInput: ()=>$1b4bcbb7f8d5210f$var$createDmElementOpt($1b4bcbb7f8d5210f$var$getElementChildByType(name, "input")),
+        setInputValue: (value)=>{
+            $1b4bcbb7f8d5210f$var$getElementChildByType(name, "input")?.setAttribute("value", value);
+        },
+        getError: ()=>$1b4bcbb7f8d5210f$var$createDmElementOpt(getErrorEl()),
+        setState: setState,
+        clearError () {
+            const el = getErrorEl();
+            if (el) {
+                setState("default");
+                el.innerHTML = "";
+            }
+        },
+        setError: (error)=>{
+            const el = getErrorEl();
+            if (el) {
+                setState("error");
+                el.innerHTML = error;
+            }
+        }
+    };
+    else return undefined;
 };
-const $02ee45712bdfc733$export$52987f4b88db0f2 = (path, handler)=>{
-    const form = $02ee45712bdfc733$export$830c804e8d921bba(path);
-    if (form) {
-        form.action = "";
-        form.method = "";
-        form.onsubmit = (e)=>{
-            e.preventDefault();
-            e.stopPropagation();
+const $1b4bcbb7f8d5210f$export$52987f4b88db0f2 = (form, handler)=>{
+    form.action = "";
+    form.method = "";
+    form.onsubmit = (e)=>{
+        e.preventDefault();
+        e.stopPropagation();
+    };
+    // TODO: Remove all event listeners
+    form.addEventListener("submit", handler);
+};
+const $1b4bcbb7f8d5210f$export$830c804e8d921bba = (name)=>{
+    const form = $1b4bcbb7f8d5210f$var$getElement(`[data-dm-id="${name}"]`);
+    const getErrorEl = ()=>$1b4bcbb7f8d5210f$var$getElementChildByName(name, "form_error");
+    if (form) return {
+        name: name,
+        el: form,
+        show: ()=>{
+            form.style.display = "block";
+        },
+        hide: ()=>{
+            form.style.display = "none";
+        },
+        getField: $1b4bcbb7f8d5210f$var$getField,
+        getError: ()=>$1b4bcbb7f8d5210f$var$createDmElementOpt(getErrorEl()),
+        clearError () {
+            const el = getErrorEl();
+            if (el) el.innerHTML = "";
+        },
+        setError: (error)=>{
+            const el = getErrorEl();
+            if (el) el.innerHTML = error;
+        },
+        setOnSubmit: (handler)=>$1b4bcbb7f8d5210f$export$52987f4b88db0f2(form, handler)
+    };
+    else return undefined;
+};
+
+
+const $f54879c0966825ba$export$dd1bc94b04021eeb = (value)=>value === null || value === undefined;
+const $f54879c0966825ba$export$4d09d4ac8ba225dd = (field, validator, errMsg)=>{
+    const value = field.input.el.value;
+    if (!validator(value)) {
+        field.setError(errMsg());
+        return undefined;
+    }
+    return value;
+};
+const $f54879c0966825ba$export$c6f9402c221ec23f = (field)=>$f54879c0966825ba$export$4d09d4ac8ba225dd(field, (value)=>!!value && value.length > 0, ()=>"This field must be filled!");
+const $f54879c0966825ba$export$18148d12c805c5b0 = (field)=>$f54879c0966825ba$export$4d09d4ac8ba225dd(field, (value)=>!!value && value.includes("@"), ()=>"Invalid email!");
+
+
+const $e765043ad39a7a25$var$getFormFields = (form, fieldNames)=>{
+    const fields = fieldNames.map((name)=>form.getField(name));
+    if (fields.length !== fieldNames.length) {
+        console.error("Form should have all fields!", fieldNames);
+        form.setError("Unexpected error: missing fields!");
+        return undefined;
+    } else return fields;
+};
+const $e765043ad39a7a25$var$createRecord = (arr, propertyName)=>{
+    const record = {};
+    arr.forEach((item)=>{
+        const key = item[propertyName];
+        record[key] = item;
+    });
+    return record;
+};
+const $e765043ad39a7a25$export$b1af796fd1475484 = (form, fieldNames)=>{
+    const fields = $e765043ad39a7a25$var$getFormFields(form, fieldNames);
+    if (!fields) throw new Error("Form should have all fields!");
+    const fieldInstances = fields.map((field)=>{
+        const label = field.getLabel();
+        const input = field.getInput();
+        const error = field.getError();
+        if (!label || !input || !error) {
+            console.error("Form field must have label, input, error elements!", field.name, field.el);
+            throw new Error("Form field must have label, input, error elements!");
+        }
+        return {
+            label: label,
+            input: input,
+            error: error,
+            id: field.id,
+            name: field.name,
+            type: field.type,
+            el: field.el,
+            show: ()=>field.show(),
+            hide: ()=>field.hide(),
+            clearError: ()=>field.clearError(),
+            setError: (error)=>field.setError(error),
+            setState: (state)=>field.setState(state),
+            setInputValue: (value)=>field.setInputValue(value)
         };
-        // TODO: Remove all event listeners
-        form.addEventListener("submit", handler);
-    } else console.error(`Unable to find form with id "${path}"`);
-};
-const $02ee45712bdfc733$export$89a6f6b18f17322b = (path, handler)=>{
-    const btn = $02ee45712bdfc733$export$d16800b7e59a8051(path);
-    if (btn) btn.onclick = handler;
-    else console.error(`Unable to find button with id "${path}"`);
-};
-const $02ee45712bdfc733$export$998191bfdf710c72 = (path)=>{
-    const el = $02ee45712bdfc733$export$d16800b7e59a8051(path);
-    if (el) el.style.display = "block";
+    });
+    const error = form.getError();
+    if (!error) {
+        console.error("Form must have error element!", form.el);
+        throw new Error("Form must have error element!");
+    }
+    return {
+        id: form.id,
+        name: form.name,
+        type: form.type,
+        el: form.el,
+        show: ()=>form.show(),
+        hide: ()=>form.hide(),
+        fields: $e765043ad39a7a25$var$createRecord(fieldInstances, "name"),
+        error: error,
+        clearError: ()=>form.clearError(),
+        clearAllErrors: ()=>{
+            form.clearError();
+            fieldInstances.forEach((field)=>field.clearError());
+        },
+        setError: (error)=>form.setError(error),
+        setOnSubmit: (handler)=>form.setOnSubmit(handler)
+    };
 };
 
 
-// TODO: Use functional State pattern
-const $b3a133cf85b0ceb6$var$state = {
-    client: undefined,
-    form: {}
-};
-const $b3a133cf85b0ceb6$var$handleSubmitClient = (stepper, f)=>(e)=>{
+const $b3a133cf85b0ceb6$var$handleSubmitClient = (conf, storage, form)=>(e)=>{
         console.log("Form submitted", e.target);
-        (0, $02ee45712bdfc733$export$ddf018cf7a99d36f)(f.msgError, "");
+        form.clearAllErrors();
+        const name = (0, $f54879c0966825ba$export$c6f9402c221ec23f)(form.fields.name);
+        const email = (0, $f54879c0966825ba$export$18148d12c805c5b0)(form.fields.email);
+        const phoneNumber = (0, $f54879c0966825ba$export$c6f9402c221ec23f)(form.fields.phone);
+        if (!name || !email || !phoneNumber) return;
         const client = {
             formType: "BUYOUT",
-            name: (0, $02ee45712bdfc733$export$7c112ceec8941e67)(f.txtName)?.value ?? "",
-            email: (0, $02ee45712bdfc733$export$7c112ceec8941e67)(f.txtEmail)?.value ?? "",
-            phoneNumber: (0, $02ee45712bdfc733$export$7c112ceec8941e67)(f.txtPhone)?.value ?? "",
+            name: name,
+            email: email,
+            phoneNumber: phoneNumber,
             language: "et"
         };
-        if (client.name && client.email && client.phoneNumber) (0, $a8cec6fe269f4471$export$3e93138bfea324f5)(client).then((resp)=>{
-            $b3a133cf85b0ceb6$var$state.client = resp;
-            console.log(`State updated: ${JSON.stringify($b3a133cf85b0ceb6$var$state)}`);
-            stepper.nextStepFn(1);
+        (0, $a8cec6fe269f4471$export$3e93138bfea324f5)(client).then((resp)=>{
+            storage.setState({
+                ...storage.state,
+                client: resp
+            });
+            console.log(`State updated: ${JSON.stringify(storage)}`);
+            conf.stepper.nextStepFn(1);
         }).catch((error)=>{
             console.error("API error:", error);
-            (0, $02ee45712bdfc733$export$ddf018cf7a99d36f)(f.msgError, "Unable to send client data!");
+            form.setError("Unable to send client data!");
         });
-        else (0, $02ee45712bdfc733$export$ddf018cf7a99d36f)(f.msgError, "All fields must be filled!");
     };
-const $b3a133cf85b0ceb6$var$handleSubmitSearchVehicle = (f)=>(e)=>{
+const $b3a133cf85b0ceb6$var$handleSubmitSearchVehicle = (storage, form, vehicleForm)=>(e)=>{
         console.log("Form submitted", e.target);
-        (0, $02ee45712bdfc733$export$ddf018cf7a99d36f)(f.plateNumber.msgError, "");
-        const plateNumber = (0, $02ee45712bdfc733$export$7c112ceec8941e67)(f.plateNumber.txtPlateNumber)?.value;
-        if (plateNumber && plateNumber.length > 0) {
-            console.log("Plate number:", plateNumber);
-            (0, $a8cec6fe269f4471$export$a716ac162dff6323)(plateNumber).then((response)=>{
-                console.log("Car response:", response);
-                (0, $02ee45712bdfc733$export$a212451ed6854bb0)(f.txtMake, response.mark);
-                (0, $02ee45712bdfc733$export$a212451ed6854bb0)(f.txtModel, response.model);
-                (0, $02ee45712bdfc733$export$a212451ed6854bb0)(f.txtYear, String(response.firstRegYear));
-                //setInput(f.txtMileage, )
-                //setInput(f.txtLocation, )
-                //setInput(f.txtPrice)
-                //setInput()
-                (0, $02ee45712bdfc733$export$998191bfdf710c72)(f.form);
-            }).catch((error)=>{
-                console.error("Car error:", error);
-                (0, $02ee45712bdfc733$export$ddf018cf7a99d36f)(f.plateNumber.msgError, "Car not found!");
+        form.clearAllErrors();
+        const plateNumber = (0, $f54879c0966825ba$export$c6f9402c221ec23f)(form.fields.plateNumber);
+        if (!plateNumber) return;
+        console.log("Plate number:", plateNumber);
+        (0, $a8cec6fe269f4471$export$a716ac162dff6323)(plateNumber).then((response)=>{
+            console.log("Car response:", response);
+            vehicleForm.fields.make.setInputValue(response.mark);
+            vehicleForm.fields.model.setInputValue(response.model);
+            vehicleForm.fields.year.setInputValue(String(response.firstRegYear));
+            storage.setState({
+                ...storage.state,
+                form: {
+                    ...storage.state.form,
+                    plateNumber: plateNumber
+                }
             });
-        } else (0, $02ee45712bdfc733$export$ddf018cf7a99d36f)(f.plateNumber.msgError, "Plate number must be filled!");
+            console.log(`State updated: ${JSON.stringify(storage)}`);
+            vehicleForm.show();
+        }).catch((error)=>{
+            console.error("Car error:", error);
+            form.fields.plateNumber.setError("Car not found!");
+        });
     };
-const $b3a133cf85b0ceb6$var$handleSubmitVehicle = (stepper, f)=>(e)=>{
+const $b3a133cf85b0ceb6$var$handleSubmitVehicle = (conf, storage, form)=>(e)=>{
         console.log("Form submitted", e.target);
-        (0, $02ee45712bdfc733$export$ddf018cf7a99d36f)(f.msgError, "");
-        const make = (0, $02ee45712bdfc733$export$7c112ceec8941e67)(f.txtMake)?.value;
-        const model = (0, $02ee45712bdfc733$export$7c112ceec8941e67)(f.txtModel)?.value;
-        const year = (0, $02ee45712bdfc733$export$7c112ceec8941e67)(f.txtYear)?.value;
-        const mileage = (0, $02ee45712bdfc733$export$7c112ceec8941e67)(f.txtMileage)?.value;
-        const location = (0, $02ee45712bdfc733$export$7c112ceec8941e67)(f.txtLocation)?.value;
-        const price = (0, $02ee45712bdfc733$export$7c112ceec8941e67)(f.txtPrice)?.value;
-        const message = (0, $02ee45712bdfc733$export$7c112ceec8941e67)(f.txtMessage)?.value;
-        const plateNumber = (0, $02ee45712bdfc733$export$7c112ceec8941e67)(f.plateNumber.txtPlateNumber)?.value;
-        if (make && model && year && mileage && price && plateNumber) {
-            const request = {
-                plateNumber: plateNumber,
-                make: make,
-                model: model,
-                year: Number(year),
-                mileage: Number(mileage),
-                location: location,
-                price: Number(price),
-                additionalInfo: message,
-                photoIds: []
-            };
-            console.log(`Submitted: request=${JSON.stringify(request)}`);
-            $b3a133cf85b0ceb6$var$state.form = request;
-            console.log(`State updated: ${JSON.stringify($b3a133cf85b0ceb6$var$state)}`);
-            stepper.nextStepFn(2);
-        } else (0, $02ee45712bdfc733$export$ddf018cf7a99d36f)(f.msgError, "All vehicle fields must be filled except message!");
+        form.clearAllErrors();
+        const make = (0, $f54879c0966825ba$export$c6f9402c221ec23f)(form.fields.make);
+        const model = (0, $f54879c0966825ba$export$c6f9402c221ec23f)(form.fields.model);
+        const year = (0, $f54879c0966825ba$export$c6f9402c221ec23f)(form.fields.year);
+        const mileage = (0, $f54879c0966825ba$export$c6f9402c221ec23f)(form.fields.mileage);
+        const location = form.fields.location?.input.el.value;
+        const price = (0, $f54879c0966825ba$export$c6f9402c221ec23f)(form.fields.price);
+        const message = form.fields.message?.input.el.value;
+        if (!make || !model || !year || !mileage || !price) return;
+        if (storage.state.form.plateNumber === undefined) throw new Error("Plate number is not set!");
+        const request = {
+            plateNumber: storage.state.form.plateNumber,
+            make: make,
+            model: model,
+            year: Number(year),
+            mileage: Number(mileage),
+            location: location,
+            price: Number(price),
+            additionalInfo: message,
+            photoIds: []
+        };
+        console.log(`Submitted: request=${JSON.stringify(request)}`);
+        storage.setState({
+            ...storage.state,
+            form: request
+        });
+        console.log(`State updated: ${JSON.stringify(storage)}`);
+        conf.stepper.nextStepFn(2);
     };
-const $b3a133cf85b0ceb6$var$handleSubmitFiles = (stepper, f)=>(e)=>{
+const $b3a133cf85b0ceb6$var$handleSubmitFiles = (conf, storage, form)=>(e)=>{
         console.log("Form submitted", e.target);
-        (0, $02ee45712bdfc733$export$ddf018cf7a99d36f)(f.msgError, "");
-        const files = (0, $02ee45712bdfc733$export$7c112ceec8941e67)(f.inputFiles)?.files;
-        if (files && files.length > 0) {
-            console.log("Files:", files);
-            const uploadFiles = (0, $a8cec6fe269f4471$export$7b64c937225679ee)((0, $a8cec6fe269f4471$export$30f6785ef4f50942));
-            uploadFiles((0, $a8cec6fe269f4471$export$bc226234bbb4652f)(files)).then((response)=>{
-                $b3a133cf85b0ceb6$var$state.form.photoIds = response.map((v)=>v.fileId);
-                console.log(`State updated: ${JSON.stringify($b3a133cf85b0ceb6$var$state)}`);
-                if ($b3a133cf85b0ceb6$var$state.client) (0, $a8cec6fe269f4471$export$ad2c850047bf833d)($b3a133cf85b0ceb6$var$state.client.personalDataId, $b3a133cf85b0ceb6$var$state.form).then(()=>{
-                    console.log("Success!");
-                    stepper.nextStepFn(3);
-                });
-                else (0, $02ee45712bdfc733$export$ddf018cf7a99d36f)(f.msgError, "client is not set!");
+        form.clearAllErrors();
+        const files = form.fields.files.input.el.files;
+        if (!files || files.length === 0) {
+            form.fields.files.setError("Files must be selected!");
+            return;
+        } else if (files && files.length > 10) {
+            form.fields.files.setError("Maximum 10 files allowed!");
+            return;
+        }
+        console.log("Files:", files);
+        const uploadFiles = (0, $a8cec6fe269f4471$export$7b64c937225679ee)((0, $a8cec6fe269f4471$export$30f6785ef4f50942));
+        uploadFiles((0, $a8cec6fe269f4471$export$bc226234bbb4652f)(files)).then((response)=>{
+            const photoIds = response.map((v)=>v.fileId);
+            storage.setState({
+                ...storage.state,
+                form: {
+                    ...storage.state.form,
+                    photoIds: photoIds
+                }
             });
-        } else if (files && files.length > 10) (0, $02ee45712bdfc733$export$ddf018cf7a99d36f)(f.msgError, "Too many files selected!");
-        else (0, $02ee45712bdfc733$export$ddf018cf7a99d36f)(f.msgError, "Files must be selected!");
+            console.log(`State updated: ${JSON.stringify(storage)}`);
+            if (storage.state.client) (0, $a8cec6fe269f4471$export$ad2c850047bf833d)(storage.state.client.personalDataId, storage.state.form).then(()=>{
+                console.log("Success!");
+                conf.stepper.nextStepFn(3);
+            });
+            else form.setError("Client is not set!");
+        });
     };
+const $b3a133cf85b0ceb6$var$initForm = (name, fieldNames)=>{
+    const form = (0, $1b4bcbb7f8d5210f$export$830c804e8d921bba)(name);
+    if (form) //form.setOnSubmit(handler(form))
+    return (0, $e765043ad39a7a25$export$b1af796fd1475484)(form, fieldNames);
+    else {
+        // eslint-disable-next-line no-console
+        console.error("Client form not found!");
+        return undefined;
+    }
+};
 const $b3a133cf85b0ceb6$export$2cd8252107eb640b = (conf)=>{
     console.log("Initializing...", conf);
-    (0, $02ee45712bdfc733$export$52987f4b88db0f2)(conf.elements.stepClient.form, $b3a133cf85b0ceb6$var$handleSubmitClient(conf.stepper, conf.elements.stepClient));
-    (0, $02ee45712bdfc733$export$52987f4b88db0f2)(conf.elements.stepVehicle.plateNumber.form, $b3a133cf85b0ceb6$var$handleSubmitSearchVehicle(conf.elements.stepVehicle));
-    (0, $02ee45712bdfc733$export$52987f4b88db0f2)(conf.elements.stepVehicle.form, $b3a133cf85b0ceb6$var$handleSubmitVehicle(conf.stepper, conf.elements.stepVehicle));
-    (0, $02ee45712bdfc733$export$52987f4b88db0f2)(conf.elements.stepFiles.form, $b3a133cf85b0ceb6$var$handleSubmitFiles(conf.stepper, conf.elements.stepFiles));
+    const storage = {
+        state: {
+            client: undefined,
+            form: {}
+        },
+        setState (value) {
+            storage.state = value;
+        }
+    };
+    const clientForm = $b3a133cf85b0ceb6$var$initForm(conf.forms.client, [
+        "name",
+        "email",
+        "phone"
+    ]);
+    const findVehicleForm = $b3a133cf85b0ceb6$var$initForm(conf.forms.findVehicle, [
+        "plateNumber"
+    ]);
+    const vehicleForm = $b3a133cf85b0ceb6$var$initForm(conf.forms.vehicle, [
+        "make",
+        "model",
+        "year",
+        "mileage",
+        "location",
+        "price",
+        "message"
+    ]);
+    const filesForm = $b3a133cf85b0ceb6$var$initForm(conf.forms.files, [
+        "files"
+    ]);
+    if (!clientForm || !findVehicleForm || !vehicleForm || !filesForm) throw new Error("Not all forms are found!");
+    clientForm.setOnSubmit($b3a133cf85b0ceb6$var$handleSubmitClient(conf, storage, clientForm));
+    findVehicleForm.setOnSubmit($b3a133cf85b0ceb6$var$handleSubmitSearchVehicle(storage, findVehicleForm, vehicleForm));
+    vehicleForm.setOnSubmit($b3a133cf85b0ceb6$var$handleSubmitVehicle(conf, storage, vehicleForm));
+    filesForm.setOnSubmit($b3a133cf85b0ceb6$var$handleSubmitFiles(conf, storage, filesForm));
 };
 
 

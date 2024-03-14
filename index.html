@@ -20,125 +20,119 @@
               console.log('Previous step', currentStep);
             },
           },
-          elements: {
-            stepClient: {
-              form: '[wf_id="client"]',
-              msgError: '[wf_id="client"] [wf_name="error-message"]',
-              txtName: '[wf_id="client"] [name="name"]',
-              txtEmail: '[wf_id="client"] [name="email"]',
-              txtPhone: '[wf_id="client"] [name="phone"]',
-              btnSubmit: '[wf_id="client"] [wf_name="submit"]',
-            },
-            stepVehicle: {
-              plateNumber: {
-                form: '[wf_id="plate_number"]',
-                msgError: '[wf_id="plate_number"] [wf_name="error-message"]',
-                txtPlateNumber: '[wf_id="plate_number"] [name="plateNumber"]',
-              },
-              form: '[wf_id="vehicle"]',
-              msgError: '[wf_id="vehicle"] [wf_name="error-message"]',
-              txtMake: '[wf_id="vehicle"] [name="make"]',
-              txtModel: '[wf_id="vehicle"] [name="model"]',
-              txtYear: '[wf_id="vehicle"] [name="year"]',
-              txtMileage: '[wf_id="vehicle"] [name="mileage"]',
-              txtLocation: '[wf_id="vehicle"] [name="location"]',
-              txtPrice: '[wf_id="vehicle"] [name="price"]',
-              txtMessage: '[wf_id="vehicle"] [name="message"]',
-              btnSubmit: '[wf_id="vehicle"] [name="submit"]'
-            },
-            stepFiles: {
-              form: '[wf_id="files"]',
-              msgError: '[wf_id="files"] [wf_name="error-message"]',
-              inputFiles: '[wf_id="files"] [name="files"]',
-              btnSubmit: '[wf_id="files"] [wf_name="submit"]'
-            }
+          forms: {
+            client: 'form_client',
+            findVehicle: 'form_find_vehicle',
+            vehicle: 'form_vehicle',
+            files: 'form_files'
           }
         });
       };
     </script>
+    <style>
+      .error {
+        color: red;
+      }
+    </style>
   </head>
   <body>
     <div id="root">
       <h1>Welcome</h1>
-      <form wf_id="client">
-        <div>
-          <label for="name">Name:</label>
-          <input type="text" id="name" name="name" value="" />
+      <div>
+        <form data-dm-id="form_client">
+          <div data-dm-type="control" data-dm-name="name">
+            <label for="name" data-dm-type="label">Name:</label>
+            <input type="text" id="name" name="name" value="" data-dm-type="input" />
+            <em data-dm-type="error" class="error"></em>
+          </div>
+          <div data-dm-type="control" data-dm-name="email">
+            <label for="email" data-dm-type="label">Email:</label>
+            <input type="email" id="email" name="email" value="" data-dm-type="input" />
+            <em data-dm-type="error" class="error"></em>
+          </div>
+          <div data-dm-type="control" data-dm-name="phone">
+            <label for="phone" data-dm-type="label">Phone:</label>
+            <input type="tel" id="phone" name="phone" value="" data-dm-type="input" />
+            <em data-dm-type="error" class="error"></em>
+          </div>
+          <div>
+            <em data-dm-name="form_error" class="error"></em>
+          </div>
+          <div>
+            <button type="submit" data-dm-name="form_submit">Submit</button>
+          </div>
+        </form>
+      </div>
+      <hr />
+      <form data-dm-id="form_find_vehicle">
+        <div data-dm-type="control" data-dm-name="plateNumber">
+          <label for="plateNumber" data-dm-type="label">Enter your plate number:</label>
+          <input type="text" id="plateNumber" name="plateNumber" value="" data-dm-type="input" />
+          <em data-dm-type="error" class="error"></em>
         </div>
         <div>
-          <label for="email">Email:</label>
-          <input type="email" id="email" name="email" value="" />
+          <em data-dm-name="form_error" class="error"></em>
         </div>
         <div>
-          <label for="phone">Phone:</label>
-          <input type="tel" id="phone" name="phone" value="" />
-        </div>
-        <div>
-          <em wf_name="error-message" style="color: red"></em>
-        </div>
-        <div>
-          <button type="submit" wf_name="submit">Submit</button>
+          <button type="submit" data-dm-name="form_submit">Find</button>
         </div>
       </form>
       <hr />
-      <form wf_id="plate_number">
-        <div>
-          <label for="plateNumber">Enter your plate number:</label>
-          <input type="text" id="plateNumber" name="plateNumber" value="" />
+      <form data-dm-id="form_vehicle" style="display: none">
+        <div data-dm-type="control" data-dm-name="make">
+          <label for="make" data-dm-type="label">Make:</label>
+          <input type="text" id="make" name="make" value="" data-dm-type="input" />
+          <em data-dm-type="error" class="error"></em>
+        </div>
+        <div data-dm-type="control" data-dm-name="model">
+          <label for="model" data-dm-type="label">Model:</label>
+          <input type="text" id="model" name="model" value="" data-dm-type="input" />
+          <em data-dm-type="error" class="error"></em>
+        </div>
+        <div data-dm-type="control" data-dm-name="year">
+          <label for="year" data-dm-type="label">Year:</label>
+          <input type="text" id="year" name="year" value="" data-dm-type="input" />
+          <em data-dm-type="error" class="error"></em>
+        </div>
+        <div data-dm-type="control" data-dm-name="mileage">
+          <label for="mileage" data-dm-type="label">Mileage:</label>
+          <input type="text" id="mileage" name="mileage" value="" data-dm-type="input" />
+          <em data-dm-type="error" class="error"></em>
+        </div>
+        <div data-dm-type="control" data-dm-name="location">
+          <label for="location" data-dm-type="label">Location:</label>
+          <input type="text" id="location" name="location" value="" data-dm-type="input" />
+          <em data-dm-type="error" class="error"></em>
+        </div>
+        <div data-dm-type="control" data-dm-name="price">
+          <label for="price" data-dm-type="label">Price:</label>
+          <input type="text" id="price" name="price" value="" data-dm-type="input" />
+          <em data-dm-type="error" class="error"></em>
+        </div>
+        <div data-dm-type="control" data-dm-name="message">
+          <label for="message" data-dm-type="label">Message:</label>
+          <textarea id="message" name="message" cols="40" rows="5" data-dm-type="input"></textarea>
+          <em data-dm-type="error" class="error"></em>
         </div>
         <div>
-          <em wf_name="error-message" style="color: red"></em>
+          <em data-dm-name="form_error" class="error"></em>
         </div>
         <div>
-          <button type="submit" wf_name="submit">Find</button>
-        </div>
-      </form>
-      <hr />
-      <form wf_id="vehicle" style="display: none">
-        <div>
-          <label for="make">Make:</label>
-          <input type="text" id="make" name="make" value="" />
-        </div>
-        <div>
-          <label for="model">Model:</label>
-          <input type="text" id="model" name="model" value="" />
-        </div>
-        <label for="year">Year:</label>
-        <input type="text" id="year" name="year" value="" />
-        <div>
-          <label for="mileage">Mileage:</label>
-          <input type="text" id="mileage" name="mileage" value="" />
-        </div>
-        <div>
-          <label for="location">Location:</label>
-          <input type="text" id="location" name="location" value="" />
-        </div>
-        <div>
-          <label for="price">Price:</label>
-          <input type="text" id="price" name="price" value="" />
-        </div>
-        <div>
-          <label for="message">Message:</label>
-          <textarea id="message" name="message" cols="40" rows="5"></textarea>
-        </div>
-        <div>
-          <em wf_name="error-message" style="color: red"></em>
-        </div>
-        <div>
-          <button type="submit" wf_name="submit">Submit</button>
+          <button type="submit" data-dm-name="form_submit">Submit</button>
         </div>
       </form>
       <hr />
-      <form wf_id="files">
-        <div>
-          <label for="files">Upload files:</label>
-          <input type="file" id="files" name="files" />
+      <form data-dm-id="form_files">
+        <div data-dm-type="control" data-dm-name="files">
+          <label for="files" data-dm-type="label">Upload files:</label>
+          <input type="file" id="files" name="files" data-dm-type="input" />
+          <em data-dm-type="error" class="error"></em>
         </div>
         <div>
-          <em wf_name="error-message" style="color: red"></em>
+          <em data-dm-name="form_error" class="error"></em>
         </div>
         <div>
-          <button type="submit" wf_name="submit">Submit</button>
+          <button type="submit" data-dm-name="form_submit">Submit</button>
         </div>
       </form>
     </div>
