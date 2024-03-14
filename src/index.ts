@@ -61,7 +61,7 @@ const handleSubmitClient =
   }
 
 const handleSubmitSearchVehicle =
-  (form: FindVehicleFormInstance, vehicleForm: VehicleFormInstance) =>
+  (storage: AppStateStorage, form: FindVehicleFormInstance, vehicleForm: VehicleFormInstance) =>
   (e: Event): void => {
     console.log('Form submitted', e.target)
     form.clearAllErrors()
@@ -79,6 +79,8 @@ const handleSubmitSearchVehicle =
         vehicleForm.fields.make.setInputValue(response.mark)
         vehicleForm.fields.model.setInputValue(response.model)
         vehicleForm.fields.year.setInputValue(String(response.firstRegYear))
+        storage.setState({ ...storage.state, form: { ...storage.state.form, plateNumber } })
+        console.log(`State updated: ${JSON.stringify(storage)}`)
         vehicleForm.show()
       })
       .catch((error) => {
@@ -88,7 +90,7 @@ const handleSubmitSearchVehicle =
   }
 
 const handleSubmitVehicle =
-  (conf: DmConfig, form: VehicleFormInstance, storage: AppStateStorage) =>
+  (conf: DmConfig, storage: AppStateStorage, form: VehicleFormInstance) =>
   (e: Event): void => {
     console.log('Form submitted', e.target)
     form.clearAllErrors()
@@ -120,6 +122,7 @@ const handleSubmitVehicle =
       photoIds: []
     }
     console.log(`Submitted: request=${JSON.stringify(request)}`)
+    storage.setState({ ...storage.state, form: request })
     console.log(`State updated: ${JSON.stringify(storage)}`)
     conf.stepper.nextStepFn(2)
   }
@@ -199,7 +202,7 @@ export const init = (conf: DmConfig): void => {
   }
 
   clientForm.setOnSubmit(handleSubmitClient(conf, storage, clientForm))
-  findVehicleForm.setOnSubmit(handleSubmitSearchVehicle(findVehicleForm, vehicleForm))
-  vehicleForm.setOnSubmit(handleSubmitVehicle(conf, vehicleForm, storage))
+  findVehicleForm.setOnSubmit(handleSubmitSearchVehicle(storage, findVehicleForm, vehicleForm))
+  vehicleForm.setOnSubmit(handleSubmitVehicle(conf, storage, vehicleForm))
   filesForm.setOnSubmit(handleSubmitFiles(conf, storage, filesForm))
 }

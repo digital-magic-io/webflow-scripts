@@ -10,10 +10,6 @@ export const validateInput = (
   errMsg: () => string
 ): string | undefined => {
   const value = field.input.el.value
-  if (!value) {
-    console.error('Form field has no input!', field.name, field.el)
-    return undefined
-  }
   if (!validator(value)) {
     field.setError(errMsg())
     return undefined
@@ -24,13 +20,13 @@ export const validateInput = (
 export const validateNonEmpty = (field: DmFieldInstance): string | undefined =>
   validateInput(
     field,
-    (value) => value.length > 0,
+    (value) => !!value && value.length > 0,
     () => 'This field must be filled!'
   )
 
 export const validateEmail = (field: DmFieldInstance): string | undefined =>
   validateInput(
     field,
-    (value) => value.includes('@'),
+    (value) => !!value && value.includes('@'),
     () => 'Invalid email!'
   )

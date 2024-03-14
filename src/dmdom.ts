@@ -61,10 +61,10 @@ export const getElementById = <T extends HTMLElement>(id: string): T | undefined
   getElement<T>(`[data-dm-id="${id}"]`)
 
 const getElementChildByType = <T extends HTMLElement>(name: string, type: DmElementType): T | undefined =>
-  getElement<T>(`[data-dm-name="${name}"][data-dm-type="${type}"]`)
+  getElement<T>(`[data-dm-name="${name}"] [data-dm-type="${type}"]`)
 
 const getElementChildByName = <T extends HTMLElement>(id: string, name: string): T | undefined =>
-  getElement<T>(`[data-dm-id="${id}"][data-dm-name="${name}"]`)
+  getElement<T>(`[data-dm-id="${id}"] [data-dm-name="${name}"]`)
 
 const getField = (name: string): DmField | undefined => {
   const field = getElement<HTMLInputElement>(`[data-dm-name="${name}"]`)
@@ -72,7 +72,9 @@ const getField = (name: string): DmField | undefined => {
   const setState = (state: DmFieldState): void => {
     const el = getErrorEl()
     if (el) {
-      el.classList.remove(DmFieldStateList.map((s) => `field-state-${s}`).join(' '))
+      DmFieldStateList.map((s) => `field-state-${s}`)
+        .filter((v) => el.classList.contains(v))
+        .forEach((s) => el.classList.remove(s))
       el.classList.add(`field-state-${state}`)
     }
   }
