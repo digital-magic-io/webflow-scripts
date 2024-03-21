@@ -1,4 +1,4 @@
-import type { Config, FormConfig, PageContext } from './config'
+import type { ButtonConfig, Config, FormConfig, PageContext } from './config'
 import type { FailedValidationType, FormErrorMessages } from './types'
 import type { DmForm } from './form'
 import { createForm } from './form'
@@ -47,6 +47,16 @@ export const init = <F extends string, B extends string>(conf: Config<F, B>): vo
         conf.errorMessages ?? defaultErrors
       ) satisfies DmForm<F>
     })
+    if (conf.buttons) {
+      Object.entries<ButtonConfig<F>>(conf.buttons).forEach(([, buttonConfig]) => {
+        const button: HTMLElement | null = document.querySelector(buttonConfig.selector)
+        if (button) {
+          button.addEventListener('click', () => buttonConfig.onClick(ctx))
+        } else {
+          console.error('Button not found by selector:', buttonConfig.selector)
+        }
+      })
+    }
 
     console.log('Initialized with context: ', ctx)
   }
