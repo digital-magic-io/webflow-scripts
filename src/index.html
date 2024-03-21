@@ -7,24 +7,111 @@
     <meta name="description" content="Example page for testing Webflow script" />
     <title>Digital Magic | Webflow script example page</title>
     <script type="module">
-      import { init } from './module.js';
+      import { init, apiGet, apiPost, apiUploadFileList } from './module.js';
       window.onload = () => {
         console.log("page is fully loaded");
+        const apiUrl = 'https://test.carprof.ee/api/v1'
+        const formsUrl = `${apiUrl}/forms`
+        const externalUrl = `${apiUrl}/external`
+
+        const fileUrl = `${formsUrl}/file`
+        const clientUrl = `${externalUrl}/personal-data`
+        const buyoutUrl = (formId) => `${externalUrl}/buyout/${formId}`
+        const lookupCarRegistryUrl = (plateNumber) => `${apiUrl}/cars/mnt/${plateNumber}`
+
+        let personalDataId = null;
+
         init({
-          stepper: {
-            steps: 3,
-            nextStepFn: (currentStep) => {
-              console.log('Next step', currentStep);
-            },
-            prevStepFn: (currentStep) => {
-              console.log('Previous step', currentStep);
-            },
-          },
           forms: {
-            client: 'form_client',
-            findVehicle: 'form_find_vehicle',
-            vehicle: 'form_vehicle',
-            files: 'form_files'
+            client: {
+              selector: '[data-dm-id="form_client"]',
+              onSubmit: (data, ctx) => {
+                console.debug('Client form submitted:', data, ctx);
+                ctx.forms.client.clearAllErrors();
+                apiPost(clientUrl, {...data, language: 'et', formType: 'BUYOUT'}).then((response) => {
+                  console.debug('Client form response:', response);
+                  personalDataId = response.personalDataId;
+                  console.log('Next step');
+                }).catch((error) => {
+                  console.error('Response error: ', error);
+                  ctx.forms.client.setError('Unable to submit client form');
+                })
+
+              },
+              errorMessages: {
+                pattern: 'Email is not valid'
+              }
+            },
+            findVehicle: {
+              selector: '[data-dm-id="form_find_vehicle"]',
+              onSubmit: (data, ctx) => {
+                console.debug('Find vehicle form submitted:', data, ctx);
+                ctx.forms.findVehicle.clearAllErrors();
+                apiGet(lookupCarRegistryUrl(data.plateNumber)).then((response) => {
+                  console.debug('Find vehicle form response:', response);
+                  const { mark, model } = response;
+                  ctx.forms.vehicle.setFormValues({ make: mark, model });
+                  ctx.forms.vehicle.el.setAttribute('style', undefined);
+                }).catch((error) => {
+                  console.error('Response error: ', error);
+                  ctx.forms.findVehicle.setError('Unable to find vehicle');
+                })
+              }
+            },
+            vehicle: {
+              selector: '[data-dm-id="form_vehicle"]',
+              onSubmit: (data, ctx) => {
+                console.debug('Vehicle form submitted:', data, ctx);
+                ctx.forms.vehicle.clearAllErrors();
+                console.log('Next step');
+              }
+            },
+            files: {
+              selector: '[data-dm-id="form_files"]',
+              onSubmit: (data, ctx) => {
+                // TODO: Update script to pass files to data (if file input element)
+                console.debug('Files form submitted:', data, ctx);
+                if (!personalDataId) {
+                  throw new Error('Personal data id is missing');
+                }
+                ctx.forms.files.clearAllErrors();
+                const files = ctx.forms.files.fields.files.input.el.files;
+                if (!files || files.length === 0) {
+                  ctx.forms.files.setError('No files selected');
+                } else {
+                  console.log('Files:', files)
+                  apiUploadFileList(fileUrl, files).then((response) => {
+                    console.debug('Files form response:', response);
+                    const photoIds = response.map((v) => v.fileId)
+                    const request = {
+                      ...ctx.forms.vehicle.getFormValues(),
+                      ...ctx.forms.findVehicle.getFormValues(),
+                      photoIds
+                    }
+                    apiPost(buyoutUrl(personalDataId), request).then((response) => {
+                      console.debug('Buyout form response:', response);
+                      console.log('Next step');
+                      console.log('Great Success!')
+                    }).catch((error) => {
+                      console.error('Response error: ', error);
+                      ctx.forms.files.setError('Unable to submit buyout form');
+                    })
+
+                  }).catch((error) => {
+                    console.error('Response error: ', error);
+                    ctx.forms.files.setError('Unable to upload files');
+                  })
+                }
+              }
+            }
+          },
+          errorMessages: {
+            required: "This field is required",
+            minlength: 'Field length is too small',
+            maxlength: 'Field length is too big',
+            pattern: 'Field does not match the pattern',
+            min: 'Field value is too small',
+            max: 'Field value is too big',
           }
         });
       };
@@ -42,17 +129,17 @@
         <form data-dm-id="form_client">
           <div data-dm-type="control" data-dm-name="name">
             <label for="name" data-dm-type="label">Name:</label>
-            <input type="text" id="name" name="name" value="" data-dm-type="input" />
+            <input type="text" id="name" name="name" value="" data-dm-type="input" minlength="1" maxlength="10" />
             <em data-dm-type="error" class="error"></em>
           </div>
           <div data-dm-type="control" data-dm-name="email">
             <label for="email" data-dm-type="label">Email:</label>
-            <input type="email" id="email" name="email" value="" data-dm-type="input" />
+            <input type="email" id="email" name="email" value="" data-dm-type="input" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" />
             <em data-dm-type="error" class="error"></em>
           </div>
-          <div data-dm-type="control" data-dm-name="phone">
+          <div data-dm-type="control" data-dm-name="phoneNumber">
             <label for="phone" data-dm-type="label">Phone:</label>
-            <input type="tel" id="phone" name="phone" value="" data-dm-type="input" />
+            <input type="tel" id="phone" name="phoneNumber" value="" data-dm-type="input" minlength="1" maxlength="10" />
             <em data-dm-type="error" class="error"></em>
           </div>
           <div>
@@ -67,7 +154,7 @@
       <form data-dm-id="form_find_vehicle">
         <div data-dm-type="control" data-dm-name="plateNumber">
           <label for="plateNumber" data-dm-type="label">Enter your plate number:</label>
-          <input type="text" id="plateNumber" name="plateNumber" value="" data-dm-type="input" />
+          <input type="text" id="plateNumber" name="plateNumber" value="" data-dm-type="input" required />
           <em data-dm-type="error" class="error"></em>
         </div>
         <div>
@@ -81,22 +168,22 @@
       <form data-dm-id="form_vehicle" style="display: none">
         <div data-dm-type="control" data-dm-name="make">
           <label for="make" data-dm-type="label">Make:</label>
-          <input type="text" id="make" name="make" value="" data-dm-type="input" />
+          <input type="text" id="make" name="make" value="" data-dm-type="input" required />
           <em data-dm-type="error" class="error"></em>
         </div>
         <div data-dm-type="control" data-dm-name="model">
           <label for="model" data-dm-type="label">Model:</label>
-          <input type="text" id="model" name="model" value="" data-dm-type="input" />
+          <input type="text" id="model" name="model" value="" data-dm-type="input" required />
           <em data-dm-type="error" class="error"></em>
         </div>
         <div data-dm-type="control" data-dm-name="year">
           <label for="year" data-dm-type="label">Year:</label>
-          <input type="text" id="year" name="year" value="" data-dm-type="input" />
+          <input type="text" id="year" name="year" value="" data-dm-type="input" required />
           <em data-dm-type="error" class="error"></em>
         </div>
         <div data-dm-type="control" data-dm-name="mileage">
           <label for="mileage" data-dm-type="label">Mileage:</label>
-          <input type="text" id="mileage" name="mileage" value="" data-dm-type="input" />
+          <input type="text" id="mileage" name="mileage" value="" data-dm-type="input" required />
           <em data-dm-type="error" class="error"></em>
         </div>
         <div data-dm-type="control" data-dm-name="location">
@@ -106,7 +193,7 @@
         </div>
         <div data-dm-type="control" data-dm-name="price">
           <label for="price" data-dm-type="label">Price:</label>
-          <input type="text" id="price" name="price" value="" data-dm-type="input" />
+          <input type="text" id="price" name="price" value="" data-dm-type="input" required />
           <em data-dm-type="error" class="error"></em>
         </div>
         <div data-dm-type="control" data-dm-name="message">
