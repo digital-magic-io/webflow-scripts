@@ -1,16 +1,49 @@
-type DmConfig = {
-    stepper: {
-        steps: number;
-        nextStepFn: (step: number) => void;
-        prevStepFn: (step: number) => void;
-    };
-    forms: {
-        client: string;
-        findVehicle: string;
-        vehicle: string;
-        files: string;
-    };
+type FN<T, R> = (value: T) => R;
+type Handler<T> = FN<T, void>;
+type FailedValidationType = 'required' | 'minlength' | 'maxlength' | 'pattern' | 'min' | 'max';
+type Validator = (v: string | number | undefined) => true | FailedValidationType;
+type FormErrorMessages = Record<FailedValidationType, string>;
+type DmElement<T extends HTMLElement> = {
+    el: T;
 };
-export const init: (conf: DmConfig) => void;
+type DmField = DmElement<HTMLElement> & {
+    input: DmElement<HTMLInputElement>;
+    error: DmElement<HTMLElement>;
+    validator: Validator;
+    clearError: Handler<void>;
+    setError: Handler<string>;
+    setInputValue: Handler<string>;
+};
+type DmForm<T extends string> = DmElement<HTMLElement> & {
+    fields: Record<T, DmField>;
+    error: DmElement<HTMLElement>;
+    clearError: Handler<void>;
+    clearAllErrors: Handler<void>;
+    setError: Handler<string>;
+    getFormValues: FN<void, Record<T, string>>;
+    setFormValues: Handler<Record<T, string>>;
+    setOnSubmit: (handler: (e: Event) => void) => void;
+};
+type PageContext<T extends string> = {
+    forms: Record<T, DmForm<string>>;
+};
+type FormConfig<T extends string> = {
+    selector: string;
+    onSubmit: (data: Record<string, unknown>, ctx: PageContext<T>) => void;
+    errorMessages?: FormErrorMessages;
+};
+type ButtonConfig<T extends string> = {
+    selector: string;
+    onClick: (ctx: PageContext<T>) => void;
+};
+type Config<F extends string, B extends string> = {
+    forms?: Record<F, FormConfig<F>>;
+    buttons?: Record<B, ButtonConfig<B>>;
+    errorMessages?: FormErrorMessages;
+};
+export const apiGet: <T>(url: string) => Promise<T>;
+export const apiPost: <T, R>(url: string, body: T) => Promise<R>;
+export const apiUploadFileList: <R>(url: string, files: FileList) => Promise<R[]>;
+export const init: <F extends string, B extends string>(conf: Config<F, B>) => void;
 
 //# sourceMappingURL=types.d.ts.map

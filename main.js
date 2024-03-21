@@ -4,14 +4,163 @@ function $parcel$export(e, n, v, s) {
 }
 
 $parcel$export(module.exports, "init", function () { return $15451612c40a4a0c$export$2cd8252107eb640b; });
-const $542eefcd7729cbce$var$apiUrl = "https://test.carprof.ee/api/v1";
-const $542eefcd7729cbce$var$formsUrl = `${$542eefcd7729cbce$var$apiUrl}/forms`;
-const $542eefcd7729cbce$var$externalUrl = `${$542eefcd7729cbce$var$apiUrl}/external`;
-const $542eefcd7729cbce$var$fileUrl = `${$542eefcd7729cbce$var$formsUrl}/file`;
-const $542eefcd7729cbce$var$clientUrl = `${$542eefcd7729cbce$var$externalUrl}/personal-data`;
-const $542eefcd7729cbce$var$buyoutUrl = (formId)=>`${$542eefcd7729cbce$var$externalUrl}/buyout/${formId}`;
-const $542eefcd7729cbce$var$lookupCarRegistryUrl = (plateNumber)=>`${$542eefcd7729cbce$var$apiUrl}/cars/mnt/${plateNumber}`;
-const $542eefcd7729cbce$var$fetchTyped = async (url, init = {
+$parcel$export(module.exports, "apiGet", function () { return $ce799568675fe138$export$1d2fa8475101ec93; });
+$parcel$export(module.exports, "apiPost", function () { return $ce799568675fe138$export$e842d00bb3325f27; });
+$parcel$export(module.exports, "apiUploadFileList", function () { return $ce799568675fe138$export$b2fd9029d5529a00; });
+const $8424e5b2d01c7ee8$export$d16800b7e59a8051 = (selector, parent)=>{
+    const el = (parent ?? document).querySelector(selector);
+    if (el === null) {
+        console.error(`Element not found by selector: ${parent ? "parent" : "document"}.${selector}.`);
+        return undefined;
+    } else return el;
+};
+const $8424e5b2d01c7ee8$export$465c18d0577ffcf1 = (selector)=>$8424e5b2d01c7ee8$export$d16800b7e59a8051(selector);
+const $8424e5b2d01c7ee8$export$be4e807bcc41c98 = (selector, parent)=>$8424e5b2d01c7ee8$export$d16800b7e59a8051(selector, parent);
+const $8424e5b2d01c7ee8$export$52987f4b88db0f2 = (form, handler)=>{
+    form.action = "";
+    form.method = "";
+    form.onsubmit = (e)=>{
+        e.preventDefault();
+        e.stopPropagation();
+    };
+    // TODO: Remove all event listeners
+    form.addEventListener("submit", handler);
+};
+
+
+class $874ccd897114849f$var$FormError extends Error {
+    parent;
+    constructor(message, parent1){
+        super(message);
+        Object.setPrototypeOf(this, new.target.prototype);
+        this.parent = parent1;
+    }
+    toString() {
+        return this.message + " Parent: [" + JSON.stringify(parent) + "]";
+    }
+}
+const $874ccd897114849f$var$scanFormFieldNames = (formElement)=>{
+    // TODO: Field selector must be configurable
+    const formFieldElements = formElement.querySelectorAll('[data-dm-type="control"]');
+    return Array.from(formFieldElements.values()).map((el)=>el.getAttribute("data-dm-name")).filter((name)=>!!name);
+};
+const $874ccd897114849f$var$createFormError = (formElement)=>{
+    // TODO: Error selector must be configurable
+    const element = (0, $8424e5b2d01c7ee8$export$d16800b7e59a8051)('[data-dm-name="form_error"]', formElement);
+    if (!element) throw new $874ccd897114849f$var$FormError("Form error element not found for form", formElement);
+    return element;
+};
+const $874ccd897114849f$var$createFieldInput = (fieldElement)=>{
+    // TODO: Field input selector must be configurable
+    const element = (0, $8424e5b2d01c7ee8$export$be4e807bcc41c98)('[data-dm-type="input"]', fieldElement);
+    if (!element) throw new $874ccd897114849f$var$FormError("Form input element not found for: ", fieldElement);
+    return element;
+};
+const $874ccd897114849f$var$createFieldError = (fieldElement)=>{
+    // TODO: Field error selector must be configurable
+    const element = (0, $8424e5b2d01c7ee8$export$d16800b7e59a8051)('[data-dm-type="error"]', fieldElement);
+    if (!element) throw new $874ccd897114849f$var$FormError("Form error element not found for: ", fieldElement);
+    return element;
+};
+const $874ccd897114849f$var$createFieldValidation = (inputElement)=>{
+    const required = inputElement.hasAttribute("required");
+    const minLength = inputElement.getAttribute("minlength");
+    const maxLength = inputElement.getAttribute("maxlength");
+    const pattern = inputElement.getAttribute("pattern");
+    const min = inputElement.getAttribute("min");
+    const max = inputElement.getAttribute("max");
+    return (value)=>{
+        if (required && !value) return "required";
+        if (minLength && String(value).length < Number(minLength)) return "minlength";
+        if (maxLength && String(value).length > Number(maxLength)) return "maxlength";
+        if (pattern && !new RegExp(pattern).test(String(value))) return "pattern";
+        if (min && Number(value) < Number(min)) return "min";
+        if (max && Number(value) > Number(max)) return "max";
+        return true;
+    };
+};
+const $874ccd897114849f$var$createFormField = (formElement, name)=>{
+    // TODO: Field selector must be configurable
+    const fieldElement = (0, $8424e5b2d01c7ee8$export$d16800b7e59a8051)(`[data-dm-name="${name}"]`, formElement);
+    if (!fieldElement) throw new $874ccd897114849f$var$FormError('Form field element not found by name: "' + name, formElement);
+    const inputElement = $874ccd897114849f$var$createFieldInput(fieldElement);
+    const errorElement = $874ccd897114849f$var$createFieldError(fieldElement);
+    const validator = $874ccd897114849f$var$createFieldValidation(inputElement);
+    return {
+        el: fieldElement,
+        input: {
+            el: inputElement
+        },
+        error: {
+            el: errorElement
+        },
+        validator: validator,
+        clearError: ()=>errorElement.textContent = "",
+        setError: (error)=>errorElement.textContent = error,
+        setInputValue: (value)=>inputElement.value = value
+    };
+};
+const $874ccd897114849f$export$f681a8129d2e9d28 = (selector, formName, formErrorMessages)=>{
+    console.debug("Creating form:", formName, selector);
+    const formElement = (0, $8424e5b2d01c7ee8$export$465c18d0577ffcf1)(selector);
+    if (!formElement) throw new Error("Form element not found by selector: " + selector);
+    // TODO: Must be optional!
+    const formErrorElement = $874ccd897114849f$var$createFormError(formElement);
+    const fieldNames = $874ccd897114849f$var$scanFormFieldNames(formElement);
+    console.debug("Fields scanned:", fieldNames);
+    const fieldElements = fieldNames.map((name)=>$874ccd897114849f$var$createFormField(formElement, name)).reduce((acc, cur)=>({
+            ...acc,
+            [cur.input.el.name]: cur
+        }), {});
+    const getFormValues = ()=>Object.entries(fieldElements).map(([name, instance])=>({
+                [name]: instance.input.el.value
+            })).reduce((acc, cur)=>({
+                ...acc,
+                ...cur
+            }), {});
+    const setFormValues = (values)=>{
+        Object.entries(values).forEach(([name, value])=>{
+            if (fieldElements[name]) fieldElements[name].setInputValue(value);
+        });
+    };
+    const setOnSubmit = (handler)=>(0, $8424e5b2d01c7ee8$export$52987f4b88db0f2)(formElement, (e)=>{
+            const errors = Object.entries(fieldElements).map(([name, field])=>({
+                    [name]: field.validator(field.input.el.value)
+                })).reduce((acc, cur)=>({
+                    ...acc,
+                    ...cur
+                }), {});
+            console.error("Validation errors", errors);
+            const hasErrors = Object.values(errors).some((error)=>error !== true);
+            if (hasErrors) Object.entries(errors).forEach(([name, error])=>{
+                if (error !== true) fieldElements[name].setError(formErrorMessages[error]);
+            });
+            else handler(e);
+        });
+    return {
+        el: formElement,
+        fields: fieldElements,
+        error: {
+            el: formErrorElement
+        },
+        clearError: ()=>formErrorElement.textContent = "",
+        clearAllErrors: ()=>{
+            formErrorElement.textContent = "";
+            Object.values(fieldElements).forEach((field)=>field.clearError());
+        },
+        setError: (error)=>formErrorElement.textContent = error,
+        getFormValues: getFormValues,
+        setFormValues: setFormValues,
+        setOnSubmit: setOnSubmit
+    };
+};
+
+
+const $f56e056924fdbc49$export$dd1bc94b04021eeb = (value)=>value === null || value === undefined;
+const $f56e056924fdbc49$export$96bdbc84526f3739 = (value)=>!$f56e056924fdbc49$export$dd1bc94b04021eeb(value);
+
+
+const $ce799568675fe138$export$61ca0380393ac2cc = async (url, init = {
     method: "GET"
 })=>{
     const response = await fetch(url, init);
@@ -22,34 +171,28 @@ const $542eefcd7729cbce$var$fetchTyped = async (url, init = {
         else return JSON.parse(responseText);
     }
 };
-const $542eefcd7729cbce$var$getTyped = async (url)=>$542eefcd7729cbce$var$fetchTyped(url);
-const $542eefcd7729cbce$var$postTyped = async (url, body)=>$542eefcd7729cbce$var$fetchTyped(url, {
+const $ce799568675fe138$export$1d2fa8475101ec93 = async (url)=>$ce799568675fe138$export$61ca0380393ac2cc(url);
+const $ce799568675fe138$export$e842d00bb3325f27 = async (url, body)=>$ce799568675fe138$export$61ca0380393ac2cc(url, {
         method: "POST",
         body: JSON.stringify(body),
         headers: {
             "Content-Type": "application/json"
         }
     });
-const $542eefcd7729cbce$export$7d7650bf4871ff57 = ()=>$542eefcd7729cbce$var$getTyped($542eefcd7729cbce$var$clientUrl);
-const $542eefcd7729cbce$export$3e93138bfea324f5 = (request)=>$542eefcd7729cbce$var$postTyped($542eefcd7729cbce$var$clientUrl, request);
-const $542eefcd7729cbce$export$30f6785ef4f50942 = (file)=>{
-    const data = new FormData();
-    data.append("file", file);
-    return $542eefcd7729cbce$var$fetchTyped($542eefcd7729cbce$var$fileUrl, {
-        method: "POST",
-        body: data
-    });
-};
-const $542eefcd7729cbce$export$ad2c850047bf833d = (formId, request)=>$542eefcd7729cbce$var$postTyped($542eefcd7729cbce$var$buyoutUrl(formId), request);
-const $542eefcd7729cbce$export$a716ac162dff6323 = (plateNumber)=>$542eefcd7729cbce$var$getTyped($542eefcd7729cbce$var$lookupCarRegistryUrl(plateNumber));
-const $542eefcd7729cbce$export$dd1bc94b04021eeb = (value)=>value === null || value === undefined;
-const $542eefcd7729cbce$export$96bdbc84526f3739 = (value)=>!$542eefcd7729cbce$export$dd1bc94b04021eeb(value);
-const $542eefcd7729cbce$export$bc226234bbb4652f = (files)=>{
+const $ce799568675fe138$export$e132348fd6a678a = (url)=>(file)=>{
+        const data = new FormData();
+        data.append("file", file);
+        return $ce799568675fe138$export$61ca0380393ac2cc(url, {
+            method: "POST",
+            body: data
+        });
+    };
+const $ce799568675fe138$export$bc226234bbb4652f = (files)=>{
     const result = [];
-    if ($542eefcd7729cbce$export$96bdbc84526f3739(files)) for (const file of files)result.push(file);
+    if ((0, $f56e056924fdbc49$export$96bdbc84526f3739)(files)) for (const file of files)result.push(file);
     return result;
 };
-const $542eefcd7729cbce$export$7b64c937225679ee = (upload, onFileUploadSuccess, onFileUploadError)=>(files)=>Promise.all(files.map((file)=>upload(file).then((result)=>{
+const $ce799568675fe138$export$7b64c937225679ee = (upload, onFileUploadSuccess, onFileUploadError)=>(files)=>Promise.all(files.map((file)=>upload(file).then((result)=>{
                 onFileUploadSuccess?.();
                 return result;
             }).catch((e)=>{
@@ -57,360 +200,44 @@ const $542eefcd7729cbce$export$7b64c937225679ee = (upload, onFileUploadSuccess, 
                 console.error("File upload error", e);
                 onFileUploadError?.(e);
                 return undefined;
-            }))).then((result)=>result.filter($542eefcd7729cbce$export$96bdbc84526f3739));
+            }))).then((result)=>result.filter((0, $f56e056924fdbc49$export$96bdbc84526f3739)));
+const $ce799568675fe138$export$1ea25e59dc2c9809 = (url, files)=>$ce799568675fe138$export$7b64c937225679ee($ce799568675fe138$export$e132348fd6a678a(url))(files);
+const $ce799568675fe138$export$b2fd9029d5529a00 = (url, files)=>$ce799568675fe138$export$1ea25e59dc2c9809(url, $ce799568675fe138$export$bc226234bbb4652f(files));
 
 
-const $9f7d2dc322d4f51a$export$de8d8c292714e7f9 = [
-    "control",
-    "label",
-    "error",
-    "input"
-];
-const $9f7d2dc322d4f51a$export$15bcbdcbe1072762 = [
-    "error",
-    "success",
-    "default"
-];
-
-
-const $be94f3f256e85d52$var$getElement = (path)=>{
-    const el = document.querySelector(path);
-    if (el === null) {
-        console.error(`Element not found by path: ${path}.`);
-        return undefined;
-    } else return el;
-};
-const $be94f3f256e85d52$var$createDmElement = (el, name)=>{
-    return {
-        el: el,
-        id: el.attributes.getNamedItem("data-dm-id")?.value,
-        name: name ?? el.attributes.getNamedItem("data-dm-name")?.value,
-        type: el.attributes.getNamedItem("data-dm-type")?.value,
-        show: ()=>{
-            el.style.display = "block";
-        },
-        hide: ()=>{
-            el.style.display = "none";
-        }
-    };
-};
-const $be94f3f256e85d52$var$createDmElementOpt = (el, name)=>el ? $be94f3f256e85d52$var$createDmElement(el, name) : undefined;
-const $be94f3f256e85d52$export$83595b84fc78b9b4 = (id)=>$be94f3f256e85d52$var$getElement(`[data-dm-id="${id}"]`);
-const $be94f3f256e85d52$var$getElementChildByType = (name, type)=>$be94f3f256e85d52$var$getElement(`[data-dm-name="${name}"] [data-dm-type="${type}"]`);
-const $be94f3f256e85d52$var$getElementChildByName = (id, name)=>$be94f3f256e85d52$var$getElement(`[data-dm-id="${id}"] [data-dm-name="${name}"]`);
-const $be94f3f256e85d52$var$getField = (name)=>{
-    const field = $be94f3f256e85d52$var$getElement(`[data-dm-name="${name}"]`);
-    const getErrorEl = ()=>$be94f3f256e85d52$var$getElementChildByType(name, "error");
-    const setState = (state)=>{
-        const el = getErrorEl();
-        if (el) {
-            (0, $9f7d2dc322d4f51a$export$15bcbdcbe1072762).map((s)=>`field-state-${s}`).filter((v)=>el.classList.contains(v)).forEach((s)=>el.classList.remove(s));
-            el.classList.add(`field-state-${state}`);
-        }
-    };
-    if (field) return {
-        ...$be94f3f256e85d52$var$createDmElement(field, name),
-        getLabel: ()=>$be94f3f256e85d52$var$createDmElementOpt($be94f3f256e85d52$var$getElementChildByType(name, "label")),
-        getInput: ()=>$be94f3f256e85d52$var$createDmElementOpt($be94f3f256e85d52$var$getElementChildByType(name, "input")),
-        setInputValue: (value)=>{
-            $be94f3f256e85d52$var$getElementChildByType(name, "input")?.setAttribute("value", value);
-        },
-        getError: ()=>$be94f3f256e85d52$var$createDmElementOpt(getErrorEl()),
-        setState: setState,
-        clearError () {
-            const el = getErrorEl();
-            if (el) {
-                setState("default");
-                el.innerHTML = "";
-            }
-        },
-        setError: (error)=>{
-            const el = getErrorEl();
-            if (el) {
-                setState("error");
-                el.innerHTML = error;
-            }
-        }
-    };
-    else return undefined;
-};
-const $be94f3f256e85d52$export$52987f4b88db0f2 = (form, handler)=>{
-    form.action = "";
-    form.method = "";
-    form.onsubmit = (e)=>{
-        e.preventDefault();
-        e.stopPropagation();
-    };
-    // TODO: Remove all event listeners
-    form.addEventListener("submit", handler);
-};
-const $be94f3f256e85d52$export$830c804e8d921bba = (name)=>{
-    const form = $be94f3f256e85d52$var$getElement(`[data-dm-id="${name}"]`);
-    const getErrorEl = ()=>$be94f3f256e85d52$var$getElementChildByName(name, "form_error");
-    if (form) return {
-        name: name,
-        el: form,
-        show: ()=>{
-            form.style.display = "block";
-        },
-        hide: ()=>{
-            form.style.display = "none";
-        },
-        getField: $be94f3f256e85d52$var$getField,
-        getError: ()=>$be94f3f256e85d52$var$createDmElementOpt(getErrorEl()),
-        clearError () {
-            const el = getErrorEl();
-            if (el) el.innerHTML = "";
-        },
-        setError: (error)=>{
-            const el = getErrorEl();
-            if (el) el.innerHTML = error;
-        },
-        setOnSubmit: (handler)=>$be94f3f256e85d52$export$52987f4b88db0f2(form, handler)
-    };
-    else return undefined;
-};
-
-
-const $a432bf2f0787dfa2$export$dd1bc94b04021eeb = (value)=>value === null || value === undefined;
-const $a432bf2f0787dfa2$export$4d09d4ac8ba225dd = (field, validator, errMsg)=>{
-    const value = field.input.el.value;
-    if (!validator(value)) {
-        field.setError(errMsg());
-        return undefined;
-    }
-    return value;
-};
-const $a432bf2f0787dfa2$export$c6f9402c221ec23f = (field)=>$a432bf2f0787dfa2$export$4d09d4ac8ba225dd(field, (value)=>!!value && value.length > 0, ()=>"This field must be filled!");
-const $a432bf2f0787dfa2$export$18148d12c805c5b0 = (field)=>$a432bf2f0787dfa2$export$4d09d4ac8ba225dd(field, (value)=>!!value && value.includes("@"), ()=>"Invalid email!");
-
-
-const $f893617372f114e3$var$getFormFields = (form, fieldNames)=>{
-    const fields = fieldNames.map((name)=>form.getField(name));
-    if (fields.length !== fieldNames.length) {
-        console.error("Form should have all fields!", fieldNames);
-        form.setError("Unexpected error: missing fields!");
-        return undefined;
-    } else return fields;
-};
-const $f893617372f114e3$var$createRecord = (arr, propertyName)=>{
-    const record = {};
-    arr.forEach((item)=>{
-        const key = item[propertyName];
-        record[key] = item;
+const $15451612c40a4a0c$var$setupForm = (ctx, formName, formConfig, globalErrorMessages)=>{
+    console.debug("Form:", formName, formConfig);
+    const form = (0, $874ccd897114849f$export$f681a8129d2e9d28)(formConfig.selector, formName, {
+        ...globalErrorMessages,
+        ...formConfig.errorMessages
     });
-    return record;
-};
-const $f893617372f114e3$export$b1af796fd1475484 = (form, fieldNames)=>{
-    const fields = $f893617372f114e3$var$getFormFields(form, fieldNames);
-    if (!fields) throw new Error("Form should have all fields!");
-    const fieldInstances = fields.map((field)=>{
-        const label = field.getLabel();
-        const input = field.getInput();
-        const error = field.getError();
-        if (!label || !input || !error) {
-            console.error("Form field must have label, input, error elements!", field.name, field.el);
-            throw new Error("Form field must have label, input, error elements!");
-        }
-        return {
-            label: label,
-            input: input,
-            error: error,
-            id: field.id,
-            name: field.name,
-            type: field.type,
-            el: field.el,
-            show: ()=>field.show(),
-            hide: ()=>field.hide(),
-            clearError: ()=>field.clearError(),
-            setError: (error)=>field.setError(error),
-            setState: (state)=>field.setState(state),
-            setInputValue: (value)=>field.setInputValue(value)
-        };
+    form.setOnSubmit(()=>{
+        console.log("Form submitted:", formName, form.fields);
+        formConfig.onSubmit(form.getFormValues(), ctx);
     });
-    const error = form.getError();
-    if (!error) {
-        console.error("Form must have error element!", form.el);
-        throw new Error("Form must have error element!");
-    }
-    return {
-        id: form.id,
-        name: form.name,
-        type: form.type,
-        el: form.el,
-        show: ()=>form.show(),
-        hide: ()=>form.hide(),
-        fields: $f893617372f114e3$var$createRecord(fieldInstances, "name"),
-        error: error,
-        clearError: ()=>form.clearError(),
-        clearAllErrors: ()=>{
-            form.clearError();
-            fieldInstances.forEach((field)=>field.clearError());
-        },
-        setError: (error)=>form.setError(error),
-        setOnSubmit: (handler)=>form.setOnSubmit(handler)
-    };
+    form.el.setAttribute("novalidate", "true");
+    return form;
 };
-
-
-const $15451612c40a4a0c$var$handleSubmitClient = (conf, storage, form)=>(e)=>{
-        console.log("Form submitted", e.target);
-        form.clearAllErrors();
-        const name = (0, $a432bf2f0787dfa2$export$c6f9402c221ec23f)(form.fields.name);
-        const email = (0, $a432bf2f0787dfa2$export$18148d12c805c5b0)(form.fields.email);
-        const phoneNumber = (0, $a432bf2f0787dfa2$export$c6f9402c221ec23f)(form.fields.phone);
-        if (!name || !email || !phoneNumber) return;
-        const client = {
-            formType: "BUYOUT",
-            name: name,
-            email: email,
-            phoneNumber: phoneNumber,
-            language: "et"
-        };
-        (0, $542eefcd7729cbce$export$3e93138bfea324f5)(client).then((resp)=>{
-            storage.setState({
-                ...storage.state,
-                client: resp
-            });
-            console.log(`State updated: ${JSON.stringify(storage)}`);
-            conf.stepper.nextStepFn(1);
-        }).catch((error)=>{
-            console.error("API error:", error);
-            form.setError("Unable to send client data!");
-        });
-    };
-const $15451612c40a4a0c$var$handleSubmitSearchVehicle = (storage, form, vehicleForm)=>(e)=>{
-        console.log("Form submitted", e.target);
-        form.clearAllErrors();
-        const plateNumber = (0, $a432bf2f0787dfa2$export$c6f9402c221ec23f)(form.fields.plateNumber);
-        if (!plateNumber) return;
-        console.log("Plate number:", plateNumber);
-        (0, $542eefcd7729cbce$export$a716ac162dff6323)(plateNumber).then((response)=>{
-            console.log("Car response:", response);
-            vehicleForm.fields.make.setInputValue(response.mark);
-            vehicleForm.fields.model.setInputValue(response.model);
-            vehicleForm.fields.year.setInputValue(String(response.firstRegYear));
-            storage.setState({
-                ...storage.state,
-                form: {
-                    ...storage.state.form,
-                    plateNumber: plateNumber
-                }
-            });
-            console.log(`State updated: ${JSON.stringify(storage)}`);
-            vehicleForm.show();
-        }).catch((error)=>{
-            console.error("Car error:", error);
-            form.fields.plateNumber.setError("Car not found!");
-        });
-    };
-const $15451612c40a4a0c$var$handleSubmitVehicle = (conf, storage, form)=>(e)=>{
-        console.log("Form submitted", e.target);
-        form.clearAllErrors();
-        const make = (0, $a432bf2f0787dfa2$export$c6f9402c221ec23f)(form.fields.make);
-        const model = (0, $a432bf2f0787dfa2$export$c6f9402c221ec23f)(form.fields.model);
-        const year = (0, $a432bf2f0787dfa2$export$c6f9402c221ec23f)(form.fields.year);
-        const mileage = (0, $a432bf2f0787dfa2$export$c6f9402c221ec23f)(form.fields.mileage);
-        const location = form.fields.location?.input.el.value;
-        const price = (0, $a432bf2f0787dfa2$export$c6f9402c221ec23f)(form.fields.price);
-        const message = form.fields.message?.input.el.value;
-        if (!make || !model || !year || !mileage || !price) return;
-        if (storage.state.form.plateNumber === undefined) throw new Error("Plate number is not set!");
-        const request = {
-            plateNumber: storage.state.form.plateNumber,
-            make: make,
-            model: model,
-            year: Number(year),
-            mileage: Number(mileage),
-            location: location,
-            price: Number(price),
-            additionalInfo: message,
-            photoIds: []
-        };
-        console.log(`Submitted: request=${JSON.stringify(request)}`);
-        storage.setState({
-            ...storage.state,
-            form: request
-        });
-        console.log(`State updated: ${JSON.stringify(storage)}`);
-        conf.stepper.nextStepFn(2);
-    };
-const $15451612c40a4a0c$var$handleSubmitFiles = (conf, storage, form)=>(e)=>{
-        console.log("Form submitted", e.target);
-        form.clearAllErrors();
-        const files = form.fields.files.input.el.files;
-        if (!files || files.length === 0) {
-            form.fields.files.setError("Files must be selected!");
-            return;
-        } else if (files && files.length > 10) {
-            form.fields.files.setError("Maximum 10 files allowed!");
-            return;
-        }
-        console.log("Files:", files);
-        const uploadFiles = (0, $542eefcd7729cbce$export$7b64c937225679ee)((0, $542eefcd7729cbce$export$30f6785ef4f50942));
-        uploadFiles((0, $542eefcd7729cbce$export$bc226234bbb4652f)(files)).then((response)=>{
-            const photoIds = response.map((v)=>v.fileId);
-            storage.setState({
-                ...storage.state,
-                form: {
-                    ...storage.state.form,
-                    photoIds: photoIds
-                }
-            });
-            console.log(`State updated: ${JSON.stringify(storage)}`);
-            if (storage.state.client) (0, $542eefcd7729cbce$export$ad2c850047bf833d)(storage.state.client.personalDataId, storage.state.form).then(()=>{
-                console.log("Success!");
-                conf.stepper.nextStepFn(3);
-            });
-            else form.setError("Client is not set!");
-        });
-    };
-const $15451612c40a4a0c$var$initForm = (name, fieldNames)=>{
-    const form = (0, $be94f3f256e85d52$export$830c804e8d921bba)(name);
-    if (form) //form.setOnSubmit(handler(form))
-    return (0, $f893617372f114e3$export$b1af796fd1475484)(form, fieldNames);
-    else {
-        // eslint-disable-next-line no-console
-        console.error("Client form not found!");
-        return undefined;
-    }
+const $15451612c40a4a0c$var$defaultErrors = {
+    required: "This field is required",
+    minlength: "Field length is too small",
+    maxlength: "Field length is too big",
+    pattern: "Field does not match the pattern",
+    min: "Field value is too small",
+    max: "Field value is too big"
 };
 const $15451612c40a4a0c$export$2cd8252107eb640b = (conf)=>{
     console.log("Initializing...", conf);
-    const storage = {
-        state: {
-            client: undefined,
-            form: {}
-        },
-        setState (value) {
-            storage.state = value;
-        }
+    const ctx = {
+        forms: {}
     };
-    const clientForm = $15451612c40a4a0c$var$initForm(conf.forms.client, [
-        "name",
-        "email",
-        "phone"
-    ]);
-    const findVehicleForm = $15451612c40a4a0c$var$initForm(conf.forms.findVehicle, [
-        "plateNumber"
-    ]);
-    const vehicleForm = $15451612c40a4a0c$var$initForm(conf.forms.vehicle, [
-        "make",
-        "model",
-        "year",
-        "mileage",
-        "location",
-        "price",
-        "message"
-    ]);
-    const filesForm = $15451612c40a4a0c$var$initForm(conf.forms.files, [
-        "files"
-    ]);
-    if (!clientForm || !findVehicleForm || !vehicleForm || !filesForm) throw new Error("Not all forms are found!");
-    clientForm.setOnSubmit($15451612c40a4a0c$var$handleSubmitClient(conf, storage, clientForm));
-    findVehicleForm.setOnSubmit($15451612c40a4a0c$var$handleSubmitSearchVehicle(storage, findVehicleForm, vehicleForm));
-    vehicleForm.setOnSubmit($15451612c40a4a0c$var$handleSubmitVehicle(conf, storage, vehicleForm));
-    filesForm.setOnSubmit($15451612c40a4a0c$var$handleSubmitFiles(conf, storage, filesForm));
+    if (conf.forms) {
+        // TODO: Update foreach to map or reduce
+        Object.entries(conf.forms).forEach(([formName, formConfig])=>{
+            ctx.forms[formName] = $15451612c40a4a0c$var$setupForm(ctx, formName, formConfig, conf.errorMessages ?? $15451612c40a4a0c$var$defaultErrors);
+        });
+        console.log("Initialized with context: ", ctx);
+    }
 };
 
 
