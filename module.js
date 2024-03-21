@@ -105,7 +105,7 @@ const $60c0287b5dcd0fba$export$f681a8129d2e9d28 = (selector, formName, formError
         }), {});
     const getFormValues = ()=>Object.entries(fieldElements).map(([name, instance])=>({
                 [name]: instance.input.el.value
-            })).reduce((acc, cur)=>({
+            })).filter((rec)=>!!rec[1] && rec[1].length > 0).reduce((acc, cur)=>({
                 ...acc,
                 ...cur
             }), {});
@@ -226,6 +226,11 @@ const $b3a133cf85b0ceb6$export$2cd8252107eb640b = (conf)=>{
         // TODO: Update foreach to map or reduce
         Object.entries(conf.forms).forEach(([formName, formConfig])=>{
             ctx.forms[formName] = $b3a133cf85b0ceb6$var$setupForm(ctx, formName, formConfig, conf.errorMessages ?? $b3a133cf85b0ceb6$var$defaultErrors);
+        });
+        if (conf.buttons) Object.entries(conf.buttons).forEach(([, buttonConfig])=>{
+            const button = document.querySelector(buttonConfig.selector);
+            if (button) button.addEventListener("click", ()=>buttonConfig.onClick(ctx));
+            else console.error("Button not found by selector:", buttonConfig.selector);
         });
         console.log("Initialized with context: ", ctx);
     }

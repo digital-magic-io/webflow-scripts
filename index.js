@@ -33,6 +33,17 @@ const init = (conf) => {
         Object.entries(conf.forms).forEach(([formName, formConfig]) => {
             ctx.forms[formName] = setupForm(ctx, formName, formConfig, conf.errorMessages ?? defaultErrors);
         });
+        if (conf.buttons) {
+            Object.entries(conf.buttons).forEach(([, buttonConfig]) => {
+                const button = document.querySelector(buttonConfig.selector);
+                if (button) {
+                    button.addEventListener('click', () => buttonConfig.onClick(ctx));
+                }
+                else {
+                    console.error('Button not found by selector:', buttonConfig.selector);
+                }
+            });
+        }
         console.log('Initialized with context: ', ctx);
     }
 };

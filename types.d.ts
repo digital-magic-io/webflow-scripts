@@ -38,7 +38,7 @@ type ButtonConfig<T extends string> = {
 };
 type Config<F extends string, B extends string> = {
     forms?: Record<F, FormConfig<F>>;
-    buttons?: Record<B, ButtonConfig<B>>;
+    buttons?: Record<B, ButtonConfig<F>>;
     errorMessages?: FormErrorMessages;
 };
 export const apiGet: <T>(url: string) => Promise<T>;

@@ -22,6 +22,16 @@
         let personalDataId = null;
 
         init({
+          buttons: {
+            manual: {
+              selector: '[data-dm-id="manual"]',
+              onClick: (ctx) => {
+                console.debug('Button clicked:', ctx);
+                ctx.forms.vehicle.el.setAttribute('style', undefined);
+              }
+
+            }
+          },
           forms: {
             client: {
               selector: '[data-dm-id="form_client"]',
@@ -162,6 +172,7 @@
         </div>
         <div>
           <button type="submit" data-dm-name="form_submit">Find</button>
+          <button type="button" data-dm-id="manual">Manual</button>
         </div>
       </form>
       <hr />
