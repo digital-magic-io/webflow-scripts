@@ -34,6 +34,12 @@
           forms: {
             initial: {
               selector: '[data-dm-id="form_find_vehicle"]',
+              onSuccess: (ctx) => {
+                // TODO: Next step should be here
+                console.log('Next step');
+                ctx.forms.initial.el.style.display = 'none';
+                ctx.forms.vehicle.el.removeAttribute('style');
+              },
               onSubmit: (data, ctx) => {
                 console.debug('Initial form submitted', data);
                 ctx.forms.initial.clearAllErrors();
@@ -56,11 +62,7 @@
                       year: firstRegYear,
                       plateNumber: registrationNumber
                     });
-
-                    // TODO: Next step should be here
-                    console.log('Next step');
-                    ctx.forms.initial.el.style.display = 'none';
-                    ctx.forms.vehicle.el.removeAttribute('style');
+                    ctx.forms.initial.onSuccess();
                   }).catch((error) => {
                   console.error('Response error: ', error);
                   ctx.forms.initial.setError('Failed to send data');
@@ -71,6 +73,12 @@
               selector: '[data-dm-id="form_vehicle"]',
               errorMessages: {
                 pattern: 'Email is not valid'
+              },
+              onSuccess(ctx) {
+                // TODO: Next step should be here
+                console.log('Next step');
+                ctx.forms.vehicle.el.style.display = 'none';
+                ctx.forms.files.el.removeAttribute('style');
               },
               onSubmit: (data, ctx) => {
                 console.debug('Vehicle form submitted:', data, ctx);
@@ -90,11 +98,7 @@
                 apiPost(formDataUrl(formId), request)
                   .then((resp) => {
                     console.debug('Response:', resp);
-
-                    // TODO: Next step should be here
-                    console.log('Next step');
-                    ctx.forms.vehicle.el.style.display = 'none';
-                    ctx.forms.files.el.removeAttribute('style');
+                    ctx.forms.vehicle.onSuccess();
                   }).catch((error) => {
                     console.error('Response error: ', error);
                     ctx.forms.vehicle.setError('Failed to send data');
@@ -103,6 +107,13 @@
             },
             files: {
               selector: '[data-dm-id="form_files"]',
+              onSuccess: (ctx) => {
+                // TODO: Next step should be here
+                console.log('Next step');
+                ctx.forms.files.el.style.display = 'none';
+                document.getElementById('success_step').removeAttribute('style');
+                console.log('Great Success!')
+              },
               onSubmit: (data, ctx) => {
                 // TODO: Update script to pass files to data (if file input element)
                 console.debug('Files form submitted:', data, ctx);
@@ -121,18 +132,11 @@
                     const request = { imageIds: response.map((v) => v.fileId) }
                     apiPost(photosUrl(formId), request).then((response) => {
                       console.debug('Buyout form response:', response);
-
-                      // TODO: Next step should be here
-                      console.log('Next step');
-                      ctx.forms.files.el.style.display = 'none';
-                      document.getElementById('success_step').removeAttribute('style');
-
-                      console.log('Great Success!')
+                      ctx.forms.files.onSuccess();
                     }).catch((error) => {
                       console.error('Response error: ', error);
                       ctx.forms.files.setError('Unable to submit buyout form');
                     })
-
                   }).catch((error) => {
                     console.error('Response error: ', error);
                     ctx.forms.files.setError('Unable to upload files');

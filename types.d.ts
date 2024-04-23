@@ -30,6 +30,7 @@ type PageContext<T extends string> = {
 type FormConfig<T extends string> = {
     selector: string;
     onSubmit: (data: Record<string, unknown>, ctx: PageContext<T>) => void;
+    onSuccess: (ctx: PageContext<T>) => void;
     errorMessages?: FormErrorMessages;
 };
 type ButtonConfig<T extends string> = {
