@@ -103,9 +103,9 @@ const $60c0287b5dcd0fba$export$f681a8129d2e9d28 = (selector, formName, formError
             ...acc,
             [cur.input.el.name]: cur
         }), {});
-    const getFormValues = ()=>Object.entries(fieldElements).map(([name, instance])=>({
+    const getFormValues = ()=>Object.entries(fieldElements).filter(([, instance])=>!!instance && instance.input.el.value.trim().length > 0).map(([name, instance])=>({
                 [name]: instance.input.el.value
-            })).filter((rec)=>!!rec[1] && rec[1].length > 0).reduce((acc, cur)=>({
+            })).reduce((acc, cur)=>({
                 ...acc,
                 ...cur
             }), {});
@@ -121,12 +121,14 @@ const $60c0287b5dcd0fba$export$f681a8129d2e9d28 = (selector, formName, formError
                     ...acc,
                     ...cur
                 }), {});
-            console.error("Validation errors", errors);
             const hasErrors = Object.values(errors).some((error)=>error !== true);
-            if (hasErrors) Object.entries(errors).forEach(([name, error])=>{
-                if (error !== true) fieldElements[name].setError(formErrorMessages[error]);
-            });
-            else handler(e);
+            if (hasErrors) {
+                console.error("Validation errors", errors);
+                Object.entries(errors).forEach(([name, error])=>{
+                    if (error !== true) fieldElements[name].setError(formErrorMessages[error]);
+                });
+            //formErrorElement.textContent = 'Form has errors!'
+            } else handler(e);
         });
     return {
         el: formElement,
