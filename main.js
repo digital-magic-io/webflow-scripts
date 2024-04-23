@@ -215,7 +215,7 @@ const $15451612c40a4a0c$var$setupForm = (ctx, formName, formConfig, globalErrorM
     });
     form.setOnSubmit(()=>{
         console.log("Form submitted:", formName, form.fields);
-        formConfig.onSubmit(form.getFormValues(), ctx);
+        formConfig.onSubmit(form.getFormValues(), ctx, ()=>formConfig.onSuccess(ctx), (error)=>formConfig.onError(error, ctx));
     });
     form.el.setAttribute("novalidate", "true");
     return form;

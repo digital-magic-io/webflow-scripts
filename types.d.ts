@@ -22,15 +22,16 @@ type DmForm<T extends string> = DmElement<HTMLElement> & {
     setError: Handler<string>;
     getFormValues: FN<void, Record<T, string>>;
     setFormValues: Handler<Record<T, string>>;
-    setOnSubmit: (handler: (e: Event) => void) => void;
+    setOnSubmit: FN<FN<Event, void>, void>;
 };
 type PageContext<T extends string> = {
     forms: Record<T, DmForm<string>>;
 };
 type FormConfig<T extends string> = {
     selector: string;
-    onSubmit: (data: Record<string, unknown>, ctx: PageContext<T>) => void;
+    onSubmit: (data: Record<string, unknown>, ctx: PageContext<T>, success: Handler<void>, fail: Handler<unknown>) => void;
     onSuccess: (ctx: PageContext<T>) => void;
+    onError: (error: unknown, ctx: PageContext<T>) => void;
     errorMessages?: FormErrorMessages;
 };
 type ButtonConfig<T extends string> = {

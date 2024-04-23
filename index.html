@@ -40,7 +40,10 @@
                 ctx.forms.initial.el.style.display = 'none';
                 ctx.forms.vehicle.el.removeAttribute('style');
               },
-              onSubmit: (data, ctx) => {
+              onError: (error, ctx) => {
+                ctx.forms.initial.setError(error);
+              },
+              onSubmit: (data, ctx, success, fail) => {
                 console.debug('Initial form submitted', data);
                 ctx.forms.initial.clearAllErrors();
                 const request = {
@@ -62,11 +65,11 @@
                       year: firstRegYear,
                       plateNumber: registrationNumber
                     });
-                    ctx.forms.initial.onSuccess();
+                    success();
                   }).catch((error) => {
-                  console.error('Response error: ', error);
-                  ctx.forms.initial.setError('Failed to send data');
-                });
+                    console.error('Response error: ', error);
+                    fail('Failed to send data');
+                  });
               }
             },
             vehicle: {
@@ -80,7 +83,10 @@
                 ctx.forms.vehicle.el.style.display = 'none';
                 ctx.forms.files.el.removeAttribute('style');
               },
-              onSubmit: (data, ctx) => {
+              onError(error, ctx) {
+                ctx.forms.vehicle.setError(error);
+              },
+              onSubmit: (data, ctx, success, fail) => {
                 console.debug('Vehicle form submitted:', data, ctx);
                 ctx.forms.vehicle.clearAllErrors();
                 if (!formId) {
@@ -98,10 +104,10 @@
                 apiPost(formDataUrl(formId), request)
                   .then((resp) => {
                     console.debug('Response:', resp);
-                    ctx.forms.vehicle.onSuccess();
+                    success();
                   }).catch((error) => {
                     console.error('Response error: ', error);
-                    ctx.forms.vehicle.setError('Failed to send data');
+                    fail('Failed to send data');
                   });
               }
             },
@@ -114,7 +120,10 @@
                 document.getElementById('success_step').removeAttribute('style');
                 console.log('Great Success!')
               },
-              onSubmit: (data, ctx) => {
+              onError: (error, ctx) => {
+                ctx.forms.files.setError(error);
+              },
+              onSubmit: (data, ctx, success, fail) => {
                 // TODO: Update script to pass files to data (if file input element)
                 console.debug('Files form submitted:', data, ctx);
                 if (!formId) {
@@ -124,7 +133,7 @@
 
                 const files = ctx.forms.files.fields.files.input.el.files;
                 if (!files || files.length === 0) {
-                  ctx.forms.files.setError('No files selected');
+                  fail('No files selected');
                 } else {
                   console.log('Files:', files)
                   apiUploadFileList(fileUrl, files).then((response) => {
@@ -132,14 +141,14 @@
                     const request = { imageIds: response.map((v) => v.fileId) }
                     apiPost(photosUrl(formId), request).then((response) => {
                       console.debug('Buyout form response:', response);
-                      ctx.forms.files.onSuccess();
+                      success();
                     }).catch((error) => {
                       console.error('Response error: ', error);
-                      ctx.forms.files.setError('Unable to submit buyout form');
+                      fail('Unable to submit buyout form');
                     })
                   }).catch((error) => {
                     console.error('Response error: ', error);
-                    ctx.forms.files.setError('Unable to upload files');
+                    fail('Unable to upload files');
                   })
                 }
               }
