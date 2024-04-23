@@ -151,8 +151,8 @@ export const createForm = <T extends string>(
 
   const getFormValues = (): Record<T, string> =>
     Object.entries<DmField>(fieldElements)
+      .filter(([, instance]) => !!instance && instance.input.el.value.trim().length > 0)
       .map(([name, instance]) => ({ [name]: instance.input.el.value }))
-      .filter((rec) => !!rec[1] && rec[1].length > 0)
       .reduce((acc, cur) => ({ ...acc, ...cur }), {}) as Record<T, string>
 
   const setFormValues = (values: Record<T, string>): void => {
@@ -168,9 +168,9 @@ export const createForm = <T extends string>(
       const errors = Object.entries(fieldElements)
         .map(([name, field]) => ({ [name]: field.validator(field.input.el.value) }))
         .reduce((acc, cur) => ({ ...acc, ...cur }), {})
-      console.error('Validation errors', errors)
       const hasErrors = Object.values(errors).some((error) => error !== true)
       if (hasErrors) {
+        console.error('Validation errors', errors)
         Object.entries(errors).forEach(([name, error]) => {
           if (error !== true) {
             fieldElements[name].setError(formErrorMessages[error])

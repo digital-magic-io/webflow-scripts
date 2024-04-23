@@ -10,70 +10,95 @@
       import { init, apiGet, apiPost, apiUploadFileList } from './module.js';
       window.onload = () => {
         console.log("page is fully loaded");
-        const apiUrl = 'https://test.carprof.ee/api/v1'
-        const formsUrl = `${apiUrl}/forms`
-        const externalUrl = `${apiUrl}/external`
+        const apiUrl = 'https://test.carprof.ee/api';
+        const formsUrl = `${apiUrl}/v2/forms`;
+        const initialFormUrl = `${formsUrl}/initial-data`;
+        const formDataUrl = (formId) => `${formsUrl}/form-data/${formId}`;
+        const photosUrl = (formId) => `${formsUrl}/photos/${formId}`;
+        const fileUrl = `${apiUrl}/v1/forms/file`;
 
-        const fileUrl = `${formsUrl}/file`
-        const clientUrl = `${externalUrl}/personal-data`
-        const buyoutUrl = (formId) => `${externalUrl}/buyout/${formId}`
-        const lookupCarRegistryUrl = (plateNumber) => `${apiUrl}/cars/mnt/${plateNumber}`
-
-        let personalDataId = null;
+        let formId = null;
 
         init({
           buttons: {
+            /*
             manual: {
               selector: '[data-dm-id="manual"]',
               onClick: (ctx) => {
                 console.debug('Button clicked:', ctx);
                 ctx.forms.vehicle.el.setAttribute('style', undefined);
               }
-
             }
+            */
           },
           forms: {
-            client: {
-              selector: '[data-dm-id="form_client"]',
-              onSubmit: (data, ctx) => {
-                console.debug('Client form submitted:', data, ctx);
-                ctx.forms.client.clearAllErrors();
-                apiPost(clientUrl, {...data, language: 'et', formType: 'BUYOUT'}).then((response) => {
-                  console.debug('Client form response:', response);
-                  personalDataId = response.personalDataId;
-                  console.log('Next step');
-                }).catch((error) => {
-                  console.error('Response error: ', error);
-                  ctx.forms.client.setError('Unable to submit client form');
-                })
-
-              },
-              errorMessages: {
-                pattern: 'Email is not valid'
-              }
-            },
-            findVehicle: {
+            initial: {
               selector: '[data-dm-id="form_find_vehicle"]',
               onSubmit: (data, ctx) => {
-                console.debug('Find vehicle form submitted:', data, ctx);
-                ctx.forms.findVehicle.clearAllErrors();
-                apiGet(lookupCarRegistryUrl(data.plateNumber)).then((response) => {
-                  console.debug('Find vehicle form response:', response);
-                  const { mark, model } = response;
-                  ctx.forms.vehicle.setFormValues({ make: mark, model });
-                  ctx.forms.vehicle.el.setAttribute('style', undefined);
-                }).catch((error) => {
+                console.debug('Initial form submitted', data);
+                ctx.forms.initial.clearAllErrors();
+                const request = {
+                  phoneNumber: data.phone,
+                  carNumber: data.plateNumber,
+                  language: 'et',
+                  formType: 'BUYOUT'
+                };
+                console.log('Sending request: ', request);
+                apiPost(initialFormUrl, request)
+                  .then((resp) => {
+                    console.debug('Response:', resp);
+                    formId = resp.formUuid;
+                    const { mark, model, firstRegYear, registrationNumber } = resp.mntData;
+                    ctx.forms.vehicle.setFormValues({
+                      phone: data.phone,
+                      make: mark,
+                      model,
+                      year: firstRegYear,
+                      plateNumber: registrationNumber
+                    });
+
+                    // TODO: Next step should be here
+                    console.log('Next step');
+                    ctx.forms.initial.el.style.display = 'none';
+                    ctx.forms.vehicle.el.removeAttribute('style');
+                  }).catch((error) => {
                   console.error('Response error: ', error);
-                  ctx.forms.findVehicle.setError('Unable to find vehicle');
-                })
+                  ctx.forms.initial.setError('Failed to send data');
+                });
               }
             },
             vehicle: {
               selector: '[data-dm-id="form_vehicle"]',
+              errorMessages: {
+                pattern: 'Email is not valid'
+              },
               onSubmit: (data, ctx) => {
                 console.debug('Vehicle form submitted:', data, ctx);
                 ctx.forms.vehicle.clearAllErrors();
-                console.log('Next step');
+                if (!formId) {
+                  throw new Error('Form id is missing');
+                }
+                const request = {
+                  mark: data.make,
+                  model: data.model,
+                  mileage: Number(data.mileage),
+                  location: data.location,
+                  requestedPrice: Number(data.price),
+                  fullName: data.name,
+                  email: data.email,
+                }
+                apiPost(formDataUrl(formId), request)
+                  .then((resp) => {
+                    console.debug('Response:', resp);
+
+                    // TODO: Next step should be here
+                    console.log('Next step');
+                    ctx.forms.vehicle.el.style.display = 'none';
+                    ctx.forms.files.el.removeAttribute('style');
+                  }).catch((error) => {
+                    console.error('Response error: ', error);
+                    ctx.forms.vehicle.setError('Failed to send data');
+                  });
               }
             },
             files: {
@@ -81,10 +106,11 @@
               onSubmit: (data, ctx) => {
                 // TODO: Update script to pass files to data (if file input element)
                 console.debug('Files form submitted:', data, ctx);
-                if (!personalDataId) {
-                  throw new Error('Personal data id is missing');
+                if (!formId) {
+                  throw new Error('FormId is missing');
                 }
                 ctx.forms.files.clearAllErrors();
+
                 const files = ctx.forms.files.fields.files.input.el.files;
                 if (!files || files.length === 0) {
                   ctx.forms.files.setError('No files selected');
@@ -92,15 +118,15 @@
                   console.log('Files:', files)
                   apiUploadFileList(fileUrl, files).then((response) => {
                     console.debug('Files form response:', response);
-                    const photoIds = response.map((v) => v.fileId)
-                    const request = {
-                      ...ctx.forms.vehicle.getFormValues(),
-                      ...ctx.forms.findVehicle.getFormValues(),
-                      photoIds
-                    }
-                    apiPost(buyoutUrl(personalDataId), request).then((response) => {
+                    const request = { imageIds: response.map((v) => v.fileId) }
+                    apiPost(photosUrl(formId), request).then((response) => {
                       console.debug('Buyout form response:', response);
+
+                      // TODO: Next step should be here
                       console.log('Next step');
+                      ctx.forms.files.el.style.display = 'none';
+                      document.getElementById('success_step').removeAttribute('style');
+
                       console.log('Great Success!')
                     }).catch((error) => {
                       console.error('Response error: ', error);
@@ -134,84 +160,94 @@
   </head>
   <body>
     <div id="root">
-      <h1>Welcome</h1>
-      <div>
-        <form data-dm-id="form_client">
-          <div data-dm-type="control" data-dm-name="name">
-            <label for="name" data-dm-type="label">Name:</label>
-            <input type="text" id="name" name="name" value="" data-dm-type="input" minlength="1" maxlength="10" />
-            <em data-dm-type="error" class="error"></em>
-          </div>
-          <div data-dm-type="control" data-dm-name="email">
-            <label for="email" data-dm-type="label">Email:</label>
-            <input type="email" id="email" name="email" value="" data-dm-type="input" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" />
-            <em data-dm-type="error" class="error"></em>
-          </div>
-          <div data-dm-type="control" data-dm-name="phoneNumber">
-            <label for="phone" data-dm-type="label">Phone:</label>
-            <input type="tel" id="phone" name="phoneNumber" value="" data-dm-type="input" minlength="1" maxlength="10" />
-            <em data-dm-type="error" class="error"></em>
-          </div>
-          <div>
-            <em data-dm-name="form_error" class="error"></em>
-          </div>
-          <div>
-            <button type="submit" data-dm-name="form_submit">Submit</button>
-          </div>
-        </form>
-      </div>
-      <hr />
+      <h1>Buyout form</h1>
+
       <form data-dm-id="form_find_vehicle">
         <div data-dm-type="control" data-dm-name="plateNumber">
           <label for="plateNumber" data-dm-type="label">Enter your plate number:</label>
           <input type="text" id="plateNumber" name="plateNumber" value="" data-dm-type="input" required />
           <em data-dm-type="error" class="error"></em>
         </div>
+        <div data-dm-type="control" data-dm-name="phone">
+          <label for="phone" data-dm-type="label">Enter your phone number:</label>
+          <input type="tel" id="phone" name="phone" value="" data-dm-type="input" required />
+          <em data-dm-type="error" class="error"></em>
+        </div>
+
         <div>
           <em data-dm-name="form_error" class="error"></em>
         </div>
         <div>
           <button type="submit" data-dm-name="form_submit">Find</button>
+          <!--
           <button type="button" data-dm-id="manual">Manual</button>
+          -->
         </div>
       </form>
-      <hr />
+
       <form data-dm-id="form_vehicle" style="display: none">
-        <div data-dm-type="control" data-dm-name="make">
-          <label for="make" data-dm-type="label">Make:</label>
-          <input type="text" id="make" name="make" value="" data-dm-type="input" required />
-          <em data-dm-type="error" class="error"></em>
-        </div>
-        <div data-dm-type="control" data-dm-name="model">
-          <label for="model" data-dm-type="label">Model:</label>
-          <input type="text" id="model" name="model" value="" data-dm-type="input" required />
-          <em data-dm-type="error" class="error"></em>
-        </div>
-        <div data-dm-type="control" data-dm-name="year">
-          <label for="year" data-dm-type="label">Year:</label>
-          <input type="text" id="year" name="year" value="" data-dm-type="input" required />
-          <em data-dm-type="error" class="error"></em>
-        </div>
-        <div data-dm-type="control" data-dm-name="mileage">
-          <label for="mileage" data-dm-type="label">Mileage:</label>
-          <input type="text" id="mileage" name="mileage" value="" data-dm-type="input" required />
-          <em data-dm-type="error" class="error"></em>
-        </div>
-        <div data-dm-type="control" data-dm-name="location">
-          <label for="location" data-dm-type="label">Location:</label>
-          <input type="text" id="location" name="location" value="" data-dm-type="input" />
-          <em data-dm-type="error" class="error"></em>
-        </div>
-        <div data-dm-type="control" data-dm-name="price">
-          <label for="price" data-dm-type="label">Price:</label>
-          <input type="text" id="price" name="price" value="" data-dm-type="input" required />
-          <em data-dm-type="error" class="error"></em>
-        </div>
-        <div data-dm-type="control" data-dm-name="message">
-          <label for="message" data-dm-type="label">Message:</label>
-          <textarea id="message" name="message" cols="40" rows="5" data-dm-type="input"></textarea>
-          <em data-dm-type="error" class="error"></em>
-        </div>
+        <fieldset>
+          <div data-dm-type="control" data-dm-name="plateNumber">
+            <label for="plateNumber_display" data-dm-type="label">Plate number:</label>
+            <input type="text" id="plateNumber_display" name="plateNumber" value="" data-dm-type="input" required disabled />
+            <em data-dm-type="error" class="error"></em>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <div data-dm-type="control" data-dm-name="name">
+            <label for="name" data-dm-type="label">Name:</label>
+            <input type="text" id="name" name="name" value="" data-dm-type="input" />
+            <em data-dm-type="error" class="error"></em>
+          </div>
+          <div data-dm-type="control" data-dm-name="email">
+            <label for="email" data-dm-type="label">Email:</label>
+            <input type="email" id="email" name="email" value="" data-dm-type="input" />
+            <em data-dm-type="error" class="error"></em>
+          </div>
+          <div data-dm-type="control" data-dm-name="phone">
+            <label for="phone_display" data-dm-type="label">Phone:</label>
+            <input type="tel" id="phone_display" name="phone" value="" data-dm-type="input" required disabled />
+            <em data-dm-type="error" class="error"></em>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <div data-dm-type="control" data-dm-name="make">
+            <label for="make" data-dm-type="label">Make:</label>
+            <input type="text" id="make" name="make" value="" data-dm-type="input" required />
+            <em data-dm-type="error" class="error"></em>
+          </div>
+          <div data-dm-type="control" data-dm-name="model">
+            <label for="model" data-dm-type="label">Model:</label>
+            <input type="text" id="model" name="model" value="" data-dm-type="input" required />
+            <em data-dm-type="error" class="error"></em>
+          </div>
+          <div data-dm-type="control" data-dm-name="year">
+            <label for="year" data-dm-type="label">Year:</label>
+            <input type="text" id="year" name="year" value="" data-dm-type="input" />
+            <em data-dm-type="error" class="error"></em>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <div data-dm-type="control" data-dm-name="mileage">
+            <label for="mileage" data-dm-type="label">Mileage:</label>
+            <input type="text" id="mileage" name="mileage" value="" data-dm-type="input" />
+            <em data-dm-type="error" class="error"></em>
+          </div>
+          <div data-dm-type="control" data-dm-name="location">
+            <label for="location" data-dm-type="label">Location:</label>
+            <input type="text" id="location" name="location" value="" data-dm-type="input" />
+            <em data-dm-type="error" class="error"></em>
+          </div>
+          <div data-dm-type="control" data-dm-name="price">
+            <label for="price" data-dm-type="label">Price:</label>
+            <input type="text" id="price" name="price" value="" data-dm-type="input" />
+            <em data-dm-type="error" class="error"></em>
+          </div>
+        </fieldset>
+
         <div>
           <em data-dm-name="form_error" class="error"></em>
         </div>
@@ -219,13 +255,14 @@
           <button type="submit" data-dm-name="form_submit">Submit</button>
         </div>
       </form>
-      <hr />
-      <form data-dm-id="form_files">
+
+      <form data-dm-id="form_files" style="display: none">
         <div data-dm-type="control" data-dm-name="files">
           <label for="files" data-dm-type="label">Upload files:</label>
           <input type="file" id="files" name="files" data-dm-type="input" />
           <em data-dm-type="error" class="error"></em>
         </div>
+
         <div>
           <em data-dm-name="form_error" class="error"></em>
         </div>
@@ -233,6 +270,11 @@
           <button type="submit" data-dm-name="form_submit">Submit</button>
         </div>
       </form>
+
+      <div id="success_step" style="display: none">
+        <h2>Success!</h2>
+        <p>Thank you for submitting the form.</p>
+      </div>
     </div>
   </body>
 </html>
