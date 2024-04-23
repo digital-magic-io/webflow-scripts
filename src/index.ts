@@ -15,7 +15,12 @@ const setupForm = <T extends string>(
   const form = createForm(formConfig.selector, formName, { ...globalErrorMessages, ...formConfig.errorMessages })
   form.setOnSubmit(() => {
     console.log('Form submitted:', formName, form.fields)
-    formConfig.onSubmit(form.getFormValues(), ctx)
+    formConfig.onSubmit(
+      form.getFormValues(),
+      ctx,
+      () => formConfig.onSuccess(ctx),
+      (error) => formConfig.onError(error, ctx)
+    )
   })
   form.el.setAttribute('novalidate', 'true')
   return form

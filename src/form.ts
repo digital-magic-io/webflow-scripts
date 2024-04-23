@@ -38,7 +38,7 @@ export type DmForm<T extends string> = DmElement<HTMLElement> & {
   // TODO: Value may be string | number
   getFormValues: FN<void, Record<T, string>>
   setFormValues: Handler<Record<T, string>>
-  setOnSubmit: (handler: (e: Event) => void) => void
+  setOnSubmit: FN<FN<Event, void>, void>
 }
 
 const scanFormFieldNames = (formElement: HTMLFormElement): ReadonlyArray<string> => {

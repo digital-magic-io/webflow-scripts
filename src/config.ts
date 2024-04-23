@@ -1,5 +1,5 @@
 import type { DmForm } from './form'
-import type { FormErrorMessages } from './types'
+import type { FormErrorMessages, Handler } from './types'
 
 export type PageContext<T extends string> = {
   forms: Record<T, DmForm<string>>
@@ -7,7 +7,9 @@ export type PageContext<T extends string> = {
 
 export type FormConfig<T extends string> = {
   selector: string
-  onSubmit: (data: Record<string, unknown>, ctx: PageContext<T>) => void
+  onSubmit: (data: Record<string, unknown>, ctx: PageContext<T>, success: Handler<void>, fail: Handler<unknown>) => void
+  onSuccess: (ctx: PageContext<T>) => void
+  onError: (error: unknown, ctx: PageContext<T>) => void
   errorMessages?: FormErrorMessages
 }
 
