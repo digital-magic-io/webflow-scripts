@@ -123,6 +123,12 @@ const $874ccd897114849f$export$f681a8129d2e9d28 = (selector, formName, formError
             if (fieldElements[name]) fieldElements[name].setInputValue(value);
         });
     };
+    const resetForm = ()=>{
+        Object.values(fieldElements).forEach((field)=>field.setInputValue(""));
+    };
+    const setFormDisabled = (disabled)=>{
+        Object.values(fieldElements).forEach((field)=>field.input.el.disabled = disabled);
+    };
     const setOnSubmit = (handler)=>(0, $8424e5b2d01c7ee8$export$52987f4b88db0f2)(formElement, (e)=>{
             const errors = Object.entries(fieldElements).map(([name, field])=>({
                     [name]: field.validator(field.input.el.value)
@@ -153,6 +159,8 @@ const $874ccd897114849f$export$f681a8129d2e9d28 = (selector, formName, formError
         setError: (error)=>formErrorElement.textContent = error,
         getFormValues: getFormValues,
         setFormValues: setFormValues,
+        resetForm: resetForm,
+        setFormDisabled: setFormDisabled,
         setOnSubmit: setOnSubmit
     };
 };
@@ -207,15 +215,17 @@ const $ce799568675fe138$export$1ea25e59dc2c9809 = (url, files)=>$ce799568675fe13
 const $ce799568675fe138$export$b2fd9029d5529a00 = (url, files)=>$ce799568675fe138$export$1ea25e59dc2c9809(url, $ce799568675fe138$export$bc226234bbb4652f(files));
 
 
-const $15451612c40a4a0c$var$setupForm = (ctx, formName, formConfig, globalErrorMessages)=>{
+const $15451612c40a4a0c$var$setupForm = (ctx, formName, formConfig, globalErrorMessages, handlers)=>{
     console.debug("Form:", formName, formConfig);
     const form = (0, $874ccd897114849f$export$f681a8129d2e9d28)(formConfig.selector, formName, {
         ...globalErrorMessages,
         ...formConfig.errorMessages
     });
-    form.setOnSubmit(()=>{
+    form.setOnSubmit(async ()=>{
         console.log("Form submitted:", formName, form.fields);
-        formConfig.onSubmit(form.getFormValues(), ctx, ()=>formConfig.onSuccess(ctx), (error)=>formConfig.onError(error, ctx));
+        handlers?.beforeSubmit?.(form);
+        await formConfig.onSubmit(form.getFormValues(), ctx, ()=>formConfig.onSuccess(ctx), (error)=>formConfig.onError(error, ctx));
+        handlers?.afterSubmit?.(form);
     });
     form.el.setAttribute("novalidate", "true");
     return form;
@@ -236,8 +246,11 @@ const $15451612c40a4a0c$export$2cd8252107eb640b = (conf)=>{
     if (conf.forms) {
         // TODO: Update foreach to map or reduce
         Object.entries(conf.forms).forEach(([formName, formConfig])=>{
-            ctx.forms[formName] = $15451612c40a4a0c$var$setupForm(ctx, formName, formConfig, conf.errorMessages ?? $15451612c40a4a0c$var$defaultErrors);
+            ctx.forms[formName] = $15451612c40a4a0c$var$setupForm(ctx, formName, formConfig, conf.errorMessages ?? $15451612c40a4a0c$var$defaultErrors, conf.handlers);
         });
+        ctx.resetAll = ()=>{
+            Object.values(ctx.forms).forEach((form)=>form.resetForm());
+        };
         if (conf.buttons) Object.entries(conf.buttons).forEach(([, buttonConfig])=>{
             const button = document.querySelector(buttonConfig.selector);
             if (button) button.addEventListener("click", ()=>buttonConfig.onClick(ctx));
