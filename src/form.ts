@@ -171,6 +171,9 @@ export const createForm = <T extends string>(
 
   const setFormDisabled = (disabled: boolean): void => {
     Object.values(fieldElements).forEach((field) => (field.input.el.disabled = disabled))
+    Array.from(formElement.getElementsByTagName('button')).forEach((button) => {
+      button.disabled = disabled
+    })
   }
 
   const setOnSubmit = (handler: (e: Event) => void): void =>
