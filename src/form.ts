@@ -171,8 +171,17 @@ export const createForm = <T extends string>(
 
   const setFormDisabled = (disabled: boolean): void => {
     Object.values(fieldElements).forEach((field) => (field.input.el.disabled = disabled))
-    Array.from(formElement.getElementsByTagName('button')).forEach((button) => {
-      button.disabled = disabled
+
+    Array.from(formElement.querySelectorAll('[data-dm-type="button"]')).forEach((element) => {
+      if (element instanceof HTMLButtonElement) {
+        element.disabled = disabled
+      }
+      // Add "disabled" class to element
+      if (disabled) {
+        element.classList.add('disabled')
+      } else {
+        element.classList.remove('disabled')
+      }
     })
   }
 
@@ -194,6 +203,14 @@ export const createForm = <T extends string>(
         handler(e)
       }
     })
+
+  // TODO: Avoid this duplication
+  Array.from(formElement.querySelectorAll('[data-dm-disable="true"]')).forEach((element) => {
+    if (element instanceof HTMLButtonElement) {
+      element.disabled = true
+    }
+    element.classList.add('disabled')
+  })
 
   return {
     el: formElement,
