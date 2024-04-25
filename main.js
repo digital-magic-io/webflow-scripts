@@ -128,6 +128,9 @@ const $874ccd897114849f$export$f681a8129d2e9d28 = (selector, formName, formError
     };
     const setFormDisabled = (disabled)=>{
         Object.values(fieldElements).forEach((field)=>field.input.el.disabled = disabled);
+        Array.from(formElement.getElementsByTagName("button")).forEach((button)=>{
+            button.disabled = disabled;
+        });
     };
     const setOnSubmit = (handler)=>(0, $8424e5b2d01c7ee8$export$52987f4b88db0f2)(formElement, (e)=>{
             const errors = Object.entries(fieldElements).map(([name, field])=>({
