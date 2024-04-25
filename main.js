@@ -128,8 +128,11 @@ const $874ccd897114849f$export$f681a8129d2e9d28 = (selector, formName, formError
     };
     const setFormDisabled = (disabled)=>{
         Object.values(fieldElements).forEach((field)=>field.input.el.disabled = disabled);
-        Array.from(formElement.getElementsByTagName("button")).forEach((button)=>{
-            button.disabled = disabled;
+        Array.from(formElement.querySelectorAll('[data-dm-type="button"]')).forEach((element)=>{
+            if (element instanceof HTMLButtonElement) element.disabled = disabled;
+            // Add "disabled" class to element
+            if (disabled) element.classList.add("disabled");
+            else element.classList.remove("disabled");
         });
     };
     const setOnSubmit = (handler)=>(0, $8424e5b2d01c7ee8$export$52987f4b88db0f2)(formElement, (e)=>{
@@ -148,6 +151,11 @@ const $874ccd897114849f$export$f681a8129d2e9d28 = (selector, formName, formError
             //formErrorElement.textContent = 'Form has errors!'
             } else handler(e);
         });
+    // TODO: Avoid this duplication
+    Array.from(formElement.querySelectorAll('[data-dm-disable="true"]')).forEach((element)=>{
+        if (element instanceof HTMLButtonElement) element.disabled = true;
+        element.classList.add("disabled");
+    });
     return {
         el: formElement,
         fields: fieldElements,
