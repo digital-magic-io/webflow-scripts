@@ -1,4 +1,4 @@
-import type { ButtonConfig, Config, FormConfig, PageContext } from './config'
+import type { ButtonConfig, Config, FormConfig, FormConfigHandlers, PageContext } from './config'
 import type { FailedValidationType, FormErrorMessages } from './types'
 import type { DmForm } from './form'
 import { createForm } from './form'
@@ -9,18 +9,21 @@ const setupForm = <T extends string>(
   ctx: PageContext<T>,
   formName: T,
   formConfig: FormConfig<T>,
-  globalErrorMessages: FormErrorMessages
+  globalErrorMessages: FormErrorMessages,
+  handlers?: FormConfigHandlers
 ): DmForm<T> => {
   console.debug('Form:', formName, formConfig)
   const form = createForm(formConfig.selector, formName, { ...globalErrorMessages, ...formConfig.errorMessages })
-  form.setOnSubmit(() => {
+  form.setOnSubmit(async () => {
     console.log('Form submitted:', formName, form.fields)
-    formConfig.onSubmit(
+    handlers?.beforeSubmit?.(form)
+    await formConfig.onSubmit(
       form.getFormValues(),
       ctx,
       () => formConfig.onSuccess(ctx),
       (error) => formConfig.onError(error, ctx)
     )
+    handlers?.afterSubmit?.(form)
   })
   form.el.setAttribute('novalidate', 'true')
   return form
@@ -49,9 +52,13 @@ export const init = <F extends string, B extends string>(conf: Config<F, B>): vo
         ctx,
         formName as F,
         formConfig,
-        conf.errorMessages ?? defaultErrors
+        conf.errorMessages ?? defaultErrors,
+        conf.handlers
       ) satisfies DmForm<F>
     })
+    ctx.resetAll = () => {
+      Object.values<DmForm<string>>(ctx.forms).forEach((form) => form.resetForm())
+    }
     if (conf.buttons) {
       Object.entries<ButtonConfig<F>>(conf.buttons).forEach(([, buttonConfig]) => {
         const button: HTMLElement | null = document.querySelector(buttonConfig.selector)

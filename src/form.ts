@@ -38,7 +38,9 @@ export type DmForm<T extends string> = DmElement<HTMLElement> & {
   // TODO: Value may be string | number
   getFormValues: FN<void, Record<T, string>>
   setFormValues: Handler<Record<T, string>>
-  setOnSubmit: FN<FN<Event, void>, void>
+  resetForm: Handler<void>
+  setFormDisabled: Handler<boolean>
+  setOnSubmit: FN<FN<Event, Promise<void>>, void>
 }
 
 const scanFormFieldNames = (formElement: HTMLFormElement): ReadonlyArray<string> => {
@@ -163,6 +165,14 @@ export const createForm = <T extends string>(
     })
   }
 
+  const resetForm = (): void => {
+    Object.values(fieldElements).forEach((field) => field.setInputValue(''))
+  }
+
+  const setFormDisabled = (disabled: boolean): void => {
+    Object.values(fieldElements).forEach((field) => (field.input.el.disabled = disabled))
+  }
+
   const setOnSubmit = (handler: (e: Event) => void): void =>
     setupFormHandler(formElement, (e) => {
       const errors = Object.entries(fieldElements)
@@ -194,6 +204,8 @@ export const createForm = <T extends string>(
     setError: (error: string) => (formErrorElement.textContent = error),
     getFormValues,
     setFormValues,
+    resetForm,
+    setFormDisabled,
     setOnSubmit
   }
 }
