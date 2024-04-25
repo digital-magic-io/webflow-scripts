@@ -137,10 +137,10 @@
                   success();
                 } else {
                   console.log('Files:', files)
-                  apiUploadFileList(fileUrl, files).then((response) => {
+                  await apiUploadFileList(fileUrl, files).then(async (response) => {
                     console.debug('Files form response:', response);
                     const request = { imageIds: response.map((v) => v.fileId) }
-                    apiPost(photosUrl(formId), request).then((response) => {
+                    await apiPost(photosUrl(formId), request).then((response) => {
                       console.debug('Photos form response:', response);
                       ctx.resetAll();
                       success();
