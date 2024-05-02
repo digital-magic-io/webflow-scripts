@@ -7,7 +7,7 @@
     <meta name="description" content="Example page for testing Webflow script" />
     <title>Digital Magic | Webflow script example page</title>
     <script type="module">
-      import { init, apiGet, apiPost, apiUploadFileList } from './module.js';
+      import { ApiError, init, apiGet, apiPost, apiUploadFileList, apiGetErrorFromResponse } from './module.js';
       window.onload = () => {
         console.log("page is fully loaded");
         const apiUrl = 'https://test.carprof.ee/api';
@@ -57,18 +57,36 @@
                   .then((resp) => {
                     console.debug('Response:', resp);
                     formId = resp.formUuid;
-                    const { mark, model, firstRegYear, registrationNumber } = resp.mntData;
-                    ctx.forms.vehicle.setFormValues({
-                      phone: data.phone,
-                      make: mark,
-                      model,
-                      year: firstRegYear,
-                      plateNumber: registrationNumber
-                    });
+                    if (resp.mntData) {
+                      const {mark, model, firstRegYear, registrationNumber} = resp.mntData;
+                      ctx.forms.vehicle.setFormValues({
+                        phone: data.phone,
+                        make: mark,
+                        model,
+                        year: firstRegYear,
+                        plateNumber: registrationNumber
+                      });
+                    } else {
+                      ctx.forms.vehicle.setFormValues({
+                        phone: data.phone,
+                        plateNumber: data.plateNumber
+                      });
+                    }
                     success();
-                  }).catch((error) => {
-                    console.error('Response error: ', error);
-                    fail('Failed to send data');
+                  }).catch(async (e) => {
+                    if (e instanceof ApiError) {
+                      const { errorCode, error } = await apiGetErrorFromResponse(e.response);
+                      console.error('Response error: ', error);
+                      if (errorCode === 'INVALID_PHONE_NUMBER') {
+                        // TODO: Translate error message!
+                        fail('Invalid phone number');
+                      } else {
+                        fail('Failed to send data');
+                      }
+                    } else {
+                      console.error('Response error: ', e);
+                      fail('Failed to send data');
+                    }
                   });
               }
             },
@@ -95,9 +113,9 @@
                 const request = {
                   mark: data.make,
                   model: data.model,
-                  mileage: Number(data.mileage),
+                  mileage: data.mileage ? Number(data.mileage) : undefined,
                   location: data.location,
-                  requestedPrice: Number(data.price),
+                  requestedPrice: data.price ? Number(data.price) : undefined,
                   fullName: data.name,
                   email: data.email,
                 }

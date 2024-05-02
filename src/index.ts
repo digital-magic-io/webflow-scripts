@@ -3,7 +3,13 @@ import type { FailedValidationType, FormErrorMessages } from './types'
 import type { DmForm } from './form'
 import { createForm } from './form'
 
-export { getTyped as apiGet, postTyped as apiPost, uploadTypedFileList as apiUploadFileList } from './fetch'
+export {
+  getTyped as apiGet,
+  postTyped as apiPost,
+  uploadTypedFileList as apiUploadFileList,
+  getErrorFromResponse as apiGetErrorFromResponse,
+  ApiError
+} from './fetch'
 
 const setupForm = <T extends string>(
   ctx: PageContext<T>,

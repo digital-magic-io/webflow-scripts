@@ -1,10 +1,37 @@
 import type { FN, Handler, NullableType } from './types'
 import { hasValue } from './utils'
 
+export class ApiError extends Error {
+  public readonly status: number
+  public readonly url: string
+  public readonly method: string
+  public readonly cause: string
+  public readonly response: Response
+
+  constructor(response: Response, cause: string) {
+    super(`Failed to fetch ${response.url}: ${response.status} ${response.statusText}: ${cause}`)
+    this.status = response.status
+    this.url = response.url
+    this.method = response.statusText
+    this.cause = cause
+    this.response = response
+  }
+}
+
+export const getErrorFromResponse = async <T>(response: Response): Promise<T> => {
+  const responseText = await response.text()
+  console.log('Error body: ', responseText)
+  if (!responseText || responseText.length === 0) {
+    return undefined as unknown as T
+  } else {
+    return JSON.parse(responseText) as T
+  }
+}
+
 export const fetchTyped = async <T>(url: string, init: RequestInit = { method: 'GET' }): Promise<T> => {
   const response = await fetch(url, init)
   if (!response.ok) {
-    throw new Error(`Failed to fetch ${init.method} ${url}: ${response.status} ${response.statusText}`)
+    throw new ApiError(response, 'Unsuccessful HTTP status')
   } else {
     const responseText = await response.text()
     if (!responseText || responseText.length === 0) {
