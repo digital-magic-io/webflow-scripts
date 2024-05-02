@@ -172,11 +172,32 @@ const $8851cb6643e00dd7$export$dd1bc94b04021eeb = (value)=>value === null || val
 const $8851cb6643e00dd7$export$96bdbc84526f3739 = (value)=>!$8851cb6643e00dd7$export$dd1bc94b04021eeb(value);
 
 
+class $1d76aa11c21f6297$export$f2e832acab1bdd79 extends Error {
+    status;
+    url;
+    method;
+    cause;
+    response;
+    constructor(response, cause){
+        super(`Failed to fetch ${response.url}: ${response.status} ${response.statusText}: ${cause}`);
+        this.status = response.status;
+        this.url = response.url;
+        this.method = response.statusText;
+        this.cause = cause;
+        this.response = response;
+    }
+}
+const $1d76aa11c21f6297$export$7780d7826aafbede = async (response)=>{
+    const responseText = await response.text();
+    console.log("Error body: ", responseText);
+    if (!responseText || responseText.length === 0) return undefined;
+    else return JSON.parse(responseText);
+};
 const $1d76aa11c21f6297$export$61ca0380393ac2cc = async (url, init = {
     method: "GET"
 })=>{
     const response = await fetch(url, init);
-    if (!response.ok) throw new Error(`Failed to fetch ${init.method} ${url}: ${response.status} ${response.statusText}`);
+    if (!response.ok) throw new $1d76aa11c21f6297$export$f2e832acab1bdd79(response, "Unsuccessful HTTP status");
     else {
         const responseText = await response.text();
         if (!responseText || responseText.length === 0) return undefined;
@@ -263,5 +284,5 @@ const $b3a133cf85b0ceb6$export$2cd8252107eb640b = (conf)=>{
 };
 
 
-export {$b3a133cf85b0ceb6$export$2cd8252107eb640b as init, $1d76aa11c21f6297$export$1d2fa8475101ec93 as apiGet, $1d76aa11c21f6297$export$e842d00bb3325f27 as apiPost, $1d76aa11c21f6297$export$b2fd9029d5529a00 as apiUploadFileList};
+export {$b3a133cf85b0ceb6$export$2cd8252107eb640b as init, $1d76aa11c21f6297$export$1d2fa8475101ec93 as apiGet, $1d76aa11c21f6297$export$e842d00bb3325f27 as apiPost, $1d76aa11c21f6297$export$b2fd9029d5529a00 as apiUploadFileList, $1d76aa11c21f6297$export$7780d7826aafbede as apiGetErrorFromResponse, $1d76aa11c21f6297$export$f2e832acab1bdd79 as ApiError};
 //# sourceMappingURL=module.js.map

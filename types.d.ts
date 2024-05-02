@@ -51,6 +51,15 @@ type Config<F extends string, B extends string> = {
     errorMessages?: FormErrorMessages;
     handlers?: FormConfigHandlers;
 };
+export class ApiError extends Error {
+    readonly status: number;
+    readonly url: string;
+    readonly method: string;
+    readonly cause: string;
+    readonly response: Response;
+    constructor(response: Response, cause: string);
+}
+export const apiGetErrorFromResponse: <T>(response: Response) => Promise<T>;
 export const apiGet: <T>(url: string) => Promise<T>;
 export const apiPost: <T, R>(url: string, body: T) => Promise<R>;
 export const apiUploadFileList: <R>(url: string, files: FileList) => Promise<R[]>;

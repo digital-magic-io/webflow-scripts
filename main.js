@@ -7,6 +7,8 @@ $parcel$export(module.exports, "init", function () { return $15451612c40a4a0c$ex
 $parcel$export(module.exports, "apiGet", function () { return $ce799568675fe138$export$1d2fa8475101ec93; });
 $parcel$export(module.exports, "apiPost", function () { return $ce799568675fe138$export$e842d00bb3325f27; });
 $parcel$export(module.exports, "apiUploadFileList", function () { return $ce799568675fe138$export$b2fd9029d5529a00; });
+$parcel$export(module.exports, "apiGetErrorFromResponse", function () { return $ce799568675fe138$export$7780d7826aafbede; });
+$parcel$export(module.exports, "ApiError", function () { return $ce799568675fe138$export$f2e832acab1bdd79; });
 const $8424e5b2d01c7ee8$export$d16800b7e59a8051 = (selector, parent)=>{
     const el = (parent ?? document).querySelector(selector);
     if (el === null) {
@@ -181,11 +183,32 @@ const $f56e056924fdbc49$export$dd1bc94b04021eeb = (value)=>value === null || val
 const $f56e056924fdbc49$export$96bdbc84526f3739 = (value)=>!$f56e056924fdbc49$export$dd1bc94b04021eeb(value);
 
 
+class $ce799568675fe138$export$f2e832acab1bdd79 extends Error {
+    status;
+    url;
+    method;
+    cause;
+    response;
+    constructor(response, cause){
+        super(`Failed to fetch ${response.url}: ${response.status} ${response.statusText}: ${cause}`);
+        this.status = response.status;
+        this.url = response.url;
+        this.method = response.statusText;
+        this.cause = cause;
+        this.response = response;
+    }
+}
+const $ce799568675fe138$export$7780d7826aafbede = async (response)=>{
+    const responseText = await response.text();
+    console.log("Error body: ", responseText);
+    if (!responseText || responseText.length === 0) return undefined;
+    else return JSON.parse(responseText);
+};
 const $ce799568675fe138$export$61ca0380393ac2cc = async (url, init = {
     method: "GET"
 })=>{
     const response = await fetch(url, init);
-    if (!response.ok) throw new Error(`Failed to fetch ${init.method} ${url}: ${response.status} ${response.statusText}`);
+    if (!response.ok) throw new $ce799568675fe138$export$f2e832acab1bdd79(response, "Unsuccessful HTTP status");
     else {
         const responseText = await response.text();
         if (!responseText || responseText.length === 0) return undefined;
