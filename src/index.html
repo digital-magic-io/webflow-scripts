@@ -13,6 +13,7 @@
         const apiUrl = 'https://test.carprof.ee/api';
         const formsUrl = `${apiUrl}/v2/forms`;
         const initialFormUrl = `${formsUrl}/initial-data`;
+        const lookupCarRegistryUrl = (plateNumber) => `${apiUrl}/v1/cars/mnt/${plateNumber}`
         const formDataUrl = (formId) => `${formsUrl}/form-data/${formId}`;
         const photosUrl = (formId) => `${formsUrl}/photos/${formId}`;
         const fileUrl = `${apiUrl}/v1/forms/file`;
@@ -72,6 +73,25 @@
                         plateNumber: data.plateNumber
                       });
                     }
+                    ctx.forms.vehicle.fields.plateNumber.input.el.onblur = () => {
+                      ctx.forms.vehicle.clearAllErrors();
+                      apiGet(lookupCarRegistryUrl(ctx.forms.vehicle.fields.plateNumber.input.el.value))
+                        .then((data) => {
+                          console.debug('Lookup response:', data);
+                          if (data) {
+                            const {mark, model, firstRegYear, registrationNumber} = data;
+                            ctx.forms.vehicle.setFormValues({
+                              make: mark,
+                              model,
+                              year: firstRegYear,
+                              plateNumber: registrationNumber
+                            });
+                          }
+                        }).catch((error) => {
+                          console.error('Lookup error:', error);
+                        });
+                      //ctx.forms.vehicle.fields.plateNumber.input.el.value = data.plateNumber;
+                    }
                     success();
                   }).catch(async (e) => {
                     if (e instanceof ApiError) {
@@ -111,6 +131,7 @@
                   throw new Error('Form id is missing');
                 }
                 const request = {
+                  carNumber: data.plateNumber,
                   mark: data.make,
                   model: data.model,
                   mileage: data.mileage ? Number(data.mileage) : undefined,
@@ -234,7 +255,7 @@
         <fieldset>
           <div data-dm-type="control" data-dm-name="plateNumber">
             <label for="plateNumber_display" data-dm-type="label">Plate number:</label>
-            <input type="text" id="plateNumber_display" name="plateNumber" value="" data-dm-type="input" required disabled />
+            <input type="text" id="plateNumber_display" name="plateNumber" value="" data-dm-type="input" required />
             <em data-dm-type="error" class="error"></em>
           </div>
         </fieldset>
@@ -288,7 +309,7 @@
           </div>
           <div data-dm-type="control" data-dm-name="price">
             <label for="price" data-dm-type="label">Price:</label>
-            <input type="text" id="price" name="price" value="" data-dm-type="input" />
+            <input type="text" id="price" name="price" value="" data-dm-type="input" required />
             <em data-dm-type="error" class="error"></em>
           </div>
         </fieldset>

@@ -176,7 +176,7 @@ export const createForm = <T extends string>(
       if (element instanceof HTMLButtonElement) {
         element.disabled = disabled
       }
-      // Add "disabled" class to element
+      // Add "disabled" class to an element
       if (disabled) {
         element.classList.add('disabled')
       } else {
