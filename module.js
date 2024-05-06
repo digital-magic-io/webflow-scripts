@@ -121,7 +121,7 @@ const $60c0287b5dcd0fba$export$f681a8129d2e9d28 = (selector, formName, formError
         Object.values(fieldElements).forEach((field)=>field.input.el.disabled = disabled);
         Array.from(formElement.querySelectorAll('[data-dm-type="button"]')).forEach((element)=>{
             if (element instanceof HTMLButtonElement) element.disabled = disabled;
-            // Add "disabled" class to element
+            // Add "disabled" class to an element
             if (disabled) element.classList.add("disabled");
             else element.classList.remove("disabled");
         });
