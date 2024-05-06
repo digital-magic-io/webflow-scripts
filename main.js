@@ -177,6 +177,16 @@ const $874ccd897114849f$export$f681a8129d2e9d28 = (selector, formName, formError
         setOnSubmit: setOnSubmit
     };
 };
+const $874ccd897114849f$export$9b6d6ca62970729f = (buttonElement)=>({
+        el: buttonElement,
+        setLabel: (label)=>buttonElement.textContent = label,
+        setDisabled: (disabled)=>buttonElement.disabled = disabled
+    });
+const $874ccd897114849f$export$f2839682b8c07f35 = (labelElement)=>({
+        el: labelElement,
+        setLabel: (label)=>labelElement.textContent = label
+    });
+
 
 
 const $f56e056924fdbc49$export$dd1bc94b04021eeb = (value)=>value === null || value === undefined;
@@ -264,6 +274,23 @@ const $15451612c40a4a0c$var$setupForm = (ctx, formName, formConfig, globalErrorM
     form.el.setAttribute("novalidate", "true");
     return form;
 };
+const $15451612c40a4a0c$var$setupButton = (ctx, buttonName, buttonConfig)=>{
+    const button = (0, $8424e5b2d01c7ee8$export$d16800b7e59a8051)(buttonConfig.selector);
+    if (button) {
+        button.addEventListener("click", ()=>buttonConfig.onClick(ctx));
+        const result = (0, $874ccd897114849f$export$9b6d6ca62970729f)(button);
+        ctx.buttons[buttonName] = result;
+        return result;
+    } else throw new Error("Button not found by selector: " + buttonConfig.selector);
+};
+const $15451612c40a4a0c$var$setupLabel = (ctx, labelName, labelConfig)=>{
+    const label = (0, $8424e5b2d01c7ee8$export$d16800b7e59a8051)(labelConfig.selector);
+    if (label) {
+        const result = (0, $874ccd897114849f$export$f2839682b8c07f35)(label);
+        ctx.labels[labelName] = result;
+        return result;
+    } else throw new Error("Label not found by selector: " + labelConfig.selector);
+};
 const $15451612c40a4a0c$var$defaultErrors = {
     required: "This field is required",
     minlength: "Field length is too small",
@@ -275,7 +302,9 @@ const $15451612c40a4a0c$var$defaultErrors = {
 const $15451612c40a4a0c$export$2cd8252107eb640b = (conf)=>{
     console.log("Initializing...", conf);
     const ctx = {
-        forms: {}
+        forms: {},
+        buttons: {},
+        labels: {}
     };
     if (conf.forms) {
         // TODO: Update foreach to map or reduce
@@ -285,10 +314,11 @@ const $15451612c40a4a0c$export$2cd8252107eb640b = (conf)=>{
         ctx.resetAll = ()=>{
             Object.values(ctx.forms).forEach((form)=>form.resetForm());
         };
-        if (conf.buttons) Object.entries(conf.buttons).forEach(([, buttonConfig])=>{
-            const button = document.querySelector(buttonConfig.selector);
-            if (button) button.addEventListener("click", ()=>buttonConfig.onClick(ctx));
-            else console.error("Button not found by selector:", buttonConfig.selector);
+        if (conf.buttons) Object.entries(conf.buttons).forEach(([buttonName, buttonConfig])=>{
+            $15451612c40a4a0c$var$setupButton(ctx, buttonName, buttonConfig);
+        });
+        if (conf.labels) Object.entries(conf.labels).forEach(([labelName, labelConfig])=>{
+            $15451612c40a4a0c$var$setupLabel(ctx, labelName, labelConfig);
         });
         console.log("Initialized with context: ", ctx);
     }
