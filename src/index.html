@@ -13,7 +13,7 @@
         const apiUrl = 'https://test.carprof.ee/api';
         const formsUrl = `${apiUrl}/v2/forms`;
         const initialFormUrl = `${formsUrl}/initial-data`;
-        const lookupCarRegistryUrl = (plateNumber) => `${apiUrl}/v1/cars/mnt/${plateNumber}`
+        const lookupCarRegistryUrl = (plateNumber) => `${apiUrl}/v1/cars/mnt/${plateNumber}`;
         const formDataUrl = (formId) => `${formsUrl}/form-data/${formId}`;
         const photosUrl = (formId) => `${formsUrl}/photos/${formId}`;
         const fileUrl = `${apiUrl}/v1/forms/file`;
@@ -22,15 +22,24 @@
 
         init({
           buttons: {
-            /*
             manual: {
               selector: '[data-dm-id="manual"]',
               onClick: (ctx) => {
                 console.debug('Button clicked:', ctx);
-                ctx.forms.vehicle.el.setAttribute('style', undefined);
+                ctx.buttons.manual.setDisabled(true);
+                ctx.buttons.manual.setLabel('Loading...');
+                ctx.labels.testLabel.setLabel('Test label');
+                setTimeout(() => {
+                  ctx.forms.initial.el.style.display = 'none';
+                  ctx.forms.vehicle.el.removeAttribute('style');
+                }, 3000);
               }
             }
-            */
+          },
+          labels: {
+            testLabel: {
+              selector: '[data-dm-id="testLabel"]',
+            }
           },
           forms: {
             initial: {
@@ -90,7 +99,6 @@
                         }).catch((error) => {
                           console.error('Lookup error:', error);
                         });
-                      //ctx.forms.vehicle.fields.plateNumber.input.el.value = data.plateNumber;
                     }
                     success();
                   }).catch(async (e) => {
@@ -244,10 +252,9 @@
           <em data-dm-name="form_error" class="error"></em>
         </div>
         <div>
+          <label data-dm-type="label" data-dm-id="testLabel"></label>
           <button type="submit" data-dm-type="button" data-dm-name="form_submit">Find</button>
-          <!--
           <button type="button" data-dm-type="button" data-dm-id="manual">Manual</button>
-          -->
         </div>
       </form>
 

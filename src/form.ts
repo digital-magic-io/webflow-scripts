@@ -19,6 +19,15 @@ type DmElement<T extends HTMLElement> = {
   el: T
 }
 
+export type DmButton = DmElement<HTMLButtonElement> & {
+  setLabel: Handler<string>
+  setDisabled: Handler<boolean>
+}
+
+export type DmLabel = DmElement<HTMLElement> & {
+  setLabel: Handler<string>
+}
+
 export type DmField = DmElement<HTMLElement> & {
   input: DmElement<HTMLInputElement>
   error: DmElement<HTMLElement>
@@ -229,3 +238,16 @@ export const createForm = <T extends string>(
     setOnSubmit
   }
 }
+
+export const createButton = (buttonElement: HTMLButtonElement): DmButton =>
+  ({
+    el: buttonElement,
+    setLabel: (label: string) => (buttonElement.textContent = label),
+    setDisabled: (disabled: boolean) => (buttonElement.disabled = disabled)
+  }) satisfies DmButton
+
+export const createLabel = (labelElement: HTMLElement): DmLabel =>
+  ({
+    el: labelElement,
+    setLabel: (label: string) => (labelElement.textContent = label)
+  }) satisfies DmLabel

@@ -1,7 +1,8 @@
-import type { ButtonConfig, Config, FormConfig, FormConfigHandlers, PageContext } from './config'
+import type { ButtonConfig, Config, FormConfig, FormConfigHandlers, LabelConfig, PageContext } from './config'
 import type { FailedValidationType, FormErrorMessages } from './types'
-import type { DmForm } from './form'
-import { createForm } from './form'
+import type { DmButton, DmForm, DmLabel } from './form'
+import { createButton, createForm, createLabel } from './form'
+import { getElement } from './dom'
 
 export {
   getTyped as apiGet,
@@ -11,13 +12,13 @@ export {
   ApiError
 } from './fetch'
 
-const setupForm = <T extends string>(
-  ctx: PageContext<T>,
-  formName: T,
-  formConfig: FormConfig<T>,
+const setupForm = <F extends string, B extends string, L extends string>(
+  ctx: PageContext<F, B, L>,
+  formName: F,
+  formConfig: FormConfig<F, B, L>,
   globalErrorMessages: FormErrorMessages,
   handlers?: FormConfigHandlers
-): DmForm<T> => {
+): DmForm<F> => {
   console.debug('Form:', formName, formConfig)
   const form = createForm(formConfig.selector, formName, { ...globalErrorMessages, ...formConfig.errorMessages })
   form.setOnSubmit(async () => {
@@ -35,6 +36,37 @@ const setupForm = <T extends string>(
   return form
 }
 
+const setupButton = <F extends string, B extends string, L extends string>(
+  ctx: PageContext<F, B, L>,
+  buttonName: B,
+  buttonConfig: ButtonConfig<F, B, L>
+): DmButton => {
+  const button = getElement<HTMLButtonElement>(buttonConfig.selector)
+  if (button) {
+    button.addEventListener('click', () => buttonConfig.onClick(ctx))
+    const result = createButton(button)
+    ctx.buttons[buttonName] = result
+    return result
+  } else {
+    throw new Error('Button not found by selector: ' + buttonConfig.selector)
+  }
+}
+
+const setupLabel = <F extends string, B extends string, L extends string>(
+  ctx: PageContext<F, B, L>,
+  labelName: L,
+  labelConfig: LabelConfig
+): DmLabel => {
+  const label = getElement(labelConfig.selector)
+  if (label) {
+    const result = createLabel(label)
+    ctx.labels[labelName] = result
+    return result
+  } else {
+    throw new Error('Label not found by selector: ' + labelConfig.selector)
+  }
+}
+
 const defaultErrors: Record<FailedValidationType, string> = {
   required: 'This field is required',
   minlength: 'Field length is too small',
@@ -44,17 +76,19 @@ const defaultErrors: Record<FailedValidationType, string> = {
   max: 'Field value is too big'
 }
 
-export const init = <F extends string, B extends string>(conf: Config<F, B>): void => {
+export const init = <F extends string, B extends string, L extends string>(conf: Config<F, B, L>): void => {
   console.log('Initializing...', conf)
 
-  const ctx: PageContext<F> = {
-    forms: {}
-  } as PageContext<F>
+  const ctx: PageContext<F, B, L> = {
+    forms: {},
+    buttons: {},
+    labels: {}
+  } as PageContext<F, B, L>
 
   if (conf.forms) {
     // TODO: Update foreach to map or reduce
-    Object.entries<FormConfig<F>>(conf.forms).forEach(([formName, formConfig]) => {
-      ctx.forms[formName as F] = setupForm<F>(
+    Object.entries<FormConfig<F, B, L>>(conf.forms).forEach(([formName, formConfig]) => {
+      ctx.forms[formName as F] = setupForm<F, B, L>(
         ctx,
         formName as F,
         formConfig,
@@ -66,13 +100,13 @@ export const init = <F extends string, B extends string>(conf: Config<F, B>): vo
       Object.values<DmForm<string>>(ctx.forms).forEach((form) => form.resetForm())
     }
     if (conf.buttons) {
-      Object.entries<ButtonConfig<F>>(conf.buttons).forEach(([, buttonConfig]) => {
-        const button: HTMLElement | null = document.querySelector(buttonConfig.selector)
-        if (button) {
-          button.addEventListener('click', () => buttonConfig.onClick(ctx))
-        } else {
-          console.error('Button not found by selector:', buttonConfig.selector)
-        }
+      Object.entries<ButtonConfig<F, B, L>>(conf.buttons).forEach(([buttonName, buttonConfig]) => {
+        setupButton(ctx, buttonName as B, buttonConfig)
+      })
+    }
+    if (conf.labels) {
+      Object.entries<LabelConfig>(conf.labels).forEach(([labelName, labelConfig]) => {
+        setupLabel(ctx, labelName as L, labelConfig)
       })
     }
 
