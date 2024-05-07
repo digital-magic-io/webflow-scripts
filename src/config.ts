@@ -1,52 +1,9 @@
-import type { DmButton, DmForm, DmLabel } from './form'
-import type { FormErrorMessages, Handler } from './types'
+import { Config } from './core'
+import { ButtonName, FormName, LabelName } from './cp'
 
-export type PageContext<F extends string, B extends string, L extends string> = {
-  buttons: Record<B, DmButton>
-  labels: Record<L, DmLabel>
-  forms: Record<F, DmForm<string>>
-  resetAll: Handler<void>
-}
-
-export type FormConfigHandlers = {
-  beforeSubmit?: Handler<DmForm<string>>
-  afterSubmit?: Handler<DmForm<string>>
-}
-
-export type ElementConfig = {
-  selector: string
-}
-
-export type FormConfig<F extends string, B extends string, L extends string> = {
-  onSubmit: (
-    data: Record<string, unknown>,
-    ctx: PageContext<F, B, L>,
-    success: Handler<void>,
-    fail: Handler<unknown>
-  ) => Promise<void>
-  onSuccess: (ctx: PageContext<F, B, L>) => void
-  onError: (error: unknown, ctx: PageContext<F, B, L>) => void
-  errorMessages?: FormErrorMessages
-} & ElementConfig
-
-export type ButtonConfig<F extends string, B extends string, L extends string> = {
-  onClick: (ctx: PageContext<F, B, L>) => void
-} & ElementConfig
-
-export type LabelConfig = ElementConfig
-
-export type Config<F extends string, B extends string, L extends string> = {
-  /*
-  dom: {
-    idAttr: string
-    typeAttr: string
-    nameAttr: string
-    setFieldState: (selector: string, state: DmFieldState) => void
-  }
-  */
-  forms?: Record<F, FormConfig<F, B, L>>
-  buttons?: Record<B, ButtonConfig<F, B, L>>
-  labels?: Record<L, LabelConfig>
-  errorMessages?: FormErrorMessages
-  handlers?: FormConfigHandlers
-}
+export type CpConfig = Readonly<{
+  formSelectors: Record<FormName, string>
+  buttonSelectors: Record<ButtonName, string>
+  labelSelectors: Record<LabelName, string>
+}> &
+  Pick<Config<FormName, ButtonName, LabelName>, 'errorMessages' | 'handlers'>
