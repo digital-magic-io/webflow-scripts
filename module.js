@@ -352,10 +352,11 @@ const $74010a292a3af4c1$export$b916619e652ca675 = async ({ data: data, ctx: ctx,
     try {
         console.debug("Initial form submitted", data);
         ctx.forms.initial.clearAllErrors();
-        const token = await grecaptcha.execute("6LfAgNQpAAAAAOYmB_Y_tmUGjP4AY-hRzyHxE3JF", {
-            action: "submit"
-        });
-        const resp = await (0, $c4603da3cc6467fa$export$a6b4d7d396320855)({
+        /*
+    const token = await grecaptcha.execute('6LfAgNQpAAAAAOYmB_Y_tmUGjP4AY-hRzyHxE3JF', {
+      action: 'submit'
+    })
+    */ const resp = await (0, $c4603da3cc6467fa$export$a6b4d7d396320855)({
             //captchaToken: token,
             phoneNumber: data.phone,
             carNumber: data.plateNumber,
