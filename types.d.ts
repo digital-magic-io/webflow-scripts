@@ -66,8 +66,8 @@ type Config<F extends string, B extends string, L extends string> = {
     afterInit?: Handler<PageContext<F, B, L>>;
 };
 type FormName = 'initial' | 'vehicle' | 'files';
-type ButtonName = 'manual';
-type LabelName = 'testLabel';
+type ButtonName = never;
+type LabelName = 'markAndModel' | 'plateNumber';
 type CpMessages = {
     internalError: string;
     invalidPhoneError: string;

@@ -25,11 +25,14 @@
             invalidPhoneError: 'Invalid phone number!',
             invalidEmailError: 'Invalid email address!',
           },
+          /*
           buttonSelectors: {
             manual: '[data-dm-id="manual"]'
           },
+          */
           labelSelectors: {
-            testLabel: '[data-dm-id="testLabel"]'
+            markAndModel:  '[data-dm-id="labelMarkAndModel"]',
+            plateNumber: '[data-dm-id="labelPlateNumber"]'
           },
           formSelectors: {
             initial: '[data-dm-id="form_find_vehicle"]',
@@ -97,9 +100,10 @@
           <em data-dm-name="form_error" class="error"></em>
         </div>
         <div>
-          <label data-dm-type="label" data-dm-id="testLabel"></label>
           <button type="submit" data-dm-type="button" data-dm-name="form_submit">Find</button>
+          <!--
           <button type="button" data-dm-type="button" data-dm-id="manual">Manual</button>
+          -->
         </div>
       </form>
 
@@ -175,6 +179,8 @@
       </form>
 
       <form data-dm-id="form_files" style="display: none">
+        <label data-dm-type="label" data-dm-id="labelMarkAndModel"></label>
+        <label data-dm-type="label" data-dm-id="labelPlateNumber"></label>
         <div data-dm-type="control" data-dm-name="files">
           <label for="files" data-dm-type="label">Upload files:</label>
           <input type="file" id="files" name="files" data-dm-type="input" />

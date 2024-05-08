@@ -442,6 +442,8 @@ const $3ee52bcfba46d30d$export$8d5773d32b4cfd23 = async ({ data: data, ctx: ctx,
             email: data.email
         });
         console.debug("Vehicle form response", response);
+        ctx.labels.markAndModel.setLabel(`${data.make}, ${data.model}`);
+        ctx.labels.plateNumber.setLabel(data.plateNumber);
         success();
     } catch (e) {
         console.error("Response error:", e);
@@ -483,24 +485,23 @@ const $15451612c40a4a0c$export$cd874e48ff214f68 = (conf)=>{
         messages: conf.messages
     };
     const labelConfig = {
-        testLabel: {
-            selector: '[data-dm-id="testLabel"]'
+        markAndModel: {
+            selector: conf.labelSelectors.markAndModel
+        },
+        plateNumber: {
+            selector: conf.labelSelectors.plateNumber
         }
     };
-    const buttonConfig = {
-        manual: {
-            selector: '[data-dm-id="manual"]',
-            onClick: (ctx)=>{
-                console.debug("Button clicked:", ctx);
-                ctx.buttons.manual.setDisabled(true);
-                ctx.buttons.manual.setLabel("Loading...");
-                ctx.labels.testLabel.setLabel("Test label");
-                setTimeout(()=>{
-                    ctx.forms.initial.el.style.display = "none";
-                    ctx.forms.vehicle.el.removeAttribute("style");
-                }, 3000);
-            }
-        }
+    /*
+  // TODO: Correct approach is to map over config entries
+  Object.entries<string>(conf.labelSelectors)
+  .map(([labelName, selector]) => ({
+    [labelName]: {
+      selector: selector
+    }
+  }))
+  .reduce((acc, val) => ({ ...acc, ...val }), {})
+   */ const buttonConfig = {
     };
     const initialFormConfig = {
         selector: '[data-dm-id="form_find_vehicle"]',
