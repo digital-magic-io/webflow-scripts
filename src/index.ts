@@ -19,13 +19,10 @@ export const initCp = (conf: CpConfig): void => {
 
   // eslint-disable-next-line prefer-const
   let formId: string | undefined = undefined
-
   const setFormId = (id: string): void => {
-    console.log('setFormId: ', id)
     formId = id
   }
   const getFormId = (): string | undefined => {
-    console.log('getFormId: ', formId)
     return formId
   }
 
@@ -60,9 +57,7 @@ export const initCp = (conf: CpConfig): void => {
   const initialFormConfig: CpFormConfig = {
     selector: '[data-dm-id="form_find_vehicle"]',
     onSuccess: (ctx) => {
-      console.log('Next step')
-      ctx.forms.initial.el.style.display = 'none'
-      ctx.forms.vehicle.el.removeAttribute('style')
+      conf.actions.switchStep(1, ctx)
     },
     onError: (error: string, ctx) => {
       ctx.forms.initial.setError(error)
@@ -78,9 +73,7 @@ export const initCp = (conf: CpConfig): void => {
     selector: '[data-dm-id="form_vehicle"]',
     errorMessages: vehicleErrorMessages,
     onSuccess: (ctx) => {
-      console.log('Next step')
-      ctx.forms.vehicle.el.style.display = 'none'
-      ctx.forms.files.el.removeAttribute('style')
+      conf.actions.switchStep(2, ctx)
     },
     onError: (error: string, ctx) => {
       ctx.forms.vehicle.setError(error)
@@ -91,9 +84,7 @@ export const initCp = (conf: CpConfig): void => {
   const filesFormConfig: CpFormConfig = {
     selector: '[data-dm-id="form_files"]',
     onSuccess: (ctx) => {
-      ctx.forms.files.el.style.display = 'none'
-      document.getElementById('success_step')?.removeAttribute('style')
-      console.log('Great Success!')
+      conf.actions.switchStep(3, ctx)
     },
     onError: (error: string, ctx) => {
       ctx.forms.files.setError(error)

@@ -11,6 +11,19 @@
       window.onload = () => {
         console.log("page is fully loaded");
         initCp({
+          errorMessages: {
+            required: "This field is required!",
+            minlength: 'Field length is too small!',
+            maxlength: 'Field length is too big!',
+            pattern: 'Field does not match the pattern!',
+            min: 'Field value is too small!',
+            max: 'Field value is too big!',
+          },
+          messages: {
+            internalError: 'Unable to send form. Please try again later.',
+            invalidPhoneError: 'Invalid phone number!',
+            invalidEmailError: 'Invalid email address!',
+          },
           buttonSelectors: {
             manual: '[data-dm-id="manual"]'
           },
@@ -34,18 +47,25 @@
               document.getElementById('loading').style.display = 'none';
             }
           },
-          errorMessages: {
-            required: "This field is required!",
-            minlength: 'Field length is too small!',
-            maxlength: 'Field length is too big!',
-            pattern: 'Field does not match the pattern!',
-            min: 'Field value is too small!',
-            max: 'Field value is too big!',
-          },
-          messages: {
-            internalError: 'Unable to send form. Please try again later.',
-            invalidPhoneError: 'Invalid phone number!',
-            invalidEmailError: 'Invalid email address!',
+          actions: {
+            switchStep: (step, ctx) => {
+              console.log('Next step: ', step);
+              switch (step) {
+                case 1:
+                  ctx.forms.initial.el.style.display = 'none';
+                  ctx.forms.vehicle.el.removeAttribute('style');
+                  break
+                case 2:
+                  ctx.forms.vehicle.el.style.display = 'none';
+                  ctx.forms.files.el.removeAttribute('style');
+                  break;
+                case 3:
+                  ctx.forms.files.el.style.display = 'none'
+                  document.getElementById('success_step')?.removeAttribute('style')
+                  console.log('Great Success!')
+                  break;
+              }
+            }
           }
         });
       };
