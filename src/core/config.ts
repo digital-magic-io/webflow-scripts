@@ -8,7 +8,8 @@ export type PageContext<F extends string, B extends string, L extends string> = 
   resetAll: Handler<void>
 }
 
-export type FormConfigHandlers = {
+export type FormHandlers = {
+  init?: Handler<DmForm<string>>
   beforeSubmit?: Handler<DmForm<string>>
   afterSubmit?: Handler<DmForm<string>>
 }
@@ -26,7 +27,7 @@ export type FormConfig<F extends string, B extends string, L extends string> = {
   ) => Promise<void>
   onSuccess: (ctx: PageContext<F, B, L>) => void
   onError: <T>(error: T, ctx: PageContext<F, B, L>) => void
-  errorMessages?: FormErrorMessages
+  errorMessages?: Partial<FormErrorMessages>
 } & ElementConfig
 
 export type ButtonConfig<F extends string, B extends string, L extends string> = {
@@ -48,5 +49,6 @@ export type Config<F extends string, B extends string, L extends string> = {
   buttons?: Record<B, ButtonConfig<F, B, L>>
   labels?: Record<L, LabelConfig>
   errorMessages?: FormErrorMessages
-  handlers?: FormConfigHandlers
+  handlers?: FormHandlers
+  afterInit?: Handler<PageContext<F, B, L>>
 }

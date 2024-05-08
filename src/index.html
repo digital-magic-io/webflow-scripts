@@ -35,12 +35,17 @@
             }
           },
           errorMessages: {
-            required: "This field is required",
-            minlength: 'Field length is too small',
-            maxlength: 'Field length is too big',
-            pattern: 'Field does not match the pattern',
-            min: 'Field value is too small',
-            max: 'Field value is too big',
+            required: "This field is required!",
+            minlength: 'Field length is too small!',
+            maxlength: 'Field length is too big!',
+            pattern: 'Field does not match the pattern!',
+            min: 'Field value is too small!',
+            max: 'Field value is too big!',
+          },
+          messages: {
+            internalError: 'Unable to send form. Please try again later.',
+            invalidPhoneError: 'Invalid phone number!',
+            invalidEmailError: 'Invalid email address!',
           }
         });
       };

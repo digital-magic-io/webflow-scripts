@@ -8,7 +8,7 @@ export const submitInitialForm = async ({
   ctx,
   success,
   fail,
-  setFormId
+  state
 }: ActionParams<InitialForm>): Promise<void> => {
   try {
     console.debug('Initial form submitted', data)
@@ -20,7 +20,7 @@ export const submitInitialForm = async ({
       formType: 'BUYOUT'
     })
     console.debug('Initial form response', resp)
-    setFormId(resp.formUuid)
+    state.setFormId(resp.formUuid)
     if (resp.mntData) {
       const { mark, model, firstRegYear, registrationNumber } = resp.mntData
       ctx.forms.vehicle.setFormValues({
@@ -38,18 +38,17 @@ export const submitInitialForm = async ({
     }
     success()
   } catch (e) {
-    // TODO: Translate error messages!
     if (e instanceof ApiError) {
       const { errorCode, error } = await getErrorFromResponse<ErrorResponse>(e.response)
       console.error('Response error: ', error)
       if (errorCode === 'INVALID_PHONE_NUMBER') {
-        fail('Invalid phone number')
+        fail(state.messages.invalidPhoneError)
       } else {
-        fail('Failed to send data')
+        fail(state.messages.internalError)
       }
     } else {
       console.error('Response error: ', e)
-      fail('Failed to send data')
+      fail(state.messages.internalError)
     }
   }
 }
@@ -58,7 +57,8 @@ export const reloadVehicleFormData = async ({
   data: { plateNumber },
   ctx,
   success,
-  fail
+  fail,
+  state
 }: ActionParams<LookupVehicleForm>): Promise<void> => {
   try {
     console.debug('Reloading vehicle data for plate number:', plateNumber)
@@ -76,9 +76,8 @@ export const reloadVehicleFormData = async ({
       success()
     }
   } catch (e) {
-    // TODO: Translate error messages!
     console.error('Lookup error:', e)
-    fail('Failed to load vehicle data')
+    fail(state.messages.internalError)
   }
 }
 
@@ -87,8 +86,9 @@ export const submitVehicleForm = async ({
   ctx,
   success,
   fail,
-  formId
+  state
 }: ActionParams<VehicleForm>): Promise<void> => {
+  const formId = state.getFormId()
   if (!formId) {
     throw new Error('FormId is missing')
   }
@@ -109,12 +109,12 @@ export const submitVehicleForm = async ({
     success()
   } catch (e) {
     console.error('Response error:', e)
-    // TODO: Translate error messages!
-    fail('Failed to send data')
+    fail(state.messages.internalError)
   }
 }
 
-export const submitFiles = async ({ data, ctx, success, fail, formId }: ActionParams<FileForm>): Promise<void> => {
+export const submitFiles = async ({ data, ctx, success, fail, state }: ActionParams<FileForm>): Promise<void> => {
+  const formId = state.getFormId()
   if (!formId) {
     throw new Error('FormId is missing')
   }
@@ -127,8 +127,7 @@ export const submitFiles = async ({ data, ctx, success, fail, formId }: ActionPa
     ctx.resetAll()
     success()
   } catch (e) {
-    // TODO: Translate error messages!
     console.error('Response error:', e)
-    fail('Failed to send data')
+    fail(state.messages.internalError)
   }
 }

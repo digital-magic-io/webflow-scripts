@@ -1,4 +1,4 @@
-import type { ButtonConfig, Config, FormConfig, FormConfigHandlers, LabelConfig, PageContext } from './config'
+import type { ButtonConfig, Config, FormConfig, FormHandlers, LabelConfig, PageContext } from './config'
 import type { FailedValidationType, FormErrorMessages } from './types'
 import type { DmButton, DmForm, DmLabel } from './form'
 import { createButton, createForm, createLabel } from './form'
@@ -12,10 +12,11 @@ const setupForm = <F extends string, B extends string, L extends string>(
   formName: F,
   formConfig: FormConfig<F, B, L>,
   globalErrorMessages: FormErrorMessages,
-  handlers?: FormConfigHandlers
+  handlers?: FormHandlers
 ): DmForm<F> => {
   console.debug('Form:', formName, formConfig)
   const form = createForm(formConfig.selector, formName, { ...globalErrorMessages, ...formConfig.errorMessages })
+  handlers?.init?.(form)
   form.setOnSubmit(async () => {
     console.log('Form submitted:', formName, form.fields)
     handlers?.beforeSubmit?.(form)
@@ -104,6 +105,8 @@ export const init = <F extends string, B extends string, L extends string>(conf:
         setupLabel(ctx, labelName as L, labelConfig)
       })
     }
+
+    conf.afterInit?.(ctx)
 
     console.log('Initialized with context: ', ctx)
   }

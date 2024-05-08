@@ -1,5 +1,35 @@
-import { PageContext } from '../core/config'
-import { Handler } from '../core/types'
+import { Config, FormConfig, PageContext } from '../core/config'
+import { FN, Handler } from '../core/types'
+
+export type FormName = 'initial' | 'vehicle' | 'files'
+export type ButtonName = 'manual'
+export type LabelName = 'testLabel'
+
+export type CpMessages = {
+  internalError: string
+  invalidPhoneError: string
+  invalidEmailError: string
+}
+
+export type AppConfig = Config<FormName, ButtonName, LabelName>
+
+export type CpFormConfig = FormConfig<FormName, ButtonName, LabelName>
+
+export type CpPageContext = PageContext<FormName, ButtonName, LabelName>
+
+export type ActionState = Readonly<{
+  setFormId: Handler<string>
+  getFormId: FN<void, string | undefined>
+  messages: CpMessages
+}>
+
+export type ActionParams<T extends Record<string, string | number | File | FileList | undefined>> = Readonly<{
+  data: T
+  ctx: CpPageContext
+  success: Handler<void>
+  fail: Handler<unknown>
+  state: ActionState
+}>
 
 export type LookupVehicleForm = Readonly<{
   plateNumber: string
@@ -24,19 +54,4 @@ export type VehicleForm = Readonly<{
 
 export type FileForm = Readonly<{
   files: FileList
-}>
-
-export type FormName = 'initial' | 'vehicle' | 'files'
-export type ButtonName = 'manual'
-export type LabelName = 'testLabel'
-
-export type CpPageContext = PageContext<FormName, ButtonName, LabelName>
-
-export type ActionParams<T extends Record<string, string | number | undefined>> = Readonly<{
-  data: T
-  ctx: CpPageContext
-  success: Handler<void>
-  fail: Handler<unknown>
-  setFormId: Handler<string>
-  formId: string | undefined
 }>

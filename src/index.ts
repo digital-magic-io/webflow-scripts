@@ -1,38 +1,47 @@
 import { CpConfig } from './config'
 import {
-  ButtonName,
-  CpPageContext,
+  ActionState,
+  AppConfig,
+  CpFormConfig,
   FileForm,
-  FormName,
   InitialForm,
-  LabelName,
+  reloadVehicleFormData,
   submitFiles,
   submitInitialForm,
   submitVehicleForm,
   VehicleForm
 } from './cp'
-import { Config, FormConfig, init, LabelConfig } from './core'
+import { init } from './core'
 import { FormErrorMessages } from './core/types'
-
-type Cfg = Config<FormName, ButtonName, LabelName>
-type FormCfg = FormConfig<FormName, ButtonName, LabelName>
 
 export const initCp = (conf: CpConfig): void => {
   console.log('Initializing...', conf)
 
   // eslint-disable-next-line prefer-const
   let formId: string | undefined = undefined
+
   const setFormId = (id: string): void => {
+    console.log('setFormId: ', id)
     formId = id
   }
+  const getFormId = (): string | undefined => {
+    console.log('getFormId: ', formId)
+    return formId
+  }
 
-  const labelConfig: Cfg['labels'] = {
+  const state: ActionState = {
+    getFormId,
+    setFormId,
+    messages: conf.messages
+  }
+
+  const labelConfig: AppConfig['labels'] = {
     testLabel: {
       selector: '[data-dm-id="testLabel"]'
     }
   }
 
-  const buttonConfig: Cfg['buttons'] = {
+  const buttonConfig: AppConfig['buttons'] = {
     manual: {
       selector: '[data-dm-id="manual"]',
       onClick: (ctx) => {
@@ -48,7 +57,7 @@ export const initCp = (conf: CpConfig): void => {
     }
   }
 
-  const initialFormConfig: FormCfg = {
+  const initialFormConfig: CpFormConfig = {
     selector: '[data-dm-id="form_find_vehicle"]',
     onSuccess: (ctx) => {
       console.log('Next step')
@@ -58,16 +67,14 @@ export const initCp = (conf: CpConfig): void => {
     onError: (error: string, ctx) => {
       ctx.forms.initial.setError(error)
     },
-    onSubmit: (data: InitialForm, ctx, success, fail) =>
-      submitInitialForm({ data, ctx, success, fail, setFormId, formId })
+    onSubmit: (data: InitialForm, ctx, success, fail) => submitInitialForm({ data, ctx, success, fail, state })
   }
 
-  // TODO: Translate error messages!
-  const vehicleErrorMessages: FormErrorMessages = {
-    pattern: 'Email is not valid'
+  const vehicleErrorMessages: Partial<FormErrorMessages> = {
+    pattern: state.messages.invalidEmailError
   }
 
-  const vehicleFormConfig: FormCfg = {
+  const vehicleFormConfig: CpFormConfig = {
     selector: '[data-dm-id="form_vehicle"]',
     errorMessages: vehicleErrorMessages,
     onSuccess: (ctx) => {
@@ -78,11 +85,10 @@ export const initCp = (conf: CpConfig): void => {
     onError: (error: string, ctx) => {
       ctx.forms.vehicle.setError(error)
     },
-    onSubmit: (data: VehicleForm, ctx, success, fail) =>
-      submitVehicleForm({ data, ctx, success, fail, setFormId, formId })
+    onSubmit: (data: VehicleForm, ctx, success, fail) => submitVehicleForm({ data, ctx, success, fail, state })
   }
 
-  const filesFormConfig: FormCfg = {
+  const filesFormConfig: CpFormConfig = {
     selector: '[data-dm-id="form_files"]',
     onSuccess: (ctx) => {
       ctx.forms.files.el.style.display = 'none'
@@ -92,10 +98,10 @@ export const initCp = (conf: CpConfig): void => {
     onError: (error: string, ctx) => {
       ctx.forms.files.setError(error)
     },
-    onSubmit: (data: FileForm, ctx, success, fail) => submitFiles({ data, ctx, success, fail, setFormId, formId })
+    onSubmit: (data: FileForm, ctx, success, fail) => submitFiles({ data, ctx, success, fail, state })
   }
 
-  const cfg: Cfg = {
+  const cfg: AppConfig = {
     forms: {
       initial: initialFormConfig,
       vehicle: vehicleFormConfig,
@@ -104,7 +110,22 @@ export const initCp = (conf: CpConfig): void => {
     buttons: buttonConfig,
     labels: labelConfig,
     handlers: conf.handlers,
-    errorMessages: conf.errorMessages
+    errorMessages: conf.errorMessages,
+    afterInit: (ctx) => {
+      console.log('After init:', ctx)
+      ctx.forms.vehicle.fields.plateNumber.input.el.onblur = () => {
+        const plateNumber = ctx.forms.vehicle.fields.plateNumber.input.el.value
+        console.log('On blur:', ctx.forms.vehicle.fields.plateNumber.input.el.value)
+        const formCfg = vehicleFormConfig
+        void reloadVehicleFormData({
+          data: { plateNumber },
+          ctx,
+          success: () => {},
+          fail: (error) => formCfg.onError(error, ctx),
+          state
+        })
+      }
+    }
   }
   init(cfg)
 }

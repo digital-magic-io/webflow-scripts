@@ -93,7 +93,7 @@ export const uploadFilesList =
             // eslint-disable-next-line no-console
             console.error('File upload error', e)
             onFileUploadError?.(e)
-            return undefined
+            throw e
           })
       )
     ).then((result) => result.filter(hasValue))
