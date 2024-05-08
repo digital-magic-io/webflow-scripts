@@ -11,7 +11,7 @@ import {
   submitVehicleForm,
   VehicleForm
 } from './cp'
-import { init } from './core'
+import { init, LabelConfig } from './core'
 import { FormErrorMessages } from './core/types'
 
 export const initCp = (conf: CpConfig): void => {
@@ -33,12 +33,26 @@ export const initCp = (conf: CpConfig): void => {
   }
 
   const labelConfig: AppConfig['labels'] = {
-    testLabel: {
-      selector: '[data-dm-id="testLabel"]'
+    markAndModel: {
+      selector: conf.labelSelectors.markAndModel
+    },
+    plateNumber: {
+      selector: conf.labelSelectors.plateNumber
     }
   }
+  /*
+  // TODO: Correct approach is to map over config entries
+  Object.entries<string>(conf.labelSelectors)
+  .map(([labelName, selector]) => ({
+    [labelName]: {
+      selector: selector
+    }
+  }))
+  .reduce((acc, val) => ({ ...acc, ...val }), {})
+   */
 
   const buttonConfig: AppConfig['buttons'] = {
+    /*
     manual: {
       selector: '[data-dm-id="manual"]',
       onClick: (ctx) => {
@@ -52,6 +66,7 @@ export const initCp = (conf: CpConfig): void => {
         }, 3000)
       }
     }
+    */
   }
 
   const initialFormConfig: CpFormConfig = {

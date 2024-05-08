@@ -24,7 +24,7 @@ export const submitInitialForm = async ({
       action: 'submit'
     })
     const resp = await sendInitForm({
-      captchaToken: token,
+      //captchaToken: token,
       phoneNumber: data.phone,
       carNumber: data.plateNumber,
       language: 'et',
@@ -125,6 +125,8 @@ export const submitVehicleForm = async ({
       email: data.email
     })
     console.debug('Vehicle form response', response)
+    ctx.labels.markAndModel.setLabel(`${data.make}, ${data.model}`)
+    ctx.labels.plateNumber.setLabel(data.plateNumber)
     success()
   } catch (e) {
     console.error('Response error:', e)

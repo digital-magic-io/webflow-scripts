@@ -2,8 +2,8 @@ import { Config, FormConfig, PageContext } from '../core'
 import { FN, Handler } from '../core/types'
 
 export type FormName = 'initial' | 'vehicle' | 'files'
-export type ButtonName = 'manual'
-export type LabelName = 'testLabel'
+export type ButtonName = never
+export type LabelName = 'markAndModel' | 'plateNumber'
 
 export type CpMessages = {
   internalError: string
