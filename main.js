@@ -358,12 +358,11 @@ const $3ee52bcfba46d30d$export$b916619e652ca675 = async ({ data: data, ctx: ctx,
     try {
         console.debug("Initial form submitted", data);
         ctx.forms.initial.clearAllErrors();
-        /*
-    const token = await grecaptcha.execute('6LfAgNQpAAAAAOYmB_Y_tmUGjP4AY-hRzyHxE3JF', {
-      action: 'submit'
-    })
-    */ const resp = await (0, $9875fc359f01f731$export$a6b4d7d396320855)({
-            //captchaToken: token,
+        const token = state.captchaKey ? await grecaptcha.execute(state.captchaKey, {
+            action: "submit"
+        }) : undefined;
+        const resp = await (0, $9875fc359f01f731$export$a6b4d7d396320855)({
+            captchaToken: token,
             phoneNumber: data.phone,
             carNumber: data.plateNumber,
             language: "et",
@@ -483,7 +482,8 @@ const $15451612c40a4a0c$export$cd874e48ff214f68 = (conf)=>{
     const state = {
         getFormId: getFormId,
         setFormId: setFormId,
-        messages: conf.messages
+        messages: conf.messages,
+        captchaKey: conf.captchaKey
     };
     const labelConfig = {
         markAndModel: {

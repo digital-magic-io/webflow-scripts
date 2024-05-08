@@ -91,6 +91,7 @@ type CpConfig = Readonly<{
     labelSelectors: Record<LabelName, string>;
     messages: CpMessages;
     actions: CpActions;
+    captchaKey?: string;
 }> & Pick<Config<FormName, ButtonName, LabelName>, 'errorMessages' | 'handlers'>;
 export const initCp: (conf: CpConfig) => void;
 
