@@ -6,202 +6,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Example page for testing Webflow script" />
     <title>Digital Magic | Webflow script example page</title>
+    <script src="https://www.google.com/recaptcha/api.js?render=6LfAgNQpAAAAAOYmB_Y_tmUGjP4AY-hRzyHxE3JF"></script>
     <script type="module">
-      import { ApiError, init, apiGet, apiPost, apiUploadFileList, apiGetErrorFromResponse } from './module.js';
+      import { initCp } from './module.js';
       window.onload = () => {
         console.log("page is fully loaded");
-        const apiUrl = 'https://test.carprof.ee/api';
-        const formsUrl = `${apiUrl}/v2/forms`;
-        const initialFormUrl = `${formsUrl}/initial-data`;
-        const lookupCarRegistryUrl = (plateNumber) => `${apiUrl}/v1/cars/mnt/${plateNumber}`;
-        const formDataUrl = (formId) => `${formsUrl}/form-data/${formId}`;
-        const photosUrl = (formId) => `${formsUrl}/photos/${formId}`;
-        const fileUrl = `${apiUrl}/v1/forms/file`;
-
-        let formId = null;
-
-        init({
-          buttons: {
-            manual: {
-              selector: '[data-dm-id="manual"]',
-              onClick: (ctx) => {
-                console.debug('Button clicked:', ctx);
-                ctx.buttons.manual.setDisabled(true);
-                ctx.buttons.manual.setLabel('Loading...');
-                ctx.labels.testLabel.setLabel('Test label');
-                setTimeout(() => {
-                  ctx.forms.initial.el.style.display = 'none';
-                  ctx.forms.vehicle.el.removeAttribute('style');
-                }, 3000);
-              }
-            }
+        initCp({
+          errorMessages: {
+            required: "This field is required!",
+            minlength: 'Field length is too small!',
+            maxlength: 'Field length is too big!',
+            pattern: 'Field does not match the pattern!',
+            min: 'Field value is too small!',
+            max: 'Field value is too big!',
           },
-          labels: {
-            testLabel: {
-              selector: '[data-dm-id="testLabel"]',
-            }
+          messages: {
+            internalError: 'Unable to send form. Please try again later.',
+            invalidPhoneError: 'Invalid phone number!',
+            invalidEmailError: 'Invalid email address!',
           },
-          forms: {
-            initial: {
-              selector: '[data-dm-id="form_find_vehicle"]',
-              onSuccess: (ctx) => {
-                // TODO: Next step should be here
-                console.log('Next step');
-                ctx.forms.initial.el.style.display = 'none';
-                ctx.forms.vehicle.el.removeAttribute('style');
-              },
-              onError: (error, ctx) => {
-                ctx.forms.initial.setError(error);
-              },
-              onSubmit: async (data, ctx, success, fail) => {
-                console.debug('Initial form submitted', data);
-                ctx.forms.initial.clearAllErrors();
-                const request = {
-                  phoneNumber: data.phone,
-                  carNumber: data.plateNumber,
-                  language: 'et',
-                  formType: 'BUYOUT'
-                };
-                console.log('Sending request: ', request);
-                await apiPost(initialFormUrl, request)
-                  .then((resp) => {
-                    console.debug('Response:', resp);
-                    formId = resp.formUuid;
-                    if (resp.mntData) {
-                      const {mark, model, firstRegYear, registrationNumber} = resp.mntData;
-                      ctx.forms.vehicle.setFormValues({
-                        phone: data.phone,
-                        make: mark,
-                        model,
-                        year: firstRegYear,
-                        plateNumber: registrationNumber
-                      });
-                    } else {
-                      ctx.forms.vehicle.setFormValues({
-                        phone: data.phone,
-                        plateNumber: data.plateNumber
-                      });
-                    }
-                    ctx.forms.vehicle.fields.plateNumber.input.el.onblur = () => {
-                      ctx.forms.vehicle.clearAllErrors();
-                      apiGet(lookupCarRegistryUrl(ctx.forms.vehicle.fields.plateNumber.input.el.value))
-                        .then((data) => {
-                          console.debug('Lookup response:', data);
-                          if (data) {
-                            const {mark, model, firstRegYear, registrationNumber} = data;
-                            ctx.forms.vehicle.setFormValues({
-                              make: mark,
-                              model,
-                              year: firstRegYear,
-                              plateNumber: registrationNumber
-                            });
-                          }
-                        }).catch((error) => {
-                          console.error('Lookup error:', error);
-                        });
-                    }
-                    success();
-                  }).catch(async (e) => {
-                    if (e instanceof ApiError) {
-                      const { errorCode, error } = await apiGetErrorFromResponse(e.response);
-                      console.error('Response error: ', error);
-                      if (errorCode === 'INVALID_PHONE_NUMBER') {
-                        // TODO: Translate error message!
-                        fail('Invalid phone number');
-                      } else {
-                        fail('Failed to send data');
-                      }
-                    } else {
-                      console.error('Response error: ', e);
-                      fail('Failed to send data');
-                    }
-                  });
-              }
-            },
-            vehicle: {
-              selector: '[data-dm-id="form_vehicle"]',
-              errorMessages: {
-                pattern: 'Email is not valid'
-              },
-              onSuccess(ctx) {
-                // TODO: Next step should be here
-                console.log('Next step');
-                ctx.forms.vehicle.el.style.display = 'none';
-                ctx.forms.files.el.removeAttribute('style');
-              },
-              onError(error, ctx) {
-                ctx.forms.vehicle.setError(error);
-              },
-              onSubmit: async (data, ctx, success, fail) => {
-                console.debug('Vehicle form submitted:', data, ctx);
-                ctx.forms.vehicle.clearAllErrors();
-                if (!formId) {
-                  throw new Error('Form id is missing');
-                }
-                const request = {
-                  carNumber: data.plateNumber,
-                  mark: data.make,
-                  model: data.model,
-                  mileage: data.mileage ? Number(data.mileage) : undefined,
-                  location: data.location,
-                  requestedPrice: data.price ? Number(data.price) : undefined,
-                  fullName: data.name,
-                  email: data.email,
-                }
-                await apiPost(formDataUrl(formId), request)
-                  .then((resp) => {
-                    console.debug('Response:', resp);
-                    success();
-                  }).catch((error) => {
-                    console.error('Response error: ', error);
-                    fail('Failed to send data');
-                  });
-              }
-            },
-            files: {
-              selector: '[data-dm-id="form_files"]',
-              onSuccess: (ctx) => {
-                // TODO: Next step should be here
-                console.log('Next step');
-                ctx.forms.files.el.style.display = 'none';
-                document.getElementById('success_step').removeAttribute('style');
-                console.log('Great Success!')
-              },
-              onError: (error, ctx) => {
-                ctx.forms.files.setError(error);
-              },
-              onSubmit: async (data, ctx, success, fail) => {
-                // TODO: Update script to pass files to data (if file input element)
-                console.debug('Files form submitted:', data, ctx);
-                if (!formId) {
-                  throw new Error('FormId is missing');
-                }
-                ctx.forms.files.clearAllErrors();
-
-                const files = ctx.forms.files.fields.files.input.el.files;
-                if (!files || files.length === 0) {
-                  ctx.resetAll();
-                  success();
-                } else {
-                  console.log('Files:', files)
-                  await apiUploadFileList(fileUrl, files).then(async (response) => {
-                    console.debug('Files form response:', response);
-                    const request = { imageIds: response.map((v) => v.fileId) }
-                    await apiPost(photosUrl(formId), request).then((response) => {
-                      console.debug('Photos form response:', response);
-                      ctx.resetAll();
-                      success();
-                    }).catch((error) => {
-                      console.error('Response error: ', error);
-                      fail('Unable to submit buyout form');
-                    })
-                  }).catch((error) => {
-                    console.error('Response error: ', error);
-                    fail('Unable to upload files');
-                  })
-                }
-              }
-            }
+          buttonSelectors: {
+            manual: '[data-dm-id="manual"]'
+          },
+          labelSelectors: {
+            testLabel: '[data-dm-id="testLabel"]'
+          },
+          formSelectors: {
+            initial: '[data-dm-id="form_find_vehicle"]',
+            vehicle: '[data-dm-id="form_vehicle"]',
+            files: '[data-dm-id="form_files"]'
           },
           handlers: {
             beforeSubmit: (form) => {
@@ -215,13 +48,25 @@
               document.getElementById('loading').style.display = 'none';
             }
           },
-          errorMessages: {
-            required: "This field is required",
-            minlength: 'Field length is too small',
-            maxlength: 'Field length is too big',
-            pattern: 'Field does not match the pattern',
-            min: 'Field value is too small',
-            max: 'Field value is too big',
+          actions: {
+            switchStep: (step, ctx) => {
+              console.log('Next step: ', step);
+              switch (step) {
+                case 1:
+                  ctx.forms.initial.el.style.display = 'none';
+                  ctx.forms.vehicle.el.removeAttribute('style');
+                  break
+                case 2:
+                  ctx.forms.vehicle.el.style.display = 'none';
+                  ctx.forms.files.el.removeAttribute('style');
+                  break;
+                case 3:
+                  ctx.forms.files.el.style.display = 'none'
+                  document.getElementById('success_step')?.removeAttribute('style')
+                  console.log('Great Success!')
+                  break;
+              }
+            }
           }
         });
       };

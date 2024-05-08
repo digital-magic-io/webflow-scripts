@@ -3,22 +3,17 @@ function $parcel$export(e, n, v, s) {
   Object.defineProperty(e, n, {get: v, set: s, enumerable: true, configurable: true});
 }
 
-$parcel$export(module.exports, "init", function () { return $15451612c40a4a0c$export$2cd8252107eb640b; });
-$parcel$export(module.exports, "apiGet", function () { return $ce799568675fe138$export$1d2fa8475101ec93; });
-$parcel$export(module.exports, "apiPost", function () { return $ce799568675fe138$export$e842d00bb3325f27; });
-$parcel$export(module.exports, "apiUploadFileList", function () { return $ce799568675fe138$export$b2fd9029d5529a00; });
-$parcel$export(module.exports, "apiGetErrorFromResponse", function () { return $ce799568675fe138$export$7780d7826aafbede; });
-$parcel$export(module.exports, "ApiError", function () { return $ce799568675fe138$export$f2e832acab1bdd79; });
-const $8424e5b2d01c7ee8$export$d16800b7e59a8051 = (selector, parent)=>{
+$parcel$export(module.exports, "initCp", function () { return $15451612c40a4a0c$export$cd874e48ff214f68; });
+const $68d6acfa1617944c$export$d16800b7e59a8051 = (selector, parent)=>{
     const el = (parent ?? document).querySelector(selector);
     if (el === null) {
         console.error(`Element not found by selector: ${parent ? "parent" : "document"}.${selector}.`);
         return undefined;
     } else return el;
 };
-const $8424e5b2d01c7ee8$export$465c18d0577ffcf1 = (selector)=>$8424e5b2d01c7ee8$export$d16800b7e59a8051(selector);
-const $8424e5b2d01c7ee8$export$be4e807bcc41c98 = (selector, parent)=>$8424e5b2d01c7ee8$export$d16800b7e59a8051(selector, parent);
-const $8424e5b2d01c7ee8$export$52987f4b88db0f2 = (form, handler)=>{
+const $68d6acfa1617944c$export$465c18d0577ffcf1 = (selector)=>$68d6acfa1617944c$export$d16800b7e59a8051(selector);
+const $68d6acfa1617944c$export$be4e807bcc41c98 = (selector, parent)=>$68d6acfa1617944c$export$d16800b7e59a8051(selector, parent);
+const $68d6acfa1617944c$export$52987f4b88db0f2 = (form, handler)=>{
     form.action = "";
     form.method = "";
     form.onsubmit = (e)=>{
@@ -30,7 +25,7 @@ const $8424e5b2d01c7ee8$export$52987f4b88db0f2 = (form, handler)=>{
 };
 
 
-class $874ccd897114849f$var$FormError extends Error {
+class $7b19bfce950638d7$var$FormError extends Error {
     parent;
     constructor(message, parent1){
         super(message);
@@ -41,30 +36,30 @@ class $874ccd897114849f$var$FormError extends Error {
         return this.message + " Parent: [" + JSON.stringify(parent) + "]";
     }
 }
-const $874ccd897114849f$var$scanFormFieldNames = (formElement)=>{
+const $7b19bfce950638d7$var$scanFormFieldNames = (formElement)=>{
     // TODO: Field selector must be configurable
     const formFieldElements = formElement.querySelectorAll('[data-dm-type="control"]');
     return Array.from(formFieldElements.values()).map((el)=>el.getAttribute("data-dm-name")).filter((name)=>!!name);
 };
-const $874ccd897114849f$var$createFormError = (formElement)=>{
+const $7b19bfce950638d7$var$createFormError = (formElement)=>{
     // TODO: Error selector must be configurable
-    const element = (0, $8424e5b2d01c7ee8$export$d16800b7e59a8051)('[data-dm-name="form_error"]', formElement);
-    if (!element) throw new $874ccd897114849f$var$FormError("Form error element not found for form", formElement);
+    const element = (0, $68d6acfa1617944c$export$d16800b7e59a8051)('[data-dm-name="form_error"]', formElement);
+    if (!element) throw new $7b19bfce950638d7$var$FormError("Form error element not found for form", formElement);
     return element;
 };
-const $874ccd897114849f$var$createFieldInput = (fieldElement)=>{
+const $7b19bfce950638d7$var$createFieldInput = (fieldElement)=>{
     // TODO: Field input selector must be configurable
-    const element = (0, $8424e5b2d01c7ee8$export$be4e807bcc41c98)('[data-dm-type="input"]', fieldElement);
-    if (!element) throw new $874ccd897114849f$var$FormError("Form input element not found for: ", fieldElement);
+    const element = (0, $68d6acfa1617944c$export$be4e807bcc41c98)('[data-dm-type="input"]', fieldElement);
+    if (!element) throw new $7b19bfce950638d7$var$FormError("Form input element not found for: ", fieldElement);
     return element;
 };
-const $874ccd897114849f$var$createFieldError = (fieldElement)=>{
+const $7b19bfce950638d7$var$createFieldError = (fieldElement)=>{
     // TODO: Field error selector must be configurable
-    const element = (0, $8424e5b2d01c7ee8$export$d16800b7e59a8051)('[data-dm-type="error"]', fieldElement);
-    if (!element) throw new $874ccd897114849f$var$FormError("Form error element not found for: ", fieldElement);
+    const element = (0, $68d6acfa1617944c$export$d16800b7e59a8051)('[data-dm-type="error"]', fieldElement);
+    if (!element) throw new $7b19bfce950638d7$var$FormError("Form error element not found for: ", fieldElement);
     return element;
 };
-const $874ccd897114849f$var$createFieldValidation = (inputElement)=>{
+const $7b19bfce950638d7$var$createFieldValidation = (inputElement)=>{
     const required = inputElement.hasAttribute("required");
     const minLength = inputElement.getAttribute("minlength");
     const maxLength = inputElement.getAttribute("maxlength");
@@ -81,13 +76,13 @@ const $874ccd897114849f$var$createFieldValidation = (inputElement)=>{
         return true;
     };
 };
-const $874ccd897114849f$var$createFormField = (formElement, name)=>{
+const $7b19bfce950638d7$var$createFormField = (formElement, name)=>{
     // TODO: Field selector must be configurable
-    const fieldElement = (0, $8424e5b2d01c7ee8$export$d16800b7e59a8051)(`[data-dm-name="${name}"]`, formElement);
-    if (!fieldElement) throw new $874ccd897114849f$var$FormError('Form field element not found by name: "' + name, formElement);
-    const inputElement = $874ccd897114849f$var$createFieldInput(fieldElement);
-    const errorElement = $874ccd897114849f$var$createFieldError(fieldElement);
-    const validator = $874ccd897114849f$var$createFieldValidation(inputElement);
+    const fieldElement = (0, $68d6acfa1617944c$export$d16800b7e59a8051)(`[data-dm-name="${name}"]`, formElement);
+    if (!fieldElement) throw new $7b19bfce950638d7$var$FormError('Form field element not found by name: "' + name, formElement);
+    const inputElement = $7b19bfce950638d7$var$createFieldInput(fieldElement);
+    const errorElement = $7b19bfce950638d7$var$createFieldError(fieldElement);
+    const validator = $7b19bfce950638d7$var$createFieldValidation(inputElement);
     return {
         el: fieldElement,
         input: {
@@ -102,15 +97,15 @@ const $874ccd897114849f$var$createFormField = (formElement, name)=>{
         setInputValue: (value)=>inputElement.value = value
     };
 };
-const $874ccd897114849f$export$f681a8129d2e9d28 = (selector, formName, formErrorMessages)=>{
+const $7b19bfce950638d7$export$f681a8129d2e9d28 = (selector, formName, formErrorMessages)=>{
     console.debug("Creating form:", formName, selector);
-    const formElement = (0, $8424e5b2d01c7ee8$export$465c18d0577ffcf1)(selector);
+    const formElement = (0, $68d6acfa1617944c$export$465c18d0577ffcf1)(selector);
     if (!formElement) throw new Error("Form element not found by selector: " + selector);
     // TODO: Must be optional!
-    const formErrorElement = $874ccd897114849f$var$createFormError(formElement);
-    const fieldNames = $874ccd897114849f$var$scanFormFieldNames(formElement);
+    const formErrorElement = $7b19bfce950638d7$var$createFormError(formElement);
+    const fieldNames = $7b19bfce950638d7$var$scanFormFieldNames(formElement);
     console.debug("Fields scanned:", fieldNames);
-    const fieldElements = fieldNames.map((name)=>$874ccd897114849f$var$createFormField(formElement, name)).reduce((acc, cur)=>({
+    const fieldElements = fieldNames.map((name)=>$7b19bfce950638d7$var$createFormField(formElement, name)).reduce((acc, cur)=>({
             ...acc,
             [cur.input.el.name]: cur
         }), {});
@@ -137,7 +132,7 @@ const $874ccd897114849f$export$f681a8129d2e9d28 = (selector, formName, formError
             else element.classList.remove("disabled");
         });
     };
-    const setOnSubmit = (handler)=>(0, $8424e5b2d01c7ee8$export$52987f4b88db0f2)(formElement, (e)=>{
+    const setOnSubmit = (handler)=>(0, $68d6acfa1617944c$export$52987f4b88db0f2)(formElement, (e)=>{
             const errors = Object.entries(fieldElements).map(([name, field])=>({
                     [name]: field.validator(field.input.el.value)
                 })).reduce((acc, cur)=>({
@@ -177,23 +172,26 @@ const $874ccd897114849f$export$f681a8129d2e9d28 = (selector, formName, formError
         setOnSubmit: setOnSubmit
     };
 };
-const $874ccd897114849f$export$9b6d6ca62970729f = (buttonElement)=>({
+const $7b19bfce950638d7$export$9b6d6ca62970729f = (buttonElement)=>({
         el: buttonElement,
         setLabel: (label)=>buttonElement.textContent = label,
         setDisabled: (disabled)=>buttonElement.disabled = disabled
     });
-const $874ccd897114849f$export$f2839682b8c07f35 = (labelElement)=>({
+const $7b19bfce950638d7$export$f2839682b8c07f35 = (labelElement)=>({
         el: labelElement,
         setLabel: (label)=>labelElement.textContent = label
     });
 
 
 
-const $f56e056924fdbc49$export$dd1bc94b04021eeb = (value)=>value === null || value === undefined;
-const $f56e056924fdbc49$export$96bdbc84526f3739 = (value)=>!$f56e056924fdbc49$export$dd1bc94b04021eeb(value);
+const $7546c35f5f2b619a$export$dd1bc94b04021eeb = (value)=>value === null || value === undefined;
+const $7546c35f5f2b619a$export$96bdbc84526f3739 = (value)=>!$7546c35f5f2b619a$export$dd1bc94b04021eeb(value);
+const $7546c35f5f2b619a$export$4f84e3a82c7b538 = (value, f)=>$7546c35f5f2b619a$export$96bdbc84526f3739(value) ? f(value) : undefined;
+const $7546c35f5f2b619a$export$8832081647a02ee7 = (value, defaultValue)=>$7546c35f5f2b619a$export$96bdbc84526f3739(value) ? value : defaultValue;
+const $7546c35f5f2b619a$export$ec46e854364465e6 = (value, f, defaultValue)=>$7546c35f5f2b619a$export$96bdbc84526f3739(value) ? f(value) : defaultValue;
 
 
-class $ce799568675fe138$export$f2e832acab1bdd79 extends Error {
+class $f20d18f353317b2a$export$f2e832acab1bdd79 extends Error {
     status;
     url;
     method;
@@ -208,90 +206,97 @@ class $ce799568675fe138$export$f2e832acab1bdd79 extends Error {
         this.response = response;
     }
 }
-const $ce799568675fe138$export$7780d7826aafbede = async (response)=>{
+const $f20d18f353317b2a$export$7780d7826aafbede = async (response)=>{
     const responseText = await response.text();
     console.log("Error body: ", responseText);
     if (!responseText || responseText.length === 0) return undefined;
     else return JSON.parse(responseText);
 };
-const $ce799568675fe138$export$61ca0380393ac2cc = async (url, init = {
+const $f20d18f353317b2a$export$61ca0380393ac2cc = async (url, init = {
     method: "GET"
 })=>{
     const response = await fetch(url, init);
-    if (!response.ok) throw new $ce799568675fe138$export$f2e832acab1bdd79(response, "Unsuccessful HTTP status");
+    if (!response.ok) throw new $f20d18f353317b2a$export$f2e832acab1bdd79(response, "Unsuccessful HTTP status");
     else {
         const responseText = await response.text();
         if (!responseText || responseText.length === 0) return undefined;
         else return JSON.parse(responseText);
     }
 };
-const $ce799568675fe138$export$1d2fa8475101ec93 = async (url)=>$ce799568675fe138$export$61ca0380393ac2cc(url);
-const $ce799568675fe138$export$e842d00bb3325f27 = async (url, body)=>$ce799568675fe138$export$61ca0380393ac2cc(url, {
+const $f20d18f353317b2a$export$1d2fa8475101ec93 = async (url)=>$f20d18f353317b2a$export$61ca0380393ac2cc(url);
+const $f20d18f353317b2a$export$e842d00bb3325f27 = async (url, body)=>$f20d18f353317b2a$export$61ca0380393ac2cc(url, {
         method: "POST",
         body: JSON.stringify(body),
         headers: {
             "Content-Type": "application/json"
         }
     });
-const $ce799568675fe138$export$e132348fd6a678a = (url)=>(file)=>{
+const $f20d18f353317b2a$export$e132348fd6a678a = (url)=>(file)=>{
         const data = new FormData();
         data.append("file", file);
-        return $ce799568675fe138$export$61ca0380393ac2cc(url, {
+        return $f20d18f353317b2a$export$61ca0380393ac2cc(url, {
             method: "POST",
             body: data
         });
     };
-const $ce799568675fe138$export$bc226234bbb4652f = (files)=>{
+const $f20d18f353317b2a$export$bc226234bbb4652f = (files)=>{
     const result = [];
-    if ((0, $f56e056924fdbc49$export$96bdbc84526f3739)(files)) for (const file of files)result.push(file);
+    if ((0, $7546c35f5f2b619a$export$96bdbc84526f3739)(files)) for (const file of files)result.push(file);
     return result;
 };
-const $ce799568675fe138$export$7b64c937225679ee = (upload, onFileUploadSuccess, onFileUploadError)=>(files)=>Promise.all(files.map((file)=>upload(file).then((result)=>{
+const $f20d18f353317b2a$export$7b64c937225679ee = (upload, onFileUploadSuccess, onFileUploadError)=>(files)=>Promise.all(files.map((file)=>upload(file).then((result)=>{
                 onFileUploadSuccess?.();
                 return result;
             }).catch((e)=>{
                 // eslint-disable-next-line no-console
                 console.error("File upload error", e);
                 onFileUploadError?.(e);
-                return undefined;
-            }))).then((result)=>result.filter((0, $f56e056924fdbc49$export$96bdbc84526f3739)));
-const $ce799568675fe138$export$1ea25e59dc2c9809 = (url, files)=>$ce799568675fe138$export$7b64c937225679ee($ce799568675fe138$export$e132348fd6a678a(url))(files);
-const $ce799568675fe138$export$b2fd9029d5529a00 = (url, files)=>$ce799568675fe138$export$1ea25e59dc2c9809(url, $ce799568675fe138$export$bc226234bbb4652f(files));
+                throw e;
+            }))).then((result)=>result.filter((0, $7546c35f5f2b619a$export$96bdbc84526f3739)));
+const $f20d18f353317b2a$export$1ea25e59dc2c9809 = (url, files)=>$f20d18f353317b2a$export$7b64c937225679ee($f20d18f353317b2a$export$e132348fd6a678a(url))(files);
+const $f20d18f353317b2a$export$b2fd9029d5529a00 = (url, files)=>$f20d18f353317b2a$export$1ea25e59dc2c9809(url, $f20d18f353317b2a$export$bc226234bbb4652f(files));
 
 
-const $15451612c40a4a0c$var$setupForm = (ctx, formName, formConfig, globalErrorMessages, handlers)=>{
+
+
+const $0564b07561875788$var$setupForm = (ctx, formName, formConfig, globalErrorMessages, handlers)=>{
     console.debug("Form:", formName, formConfig);
-    const form = (0, $874ccd897114849f$export$f681a8129d2e9d28)(formConfig.selector, formName, {
+    const form = (0, $7b19bfce950638d7$export$f681a8129d2e9d28)(formConfig.selector, formName, {
         ...globalErrorMessages,
         ...formConfig.errorMessages
     });
+    handlers?.init?.(form);
     form.setOnSubmit(async ()=>{
         console.log("Form submitted:", formName, form.fields);
         handlers?.beforeSubmit?.(form);
-        await formConfig.onSubmit(form.getFormValues(), ctx, ()=>formConfig.onSuccess(ctx), (error)=>formConfig.onError(error, ctx));
-        handlers?.afterSubmit?.(form);
+        await formConfig.onSubmit(form.getFormValues(), ctx, ()=>formConfig.onSuccess(ctx), (error)=>formConfig.onError(error, ctx)).catch((error)=>{
+            console.error("Unhandled exception!", error);
+            formConfig.onError("Unexpected error!", ctx);
+        }).finally(()=>{
+            handlers?.afterSubmit?.(form);
+        });
     });
     form.el.setAttribute("novalidate", "true");
     return form;
 };
-const $15451612c40a4a0c$var$setupButton = (ctx, buttonName, buttonConfig)=>{
-    const button = (0, $8424e5b2d01c7ee8$export$d16800b7e59a8051)(buttonConfig.selector);
+const $0564b07561875788$var$setupButton = (ctx, buttonName, buttonConfig)=>{
+    const button = (0, $68d6acfa1617944c$export$d16800b7e59a8051)(buttonConfig.selector);
     if (button) {
         button.addEventListener("click", ()=>buttonConfig.onClick(ctx));
-        const result = (0, $874ccd897114849f$export$9b6d6ca62970729f)(button);
+        const result = (0, $7b19bfce950638d7$export$9b6d6ca62970729f)(button);
         ctx.buttons[buttonName] = result;
         return result;
     } else throw new Error("Button not found by selector: " + buttonConfig.selector);
 };
-const $15451612c40a4a0c$var$setupLabel = (ctx, labelName, labelConfig)=>{
-    const label = (0, $8424e5b2d01c7ee8$export$d16800b7e59a8051)(labelConfig.selector);
+const $0564b07561875788$var$setupLabel = (ctx, labelName, labelConfig)=>{
+    const label = (0, $68d6acfa1617944c$export$d16800b7e59a8051)(labelConfig.selector);
     if (label) {
-        const result = (0, $874ccd897114849f$export$f2839682b8c07f35)(label);
+        const result = (0, $7b19bfce950638d7$export$f2839682b8c07f35)(label);
         ctx.labels[labelName] = result;
         return result;
     } else throw new Error("Label not found by selector: " + labelConfig.selector);
 };
-const $15451612c40a4a0c$var$defaultErrors = {
+const $0564b07561875788$var$defaultErrors = {
     required: "This field is required",
     minlength: "Field length is too small",
     maxlength: "Field length is too big",
@@ -299,7 +304,7 @@ const $15451612c40a4a0c$var$defaultErrors = {
     min: "Field value is too small",
     max: "Field value is too big"
 };
-const $15451612c40a4a0c$export$2cd8252107eb640b = (conf)=>{
+const $0564b07561875788$export$2cd8252107eb640b = (conf)=>{
     console.log("Initializing...", conf);
     const ctx = {
         forms: {},
@@ -309,19 +314,275 @@ const $15451612c40a4a0c$export$2cd8252107eb640b = (conf)=>{
     if (conf.forms) {
         // TODO: Update foreach to map or reduce
         Object.entries(conf.forms).forEach(([formName, formConfig])=>{
-            ctx.forms[formName] = $15451612c40a4a0c$var$setupForm(ctx, formName, formConfig, conf.errorMessages ?? $15451612c40a4a0c$var$defaultErrors, conf.handlers);
+            ctx.forms[formName] = $0564b07561875788$var$setupForm(ctx, formName, formConfig, conf.errorMessages ?? $0564b07561875788$var$defaultErrors, conf.handlers);
         });
         ctx.resetAll = ()=>{
             Object.values(ctx.forms).forEach((form)=>form.resetForm());
         };
         if (conf.buttons) Object.entries(conf.buttons).forEach(([buttonName, buttonConfig])=>{
-            $15451612c40a4a0c$var$setupButton(ctx, buttonName, buttonConfig);
+            $0564b07561875788$var$setupButton(ctx, buttonName, buttonConfig);
         });
         if (conf.labels) Object.entries(conf.labels).forEach(([labelName, labelConfig])=>{
-            $15451612c40a4a0c$var$setupLabel(ctx, labelName, labelConfig);
+            $0564b07561875788$var$setupLabel(ctx, labelName, labelConfig);
         });
+        conf.afterInit?.(ctx);
         console.log("Initialized with context: ", ctx);
     }
+};
+
+
+const $9875fc359f01f731$var$apiUrl = "https://test.carprof.ee/api";
+const $9875fc359f01f731$var$formsUrl = `${$9875fc359f01f731$var$apiUrl}/v2/forms`;
+const $9875fc359f01f731$var$initialFormUrl = `${$9875fc359f01f731$var$formsUrl}/initial-data`;
+const $9875fc359f01f731$var$lookupCarRegistryUrl = (plateNumber)=>`${$9875fc359f01f731$var$apiUrl}/v1/cars/mnt/${plateNumber}`;
+const $9875fc359f01f731$var$formDataUrl = (formId)=>`${$9875fc359f01f731$var$formsUrl}/form-data/${formId}`;
+const $9875fc359f01f731$var$photosUrl = (formId)=>`${$9875fc359f01f731$var$formsUrl}/photos/${formId}`;
+const $9875fc359f01f731$var$fileUrl = `${$9875fc359f01f731$var$apiUrl}/v1/forms/file`;
+const $9875fc359f01f731$export$8bdb25a87ae6a6fa = async (plateNumber)=>(0, $f20d18f353317b2a$export$1d2fa8475101ec93)($9875fc359f01f731$var$lookupCarRegistryUrl(plateNumber));
+const $9875fc359f01f731$export$a6b4d7d396320855 = (request)=>(0, $f20d18f353317b2a$export$e842d00bb3325f27)($9875fc359f01f731$var$initialFormUrl, request);
+const $9875fc359f01f731$export$e7cdd9ab52da88de = (formId, data)=>(0, $f20d18f353317b2a$export$e842d00bb3325f27)($9875fc359f01f731$var$formDataUrl(formId), data);
+const $9875fc359f01f731$export$d1e050cff6279152 = (formId, data)=>(0, $f20d18f353317b2a$export$e842d00bb3325f27)($9875fc359f01f731$var$photosUrl(formId), data);
+const $9875fc359f01f731$export$42404212ef451a92 = async (formId, files)=>{
+    const fileIds = await (0, $f20d18f353317b2a$export$b2fd9029d5529a00)($9875fc359f01f731$var$fileUrl, files);
+    await $9875fc359f01f731$export$d1e050cff6279152(formId, {
+        imageIds: fileIds.map((v)=>v.fileId)
+    });
+};
+
+
+
+
+
+
+const $3ee52bcfba46d30d$export$b916619e652ca675 = async ({ data: data, ctx: ctx, success: success, fail: fail, state: state })=>{
+    try {
+        console.debug("Initial form submitted", data);
+        ctx.forms.initial.clearAllErrors();
+        const token = await grecaptcha.execute("6LfAgNQpAAAAAOYmB_Y_tmUGjP4AY-hRzyHxE3JF", {
+            action: "submit"
+        });
+        const resp = await (0, $9875fc359f01f731$export$a6b4d7d396320855)({
+            //captchaToken: token,
+            phoneNumber: data.phone,
+            carNumber: data.plateNumber,
+            language: "et",
+            formType: "BUYOUT"
+        });
+        console.debug("Initial form response", resp);
+        state.setFormId(resp.formUuid);
+        if (resp.mntData) {
+            const { mark: mark, model: model, firstRegYear: firstRegYear, registrationNumber: registrationNumber } = resp.mntData;
+            ctx.forms.vehicle.setFormValues({
+                phone: data.phone,
+                make: mark,
+                model: model,
+                year: (0, $7546c35f5f2b619a$export$ec46e854364465e6)(firstRegYear, String, ""),
+                plateNumber: registrationNumber
+            });
+        } else ctx.forms.vehicle.setFormValues({
+            phone: data.phone,
+            plateNumber: data.plateNumber
+        });
+        success();
+    } catch (e) {
+        if (e instanceof (0, $f20d18f353317b2a$export$f2e832acab1bdd79)) {
+            if (e.response.status === 400) {
+                const { errorCode: errorCode, error: error } = await (0, $f20d18f353317b2a$export$7780d7826aafbede)(e.response);
+                console.error("Response error: ", error);
+                if (errorCode === "INVALID_PHONE_NUMBER") fail(state.messages.invalidPhoneError);
+                else fail(state.messages.internalError);
+            } else if (e.response.status === 403) {
+                console.error("Response error: ", e);
+                fail("Captcha error");
+            } else {
+                console.error("Response error: ", e);
+                fail(state.messages.internalError);
+            }
+        } else {
+            console.error("Response error: ", e);
+            fail(state.messages.internalError);
+        }
+    }
+};
+const $3ee52bcfba46d30d$export$9af790bd8a0132a2 = async ({ data: { plateNumber: plateNumber }, ctx: ctx, success: success, fail: fail, state: state })=>{
+    try {
+        console.debug("Reloading vehicle data for plate number:", plateNumber);
+        ctx.forms.vehicle.clearAllErrors();
+        const resp = await (0, $9875fc359f01f731$export$8bdb25a87ae6a6fa)(plateNumber);
+        if (resp) {
+            console.debug("Lookup response:", resp);
+            const { mark: mark, model: model, firstRegYear: firstRegYear, registrationNumber: registrationNumber } = resp;
+            ctx.forms.vehicle.setFormValues({
+                make: mark,
+                model: model,
+                year: (0, $7546c35f5f2b619a$export$ec46e854364465e6)(firstRegYear, String, ""),
+                plateNumber: registrationNumber
+            });
+            success();
+        }
+    } catch (e) {
+        console.error("Lookup error:", e);
+        fail(state.messages.internalError);
+    }
+};
+const $3ee52bcfba46d30d$export$8d5773d32b4cfd23 = async ({ data: data, ctx: ctx, success: success, fail: fail, state: state })=>{
+    const formId = state.getFormId();
+    if (!formId) throw new Error("FormId is missing");
+    try {
+        console.debug("Vehicle form submitted", data);
+        ctx.forms.vehicle.clearAllErrors();
+        const response = await (0, $9875fc359f01f731$export$e7cdd9ab52da88de)(formId, {
+            carNumber: data.plateNumber,
+            mark: data.make,
+            model: data.model,
+            mileage: (0, $7546c35f5f2b619a$export$4f84e3a82c7b538)(data.mileage, Number),
+            location: data.location,
+            requestedPrice: Number(data.price),
+            fullName: data.name,
+            email: data.email
+        });
+        console.debug("Vehicle form response", response);
+        success();
+    } catch (e) {
+        console.error("Response error:", e);
+        fail(state.messages.internalError);
+    }
+};
+const $3ee52bcfba46d30d$export$cc36134c338ba9da = async ({ data: data, ctx: ctx, success: success, fail: fail, state: state })=>{
+    const formId = state.getFormId();
+    if (!formId) throw new Error("FormId is missing");
+    try {
+        console.debug("Files submitted", data);
+        ctx.forms.files.clearAllErrors();
+        if (data?.files && data.files.length > 0) await (0, $9875fc359f01f731$export$42404212ef451a92)(formId, data.files);
+        ctx.resetAll();
+        success();
+    } catch (e) {
+        console.error("Response error:", e);
+        fail(state.messages.internalError);
+    }
+};
+
+
+
+
+
+const $15451612c40a4a0c$export$cd874e48ff214f68 = (conf)=>{
+    console.log("Initializing...", conf);
+    // eslint-disable-next-line prefer-const
+    let formId = undefined;
+    const setFormId = (id)=>{
+        formId = id;
+    };
+    const getFormId = ()=>{
+        return formId;
+    };
+    const state = {
+        getFormId: getFormId,
+        setFormId: setFormId,
+        messages: conf.messages
+    };
+    const labelConfig = {
+        testLabel: {
+            selector: '[data-dm-id="testLabel"]'
+        }
+    };
+    const buttonConfig = {
+        manual: {
+            selector: '[data-dm-id="manual"]',
+            onClick: (ctx)=>{
+                console.debug("Button clicked:", ctx);
+                ctx.buttons.manual.setDisabled(true);
+                ctx.buttons.manual.setLabel("Loading...");
+                ctx.labels.testLabel.setLabel("Test label");
+                setTimeout(()=>{
+                    ctx.forms.initial.el.style.display = "none";
+                    ctx.forms.vehicle.el.removeAttribute("style");
+                }, 3000);
+            }
+        }
+    };
+    const initialFormConfig = {
+        selector: '[data-dm-id="form_find_vehicle"]',
+        onSuccess: (ctx)=>{
+            conf.actions.switchStep(1, ctx);
+        },
+        onError: (error, ctx)=>{
+            ctx.forms.initial.setError(error);
+        },
+        onSubmit: (data, ctx, success, fail)=>(0, $3ee52bcfba46d30d$export$b916619e652ca675)({
+                data: data,
+                ctx: ctx,
+                success: success,
+                fail: fail,
+                state: state
+            })
+    };
+    const vehicleErrorMessages = {
+        pattern: state.messages.invalidEmailError
+    };
+    const vehicleFormConfig = {
+        selector: '[data-dm-id="form_vehicle"]',
+        errorMessages: vehicleErrorMessages,
+        onSuccess: (ctx)=>{
+            conf.actions.switchStep(2, ctx);
+        },
+        onError: (error, ctx)=>{
+            ctx.forms.vehicle.setError(error);
+        },
+        onSubmit: (data, ctx, success, fail)=>(0, $3ee52bcfba46d30d$export$8d5773d32b4cfd23)({
+                data: data,
+                ctx: ctx,
+                success: success,
+                fail: fail,
+                state: state
+            })
+    };
+    const filesFormConfig = {
+        selector: '[data-dm-id="form_files"]',
+        onSuccess: (ctx)=>{
+            conf.actions.switchStep(3, ctx);
+        },
+        onError: (error, ctx)=>{
+            ctx.forms.files.setError(error);
+        },
+        onSubmit: (data, ctx, success, fail)=>(0, $3ee52bcfba46d30d$export$cc36134c338ba9da)({
+                data: data,
+                ctx: ctx,
+                success: success,
+                fail: fail,
+                state: state
+            })
+    };
+    const cfg = {
+        forms: {
+            initial: initialFormConfig,
+            vehicle: vehicleFormConfig,
+            files: filesFormConfig
+        },
+        buttons: buttonConfig,
+        labels: labelConfig,
+        handlers: conf.handlers,
+        errorMessages: conf.errorMessages,
+        afterInit: (ctx)=>{
+            console.log("After init:", ctx);
+            ctx.forms.vehicle.fields.plateNumber.input.el.onblur = ()=>{
+                const plateNumber = ctx.forms.vehicle.fields.plateNumber.input.el.value;
+                console.log("On blur:", ctx.forms.vehicle.fields.plateNumber.input.el.value);
+                const formCfg = vehicleFormConfig;
+                (0, $3ee52bcfba46d30d$export$9af790bd8a0132a2)({
+                    data: {
+                        plateNumber: plateNumber
+                    },
+                    ctx: ctx,
+                    success: ()=>{},
+                    fail: (error)=>formCfg.onError(error, ctx),
+                    state: state
+                });
+            };
+        }
+    };
+    (0, $0564b07561875788$export$2cd8252107eb640b)(cfg);
 };
 
 

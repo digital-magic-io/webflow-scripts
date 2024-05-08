@@ -39,7 +39,8 @@ type PageContext<F extends string, B extends string, L extends string> = {
     forms: Record<F, DmForm<string>>;
     resetAll: Handler<void>;
 };
-type FormConfigHandlers = {
+type FormHandlers = {
+    init?: Handler<DmForm<string>>;
     beforeSubmit?: Handler<DmForm<string>>;
     afterSubmit?: Handler<DmForm<string>>;
 };
@@ -47,10 +48,10 @@ type ElementConfig = {
     selector: string;
 };
 type FormConfig<F extends string, B extends string, L extends string> = {
-    onSubmit: (data: Record<string, unknown>, ctx: PageContext<F, B, L>, success: Handler<void>, fail: Handler<unknown>) => Promise<void>;
+    onSubmit: <T extends Record<string, unknown>>(data: T, ctx: PageContext<F, B, L>, success: Handler<void>, fail: Handler<unknown>) => Promise<void>;
     onSuccess: (ctx: PageContext<F, B, L>) => void;
-    onError: (error: unknown, ctx: PageContext<F, B, L>) => void;
-    errorMessages?: FormErrorMessages;
+    onError: <T>(error: T, ctx: PageContext<F, B, L>) => void;
+    errorMessages?: Partial<FormErrorMessages>;
 } & ElementConfig;
 type ButtonConfig<F extends string, B extends string, L extends string> = {
     onClick: (ctx: PageContext<F, B, L>) => void;
@@ -61,20 +62,36 @@ type Config<F extends string, B extends string, L extends string> = {
     buttons?: Record<B, ButtonConfig<F, B, L>>;
     labels?: Record<L, LabelConfig>;
     errorMessages?: FormErrorMessages;
-    handlers?: FormConfigHandlers;
+    handlers?: FormHandlers;
+    afterInit?: Handler<PageContext<F, B, L>>;
 };
-export class ApiError extends Error {
-    readonly status: number;
-    readonly url: string;
-    readonly method: string;
-    readonly cause: string;
-    readonly response: Response;
-    constructor(response: Response, cause: string);
+type FormName = 'initial' | 'vehicle' | 'files';
+type ButtonName = 'manual';
+type LabelName = 'testLabel';
+type CpMessages = {
+    internalError: string;
+    invalidPhoneError: string;
+    invalidEmailError: string;
+};
+type CpPageContext = PageContext<FormName, ButtonName, LabelName>;
+declare global {
+    const grecaptcha: {
+        ready: (callback: () => void) => void;
+        execute: (siteKey: string, options: {
+            action: string;
+        }) => Promise<string>;
+    };
 }
-export const apiGetErrorFromResponse: <T>(response: Response) => Promise<T>;
-export const apiGet: <T>(url: string) => Promise<T>;
-export const apiPost: <T, R>(url: string, body: T) => Promise<R>;
-export const apiUploadFileList: <R>(url: string, files: FileList) => Promise<R[]>;
-export const init: <F extends string, B extends string, L extends string>(conf: Config<F, B, L>) => void;
+type CpActions = Readonly<{
+    switchStep: (step: number, ctx: CpPageContext) => void;
+}>;
+type CpConfig = Readonly<{
+    formSelectors: Record<FormName, string>;
+    buttonSelectors: Record<ButtonName, string>;
+    labelSelectors: Record<LabelName, string>;
+    messages: CpMessages;
+    actions: CpActions;
+}> & Pick<Config<FormName, ButtonName, LabelName>, 'errorMessages' | 'handlers'>;
+export const initCp: (conf: CpConfig) => void;
 
 //# sourceMappingURL=types.d.ts.map
