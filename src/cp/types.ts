@@ -21,6 +21,7 @@ export type ActionState = Readonly<{
   setFormId: Handler<string>
   getFormId: FN<void, string | undefined>
   messages: CpMessages
+  captchaKey?: string
 }>
 
 export type ActionParams<T extends Record<string, string | number | File | FileList | undefined>> = Readonly<{

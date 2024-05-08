@@ -29,7 +29,8 @@ export const initCp = (conf: CpConfig): void => {
   const state: ActionState = {
     getFormId,
     setFormId,
-    messages: conf.messages
+    messages: conf.messages,
+    captchaKey: conf.captchaKey
   }
 
   const labelConfig: AppConfig['labels'] = {

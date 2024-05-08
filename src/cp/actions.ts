@@ -20,13 +20,10 @@ export const submitInitialForm = async ({
   try {
     console.debug('Initial form submitted', data)
     ctx.forms.initial.clearAllErrors()
-    /*
-    const token = await grecaptcha.execute('6LfAgNQpAAAAAOYmB_Y_tmUGjP4AY-hRzyHxE3JF', {
-      action: 'submit'
-    })
-    */
+
+    const token = state.captchaKey ? await grecaptcha.execute(state.captchaKey, { action: 'submit' }) : undefined
     const resp = await sendInitForm({
-      //captchaToken: token,
+      captchaToken: token,
       phoneNumber: data.phone,
       carNumber: data.plateNumber,
       language: 'et',
