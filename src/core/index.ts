@@ -20,13 +20,20 @@ const setupForm = <F extends string, B extends string, L extends string>(
   form.setOnSubmit(async () => {
     console.log('Form submitted:', formName, form.fields)
     handlers?.beforeSubmit?.(form)
-    await formConfig.onSubmit(
-      form.getFormValues(),
-      ctx,
-      () => formConfig.onSuccess(ctx),
-      (error) => formConfig.onError(error, ctx)
-    )
-    handlers?.afterSubmit?.(form)
+    await formConfig
+      .onSubmit(
+        form.getFormValues(),
+        ctx,
+        () => formConfig.onSuccess(ctx),
+        (error) => formConfig.onError(error, ctx)
+      )
+      .catch((error) => {
+        console.error('Unhandled exception!', error)
+        formConfig.onError('Unexpected error!', ctx)
+      })
+      .finally(() => {
+        handlers?.afterSubmit?.(form)
+      })
   })
   form.el.setAttribute('novalidate', 'true')
   return form

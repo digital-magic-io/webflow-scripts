@@ -3,6 +3,13 @@ import { ErrorResponse, lookupCarRegistry, sendFormData, sendInitForm, uploadAnd
 import { mapOrElse, mapValue } from '../core/utils'
 import { ApiError, getErrorFromResponse } from '../core'
 
+declare global {
+  const grecaptcha: {
+    ready: (callback: () => void) => void
+    execute: (siteKey: string, options: { action: string }) => Promise<string>
+  }
+}
+
 export const submitInitialForm = async ({
   data,
   ctx,
@@ -13,7 +20,11 @@ export const submitInitialForm = async ({
   try {
     console.debug('Initial form submitted', data)
     ctx.forms.initial.clearAllErrors()
+    const token = await grecaptcha.execute('6LfAgNQpAAAAAOYmB_Y_tmUGjP4AY-hRzyHxE3JF', {
+      action: 'submit'
+    })
     const resp = await sendInitForm({
+      captchaToken: token,
       phoneNumber: data.phone,
       carNumber: data.plateNumber,
       language: 'et',
@@ -39,11 +50,19 @@ export const submitInitialForm = async ({
     success()
   } catch (e) {
     if (e instanceof ApiError) {
-      const { errorCode, error } = await getErrorFromResponse<ErrorResponse>(e.response)
-      console.error('Response error: ', error)
-      if (errorCode === 'INVALID_PHONE_NUMBER') {
-        fail(state.messages.invalidPhoneError)
+      if (e.response.status === 400) {
+        const { errorCode, error } = await getErrorFromResponse<ErrorResponse>(e.response)
+        console.error('Response error: ', error)
+        if (errorCode === 'INVALID_PHONE_NUMBER') {
+          fail(state.messages.invalidPhoneError)
+        } else {
+          fail(state.messages.internalError)
+        }
+      } else if (e.response.status === 403) {
+        console.error('Response error: ', e)
+        fail('Captcha error')
       } else {
+        console.error('Response error: ', e)
         fail(state.messages.internalError)
       }
     } else {

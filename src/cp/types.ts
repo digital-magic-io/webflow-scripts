@@ -1,4 +1,4 @@
-import { Config, FormConfig, PageContext } from '../core/config'
+import { Config, FormConfig, PageContext } from '../core'
 import { FN, Handler } from '../core/types'
 
 export type FormName = 'initial' | 'vehicle' | 'files'

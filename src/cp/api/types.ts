@@ -17,6 +17,7 @@ export type CarRegistryData = Readonly<{
 export type LookupCarRegistryRequest = CarRegistryData
 
 export type InitialDataRequest = Readonly<{
+  captchaToken: string
   phoneNumber: string
   carNumber: string
   language: Language
