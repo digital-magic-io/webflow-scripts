@@ -4,6 +4,17 @@ exports.initCp = void 0;
 const cp_1 = require("./cp");
 const core_1 = require("./core");
 const utils_1 = require("./core/utils");
+const setVisibilityForAll = (selector, value) => {
+    if (selector) {
+        const elements = document.querySelectorAll(selector);
+        elements.forEach((el) => {
+            setElementVisible(el, value);
+        });
+    }
+};
+const setElementVisible = (el, value) => {
+    el.style.display = value ? 'flex' : 'none';
+};
 const initCp = (conf) => {
     console.log('Initializing...', conf);
     const state = {
@@ -65,21 +76,11 @@ const initCp = (conf) => {
         handlers: {
             beforeSubmit: (form) => {
                 form.setFormDisabled(true);
-                if (conf.loaderSelector) {
-                    const loaderElements = document.querySelectorAll(conf.loaderSelector);
-                    loaderElements.forEach((el) => {
-                        el.style.display = 'flex';
-                    });
-                }
+                setVisibilityForAll(conf.loaderSelector, true);
             },
             afterSubmit: (form) => {
                 form.setFormDisabled(false);
-                if (conf.loaderSelector) {
-                    const loaderElements = document.querySelectorAll(conf.loaderSelector);
-                    loaderElements.forEach((el) => {
-                        el.style.display = 'none';
-                    });
-                }
+                setVisibilityForAll(conf.loaderSelector, false);
             }
         },
         errorMessages: conf.errorMessages,

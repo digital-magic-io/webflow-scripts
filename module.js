@@ -473,6 +473,26 @@ const $74010a292a3af4c1$export$cc36134c338ba9da = async ({ data: data, ctx: ctx,
 
 
 
+const $b3a133cf85b0ceb6$var$setVisibilityForAll = (selector, value)=>{
+    if (selector) {
+        const elements = document.querySelectorAll(selector);
+        elements.forEach((el)=>{
+            $b3a133cf85b0ceb6$var$setElementVisible(el, value);
+        });
+    }
+};
+/*
+const setVisibility = (selector: string | undefined, value: boolean): void => {
+  if (selector) {
+    const el = document.querySelector<HTMLElement>(selector)
+    if (el) {
+      setElementVisible(el, value)
+    }
+  }
+}
+*/ const $b3a133cf85b0ceb6$var$setElementVisible = (el, value)=>{
+    el.style.display = value ? "flex" : "none";
+};
 const $b3a133cf85b0ceb6$export$cd874e48ff214f68 = (conf)=>{
     console.log("Initializing...", conf);
     const state = {
@@ -562,26 +582,17 @@ const $b3a133cf85b0ceb6$export$cd874e48ff214f68 = (conf)=>{
         handlers: {
             beforeSubmit: (form)=>{
                 form.setFormDisabled(true);
-                if (conf.loaderSelector) {
-                    const loaderElements = document.querySelectorAll(conf.loaderSelector);
-                    loaderElements.forEach((el)=>{
-                        el.style.display = "flex";
-                    });
-                }
+                $b3a133cf85b0ceb6$var$setVisibilityForAll(conf.loaderSelector, true);
             },
             afterSubmit: (form)=>{
                 form.setFormDisabled(false);
-                if (conf.loaderSelector) {
-                    const loaderElements = document.querySelectorAll(conf.loaderSelector);
-                    loaderElements.forEach((el)=>{
-                        el.style.display = "none";
-                    });
-                }
+                $b3a133cf85b0ceb6$var$setVisibilityForAll(conf.loaderSelector, false);
             }
         },
         errorMessages: conf.errorMessages,
         afterInit: (ctx)=>{
             console.log("After init:", ctx);
+            $b3a133cf85b0ceb6$var$setVisibilityForAll(conf.loaderSelector, false);
             ctx.forms.vehicle.fields.plateNumber.input.el.onblur = ()=>{
                 const plateNumber = ctx.forms.vehicle.fields.plateNumber.input.el.value;
                 console.log("On blur:", ctx.forms.vehicle.fields.plateNumber.input.el.value);
