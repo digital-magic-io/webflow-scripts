@@ -481,9 +481,7 @@ const $3ee52bcfba46d30d$export$cc36134c338ba9da = async ({ data: data, ctx: ctx,
 
 const $15451612c40a4a0c$var$setVisibilityForAll = (selector, value)=>{
     if (selector) {
-        console.log("loader: ", selector);
         const elements = document.querySelectorAll(selector);
-        console.log("loader elements: ", elements);
         elements.forEach((el)=>{
             $15451612c40a4a0c$var$setElementVisible(el, value);
         });
@@ -499,11 +497,9 @@ const setVisibility = (selector: string | undefined, value: boolean): void => {
   }
 }
 */ const $15451612c40a4a0c$var$setElementVisible = (el, value)=>{
-    console.log("setting value: ", el, el.style, value);
     el.style.display = value ? "flex" : "none";
 };
 const $15451612c40a4a0c$export$cd874e48ff214f68 = (conf)=>{
-    console.log("Initializing...", conf);
     const state = {
         formId: (0, $7546c35f5f2b619a$export$e6a0daad8304de)(undefined),
         messages: conf.messages,
@@ -600,11 +596,9 @@ const $15451612c40a4a0c$export$cd874e48ff214f68 = (conf)=>{
         },
         errorMessages: conf.errorMessages,
         afterInit: (ctx)=>{
-            console.log("After init:", ctx);
             $15451612c40a4a0c$var$setVisibilityForAll(conf.loaderSelector, false);
             ctx.forms.vehicle.fields.plateNumber.input.el.onblur = ()=>{
                 const plateNumber = ctx.forms.vehicle.fields.plateNumber.input.el.value;
-                console.log("On blur:", ctx.forms.vehicle.fields.plateNumber.input.el.value);
                 const formCfg = vehicleFormConfig;
                 (0, $3ee52bcfba46d30d$export$9af790bd8a0132a2)({
                     data: {
