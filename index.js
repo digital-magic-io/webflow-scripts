@@ -3,71 +3,56 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.initCp = void 0;
 const cp_1 = require("./cp");
 const core_1 = require("./core");
+const utils_1 = require("./core/utils");
 const initCp = (conf) => {
     console.log('Initializing...', conf);
-    let formId = undefined;
-    const setFormId = (id) => {
-        formId = id;
+    const state = {
+        formId: (0, utils_1.createState)(undefined),
+        messages: conf.messages,
+        captchaKey: conf.captchaKey
     };
     const labelConfig = {
-        testLabel: {
-            selector: '[data-dm-id="testLabel"]'
+        markAndModel: {
+            selector: conf.labelSelectors.markAndModel
+        },
+        plateNumber: {
+            selector: conf.labelSelectors.plateNumber
         }
     };
-    const buttonConfig = {
-        manual: {
-            selector: '[data-dm-id="manual"]',
-            onClick: (ctx) => {
-                console.debug('Button clicked:', ctx);
-                ctx.buttons.manual.setDisabled(true);
-                ctx.buttons.manual.setLabel('Loading...');
-                ctx.labels.testLabel.setLabel('Test label');
-                setTimeout(() => {
-                    ctx.forms.initial.el.style.display = 'none';
-                    ctx.forms.vehicle.el.removeAttribute('style');
-                }, 3000);
-            }
-        }
-    };
+    const buttonConfig = {};
     const initialFormConfig = {
         selector: '[data-dm-id="form_find_vehicle"]',
         onSuccess: (ctx) => {
-            console.log('Next step');
-            ctx.forms.initial.el.style.display = 'none';
-            ctx.forms.vehicle.el.removeAttribute('style');
+            conf.actions.switchStep(1, ctx);
         },
         onError: (error, ctx) => {
             ctx.forms.initial.setError(error);
         },
-        onSubmit: (data, ctx, success, fail) => (0, cp_1.submitInitialForm)({ data, ctx, success, fail, setFormId, formId })
+        onSubmit: (data, ctx, success, fail) => (0, cp_1.submitInitialForm)({ data, ctx, success, fail, state })
     };
     const vehicleErrorMessages = {
-        pattern: 'Email is not valid'
+        pattern: state.messages.invalidEmailError
     };
     const vehicleFormConfig = {
         selector: '[data-dm-id="form_vehicle"]',
         errorMessages: vehicleErrorMessages,
         onSuccess: (ctx) => {
-            console.log('Next step');
-            ctx.forms.vehicle.el.style.display = 'none';
-            ctx.forms.files.el.removeAttribute('style');
+            conf.actions.switchStep(2, ctx);
         },
         onError: (error, ctx) => {
             ctx.forms.vehicle.setError(error);
         },
-        onSubmit: (data, ctx, success, fail) => (0, cp_1.submitVehicleForm)({ data, ctx, success, fail, setFormId, formId })
+        onSubmit: (data, ctx, success, fail) => (0, cp_1.submitVehicleForm)({ data, ctx, success, fail, state })
     };
     const filesFormConfig = {
         selector: '[data-dm-id="form_files"]',
         onSuccess: (ctx) => {
-            ctx.forms.files.el.style.display = 'none';
-            document.getElementById('success_step')?.removeAttribute('style');
-            console.log('Great Success!');
+            conf.actions.switchStep(3, ctx);
         },
         onError: (error, ctx) => {
             ctx.forms.files.setError(error);
         },
-        onSubmit: (data, ctx, success, fail) => (0, cp_1.submitFiles)({ data, ctx, success, fail, setFormId, formId })
+        onSubmit: (data, ctx, success, fail) => (0, cp_1.submitFiles)({ data, ctx, success, fail, state })
     };
     const cfg = {
         forms: {
@@ -77,8 +62,42 @@ const initCp = (conf) => {
         },
         buttons: buttonConfig,
         labels: labelConfig,
-        handlers: conf.handlers,
-        errorMessages: conf.errorMessages
+        handlers: {
+            beforeSubmit: (form) => {
+                form.setFormDisabled(true);
+                if (conf.loaderSelector) {
+                    const loaderElements = document.querySelectorAll(conf.loaderSelector);
+                    loaderElements.forEach((el) => {
+                        el.style.display = 'flex';
+                    });
+                }
+            },
+            afterSubmit: (form) => {
+                form.setFormDisabled(false);
+                if (conf.loaderSelector) {
+                    const loaderElements = document.querySelectorAll(conf.loaderSelector);
+                    loaderElements.forEach((el) => {
+                        el.style.display = 'none';
+                    });
+                }
+            }
+        },
+        errorMessages: conf.errorMessages,
+        afterInit: (ctx) => {
+            console.log('After init:', ctx);
+            ctx.forms.vehicle.fields.plateNumber.input.el.onblur = () => {
+                const plateNumber = ctx.forms.vehicle.fields.plateNumber.input.el.value;
+                console.log('On blur:', ctx.forms.vehicle.fields.plateNumber.input.el.value);
+                const formCfg = vehicleFormConfig;
+                void (0, cp_1.reloadVehicleFormData)({
+                    data: { plateNumber },
+                    ctx,
+                    success: () => { },
+                    fail: (error) => formCfg.onError(error, ctx),
+                    state
+                });
+            };
+        }
     };
     (0, core_1.init)(cfg);
 };

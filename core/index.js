@@ -22,11 +22,19 @@ __exportStar(require("./config"), exports);
 const setupForm = (ctx, formName, formConfig, globalErrorMessages, handlers) => {
     console.debug('Form:', formName, formConfig);
     const form = (0, form_1.createForm)(formConfig.selector, formName, { ...globalErrorMessages, ...formConfig.errorMessages });
+    handlers?.init?.(form);
     form.setOnSubmit(async () => {
         console.log('Form submitted:', formName, form.fields);
         handlers?.beforeSubmit?.(form);
-        await formConfig.onSubmit(form.getFormValues(), ctx, () => formConfig.onSuccess(ctx), (error) => formConfig.onError(error, ctx));
-        handlers?.afterSubmit?.(form);
+        await formConfig
+            .onSubmit(form.getFormValues(), ctx, () => formConfig.onSuccess(ctx), (error) => formConfig.onError(error, ctx))
+            .catch((error) => {
+            console.error('Unhandled exception!', error);
+            formConfig.onError('Unexpected error!', ctx);
+        })
+            .finally(() => {
+            handlers?.afterSubmit?.(form);
+        });
     });
     form.el.setAttribute('novalidate', 'true');
     return form;
@@ -86,6 +94,7 @@ const init = (conf) => {
                 setupLabel(ctx, labelName, labelConfig);
             });
         }
+        conf.afterInit?.(ctx);
         console.log('Initialized with context: ', ctx);
     }
 };

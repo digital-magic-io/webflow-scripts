@@ -82,7 +82,7 @@ const uploadFilesList = (upload, onFileUploadSuccess, onFileUploadError) => (fil
     .catch((e) => {
     console.error('File upload error', e);
     onFileUploadError?.(e);
-    return undefined;
+    throw e;
 }))).then((result) => result.filter(utils_1.hasValue));
 exports.uploadFilesList = uploadFilesList;
 const uploadTypedArray = (url, files) => (0, exports.uploadFilesList)((0, exports.uploadTyped)(url))(files);

@@ -4,18 +4,20 @@ exports.submitFiles = exports.submitVehicleForm = exports.reloadVehicleFormData 
 const api_1 = require("./api");
 const utils_1 = require("../core/utils");
 const core_1 = require("../core");
-const submitInitialForm = async ({ data, ctx, success, fail, setFormId }) => {
+const submitInitialForm = async ({ data, ctx, success, fail, state }) => {
     try {
         console.debug('Initial form submitted', data);
         ctx.forms.initial.clearAllErrors();
+        const token = state.captchaKey ? await grecaptcha.execute(state.captchaKey, { action: 'submit' }) : undefined;
         const resp = await (0, api_1.sendInitForm)({
+            captchaToken: token,
             phoneNumber: data.phone,
             carNumber: data.plateNumber,
             language: 'et',
             formType: 'BUYOUT'
         });
         console.debug('Initial form response', resp);
-        setFormId(resp.formUuid);
+        state.formId.set(resp.formUuid);
         if (resp.mntData) {
             const { mark, model, firstRegYear, registrationNumber } = resp.mntData;
             ctx.forms.vehicle.setFormValues({
@@ -36,23 +38,33 @@ const submitInitialForm = async ({ data, ctx, success, fail, setFormId }) => {
     }
     catch (e) {
         if (e instanceof core_1.ApiError) {
-            const { errorCode, error } = await (0, core_1.getErrorFromResponse)(e.response);
-            console.error('Response error: ', error);
-            if (errorCode === 'INVALID_PHONE_NUMBER') {
-                fail('Invalid phone number');
+            if (e.response.status === 400) {
+                const { errorCode, error } = await (0, core_1.getErrorFromResponse)(e.response);
+                console.error('Response error: ', error);
+                if (errorCode === 'INVALID_PHONE_NUMBER') {
+                    fail(state.messages.invalidPhoneError);
+                }
+                else {
+                    fail(state.messages.internalError);
+                }
+            }
+            else if (e.response.status === 403) {
+                console.error('Response error: ', e);
+                fail('Captcha error');
             }
             else {
-                fail('Failed to send data');
+                console.error('Response error: ', e);
+                fail(state.messages.internalError);
             }
         }
         else {
             console.error('Response error: ', e);
-            fail('Failed to send data');
+            fail(state.messages.internalError);
         }
     }
 };
 exports.submitInitialForm = submitInitialForm;
-const reloadVehicleFormData = async ({ data: { plateNumber }, ctx, success, fail }) => {
+const reloadVehicleFormData = async ({ data: { plateNumber }, ctx, success, fail, state }) => {
     try {
         console.debug('Reloading vehicle data for plate number:', plateNumber);
         ctx.forms.vehicle.clearAllErrors();
@@ -71,11 +83,12 @@ const reloadVehicleFormData = async ({ data: { plateNumber }, ctx, success, fail
     }
     catch (e) {
         console.error('Lookup error:', e);
-        fail('Failed to load vehicle data');
+        fail(state.messages.internalError);
     }
 };
 exports.reloadVehicleFormData = reloadVehicleFormData;
-const submitVehicleForm = async ({ data, ctx, success, fail, formId }) => {
+const submitVehicleForm = async ({ data, ctx, success, fail, state }) => {
+    const formId = state.formId.get();
     if (!formId) {
         throw new Error('FormId is missing');
     }
@@ -93,15 +106,18 @@ const submitVehicleForm = async ({ data, ctx, success, fail, formId }) => {
             email: data.email
         });
         console.debug('Vehicle form response', response);
+        ctx.labels.markAndModel.setLabel(`${data.make}, ${data.model}`);
+        ctx.labels.plateNumber.setLabel(data.plateNumber);
         success();
     }
     catch (e) {
         console.error('Response error:', e);
-        fail('Failed to send data');
+        fail(state.messages.internalError);
     }
 };
 exports.submitVehicleForm = submitVehicleForm;
-const submitFiles = async ({ data, ctx, success, fail, formId }) => {
+const submitFiles = async ({ data, ctx, success, fail, state }) => {
+    const formId = state.formId.get();
     if (!formId) {
         throw new Error('FormId is missing');
     }
@@ -116,7 +132,7 @@ const submitFiles = async ({ data, ctx, success, fail, formId }) => {
     }
     catch (e) {
         console.error('Response error:', e);
-        fail('Failed to send data');
+        fail(state.messages.internalError);
     }
 };
 exports.submitFiles = submitFiles;

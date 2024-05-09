@@ -47,10 +47,10 @@ type FormHandlers = {
 type ElementConfig = {
     selector: string;
 };
-type FormConfig<F extends string, B extends string, L extends string> = {
-    onSubmit: <T extends Record<string, unknown>>(data: T, ctx: PageContext<F, B, L>, success: Handler<void>, fail: Handler<unknown>) => Promise<void>;
+type FormConfig<F extends string, B extends string, L extends string, V extends Record<string, unknown>> = {
+    onSubmit: (data: V, ctx: PageContext<F, B, L>, success: Handler<void>, fail: Handler<string>) => Promise<void>;
     onSuccess: (ctx: PageContext<F, B, L>) => void;
-    onError: <T>(error: T, ctx: PageContext<F, B, L>) => void;
+    onError: (error: string, ctx: PageContext<F, B, L>) => void;
     errorMessages?: Partial<FormErrorMessages>;
 } & ElementConfig;
 type ButtonConfig<F extends string, B extends string, L extends string> = {
@@ -58,7 +58,7 @@ type ButtonConfig<F extends string, B extends string, L extends string> = {
 } & ElementConfig;
 type LabelConfig = ElementConfig;
 type Config<F extends string, B extends string, L extends string> = {
-    forms?: Record<F, FormConfig<F, B, L>>;
+    forms?: Record<F, FormConfig<F, B, L, any>>;
     buttons?: Record<B, ButtonConfig<F, B, L>>;
     labels?: Record<L, LabelConfig>;
     errorMessages?: FormErrorMessages;
@@ -89,10 +89,11 @@ type CpConfig = Readonly<{
     formSelectors: Record<FormName, string>;
     buttonSelectors: Record<ButtonName, string>;
     labelSelectors: Record<LabelName, string>;
+    loaderSelector?: string;
     messages: CpMessages;
     actions: CpActions;
     captchaKey?: string;
-}> & Pick<Config<FormName, ButtonName, LabelName>, 'errorMessages' | 'handlers'>;
+}> & Pick<Config<FormName, ButtonName, LabelName>, 'errorMessages'>;
 export const initCp: (conf: CpConfig) => void;
 
 //# sourceMappingURL=types.d.ts.map

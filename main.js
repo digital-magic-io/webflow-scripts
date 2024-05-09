@@ -189,6 +189,15 @@ const $7546c35f5f2b619a$export$96bdbc84526f3739 = (value)=>!$7546c35f5f2b619a$ex
 const $7546c35f5f2b619a$export$4f84e3a82c7b538 = (value, f)=>$7546c35f5f2b619a$export$96bdbc84526f3739(value) ? f(value) : undefined;
 const $7546c35f5f2b619a$export$8832081647a02ee7 = (value, defaultValue)=>$7546c35f5f2b619a$export$96bdbc84526f3739(value) ? value : defaultValue;
 const $7546c35f5f2b619a$export$ec46e854364465e6 = (value, f, defaultValue)=>$7546c35f5f2b619a$export$96bdbc84526f3739(value) ? f(value) : defaultValue;
+const $7546c35f5f2b619a$export$e6a0daad8304de = (initialState)=>{
+    let state = initialState;
+    return {
+        set: (newState)=>{
+            state = newState;
+        },
+        get: ()=>state
+    };
+};
 
 
 class $f20d18f353317b2a$export$f2e832acab1bdd79 extends Error {
@@ -369,7 +378,7 @@ const $3ee52bcfba46d30d$export$b916619e652ca675 = async ({ data: data, ctx: ctx,
             formType: "BUYOUT"
         });
         console.debug("Initial form response", resp);
-        state.setFormId(resp.formUuid);
+        state.formId.set(resp.formUuid);
         if (resp.mntData) {
             const { mark: mark, model: model, firstRegYear: firstRegYear, registrationNumber: registrationNumber } = resp.mntData;
             ctx.forms.vehicle.setFormValues({
@@ -426,7 +435,7 @@ const $3ee52bcfba46d30d$export$9af790bd8a0132a2 = async ({ data: { plateNumber: 
     }
 };
 const $3ee52bcfba46d30d$export$8d5773d32b4cfd23 = async ({ data: data, ctx: ctx, success: success, fail: fail, state: state })=>{
-    const formId = state.getFormId();
+    const formId = state.formId.get();
     if (!formId) throw new Error("FormId is missing");
     try {
         console.debug("Vehicle form submitted", data);
@@ -451,7 +460,7 @@ const $3ee52bcfba46d30d$export$8d5773d32b4cfd23 = async ({ data: data, ctx: ctx,
     }
 };
 const $3ee52bcfba46d30d$export$cc36134c338ba9da = async ({ data: data, ctx: ctx, success: success, fail: fail, state: state })=>{
-    const formId = state.getFormId();
+    const formId = state.formId.get();
     if (!formId) throw new Error("FormId is missing");
     try {
         console.debug("Files submitted", data);
@@ -469,19 +478,11 @@ const $3ee52bcfba46d30d$export$cc36134c338ba9da = async ({ data: data, ctx: ctx,
 
 
 
+
 const $15451612c40a4a0c$export$cd874e48ff214f68 = (conf)=>{
     console.log("Initializing...", conf);
-    // eslint-disable-next-line prefer-const
-    let formId = undefined;
-    const setFormId = (id)=>{
-        formId = id;
-    };
-    const getFormId = ()=>{
-        return formId;
-    };
     const state = {
-        getFormId: getFormId,
-        setFormId: setFormId,
+        formId: (0, $7546c35f5f2b619a$export$e6a0daad8304de)(undefined),
         messages: conf.messages,
         captchaKey: conf.captchaKey
     };
@@ -564,7 +565,26 @@ const $15451612c40a4a0c$export$cd874e48ff214f68 = (conf)=>{
         },
         buttons: buttonConfig,
         labels: labelConfig,
-        handlers: conf.handlers,
+        handlers: {
+            beforeSubmit: (form)=>{
+                form.setFormDisabled(true);
+                if (conf.loaderSelector) {
+                    const loaderElements = document.querySelectorAll(conf.loaderSelector);
+                    loaderElements.forEach((el)=>{
+                        el.style.display = "flex";
+                    });
+                }
+            },
+            afterSubmit: (form)=>{
+                form.setFormDisabled(false);
+                if (conf.loaderSelector) {
+                    const loaderElements = document.querySelectorAll(conf.loaderSelector);
+                    loaderElements.forEach((el)=>{
+                        el.style.display = "none";
+                    });
+                }
+            }
+        },
         errorMessages: conf.errorMessages,
         afterInit: (ctx)=>{
             console.log("After init:", ctx);
