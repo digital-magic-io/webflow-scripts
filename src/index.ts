@@ -15,6 +15,30 @@ import { init } from './core'
 import { FormErrorMessages } from './core/types'
 import { createState } from './core/utils'
 
+const setVisibilityForAll = (selector: string | undefined, value: boolean): void => {
+  if (selector) {
+    const elements = document.querySelectorAll<HTMLElement>(selector)
+    elements.forEach((el) => {
+      setElementVisible(el, value)
+    })
+  }
+}
+
+/*
+const setVisibility = (selector: string | undefined, value: boolean): void => {
+  if (selector) {
+    const el = document.querySelector<HTMLElement>(selector)
+    if (el) {
+      setElementVisible(el, value)
+    }
+  }
+}
+*/
+
+const setElementVisible = (el: HTMLElement, value: boolean): void => {
+  el.style.display = value ? 'flex' : 'none'
+}
+
 export const initCp = (conf: CpConfig): void => {
   console.log('Initializing...', conf)
 
@@ -110,26 +134,17 @@ export const initCp = (conf: CpConfig): void => {
     handlers: {
       beforeSubmit: (form) => {
         form.setFormDisabled(true)
-        if (conf.loaderSelector) {
-          const loaderElements = document.querySelectorAll<HTMLElement>(conf.loaderSelector)
-          loaderElements.forEach((el) => {
-            el.style.display = 'flex'
-          })
-        }
+        setVisibilityForAll(conf.loaderSelector, true)
       },
       afterSubmit: (form) => {
         form.setFormDisabled(false)
-        if (conf.loaderSelector) {
-          const loaderElements = document.querySelectorAll<HTMLElement>(conf.loaderSelector)
-          loaderElements.forEach((el) => {
-            el.style.display = 'none'
-          })
-        }
+        setVisibilityForAll(conf.loaderSelector, false)
       }
     },
     errorMessages: conf.errorMessages,
     afterInit: (ctx) => {
       console.log('After init:', ctx)
+      setVisibilityForAll(conf.loaderSelector, false)
       ctx.forms.vehicle.fields.plateNumber.input.el.onblur = () => {
         const plateNumber = ctx.forms.vehicle.fields.plateNumber.input.el.value
         console.log('On blur:', ctx.forms.vehicle.fields.plateNumber.input.el.value)
