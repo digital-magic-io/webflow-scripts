@@ -40,8 +40,6 @@ const setElementVisible = (el: HTMLElement, value: boolean): void => {
 }
 
 export const initCp = (conf: CpConfig): void => {
-  console.log('Initializing...', conf)
-
   const state: ActionState = {
     formId: createState<string | undefined>(undefined),
     messages: conf.messages,
@@ -143,11 +141,9 @@ export const initCp = (conf: CpConfig): void => {
     },
     errorMessages: conf.errorMessages,
     afterInit: (ctx) => {
-      console.log('After init:', ctx)
       setVisibilityForAll(conf.loaderSelector, false)
       ctx.forms.vehicle.fields.plateNumber.input.el.onblur = () => {
         const plateNumber = ctx.forms.vehicle.fields.plateNumber.input.el.value
-        console.log('On blur:', ctx.forms.vehicle.fields.plateNumber.input.el.value)
         const formCfg = vehicleFormConfig
         void reloadVehicleFormData({
           data: { plateNumber },
