@@ -475,7 +475,9 @@ const $74010a292a3af4c1$export$cc36134c338ba9da = async ({ data: data, ctx: ctx,
 
 const $b3a133cf85b0ceb6$var$setVisibilityForAll = (selector, value)=>{
     if (selector) {
+        console.log("loader: ", selector);
         const elements = document.querySelectorAll(selector);
+        console.log("loader elements: ", elements);
         elements.forEach((el)=>{
             $b3a133cf85b0ceb6$var$setElementVisible(el, value);
         });
@@ -491,6 +493,7 @@ const setVisibility = (selector: string | undefined, value: boolean): void => {
   }
 }
 */ const $b3a133cf85b0ceb6$var$setElementVisible = (el, value)=>{
+    console.log("setting value: ", el, el.style, value);
     el.style.display = value ? "flex" : "none";
 };
 const $b3a133cf85b0ceb6$export$cd874e48ff214f68 = (conf)=>{
