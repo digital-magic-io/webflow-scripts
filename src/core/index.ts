@@ -10,7 +10,7 @@ export * from './config'
 const setupForm = <F extends string, B extends string, L extends string>(
   ctx: PageContext<F, B, L>,
   formName: F,
-  formConfig: FormConfig<F, B, L>,
+  formConfig: FormConfig<F, B, L, Record<string, unknown>>,
   globalErrorMessages: FormErrorMessages,
   handlers?: FormHandlers
 ): DmForm<F> => {
@@ -90,7 +90,7 @@ export const init = <F extends string, B extends string, L extends string>(conf:
 
   if (conf.forms) {
     // TODO: Update foreach to map or reduce
-    Object.entries<FormConfig<F, B, L>>(conf.forms).forEach(([formName, formConfig]) => {
+    Object.entries<FormConfig<F, B, L, Record<string, unknown>>>(conf.forms).forEach(([formName, formConfig]) => {
       ctx.forms[formName as F] = setupForm<F, B, L>(
         ctx,
         formName as F,

@@ -1,5 +1,5 @@
 import { Config, FormConfig, PageContext } from '../core'
-import { FN, Handler, ManagedState } from '../core/types'
+import { Handler, ManagedState } from '../core/types'
 
 export type FormName = 'initial' | 'vehicle' | 'files'
 export type ButtonName = never
@@ -13,7 +13,7 @@ export type CpMessages = {
 
 export type AppConfig = Config<FormName, ButtonName, LabelName>
 
-export type CpFormConfig = FormConfig<FormName, ButtonName, LabelName>
+export type CpFormConfig<V extends Record<string, unknown>> = FormConfig<FormName, ButtonName, LabelName, V>
 
 export type CpPageContext = PageContext<FormName, ButtonName, LabelName>
 
@@ -27,7 +27,7 @@ export type ActionParams<T extends Record<string, string | number | File | FileL
   data: T
   ctx: CpPageContext
   success: Handler<void>
-  fail: Handler<unknown>
+  fail: Handler<string>
   state: ActionState
 }>
 

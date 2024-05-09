@@ -13,15 +13,13 @@ import {
 } from './cp'
 import { init } from './core'
 import { FormErrorMessages } from './core/types'
-import { getElement } from './core/dom'
 import { createState } from './core/utils'
 
 export const initCp = (conf: CpConfig): void => {
   console.log('Initializing...', conf)
 
   const state: ActionState = {
-    formId: createState(undefined),
-    loaderDisplayStyle: createState(undefined),
+    formId: createState<string | undefined>(undefined),
     messages: conf.messages,
     captchaKey: conf.captchaKey
   }
@@ -63,42 +61,42 @@ export const initCp = (conf: CpConfig): void => {
     */
   }
 
-  const initialFormConfig: CpFormConfig = {
+  const initialFormConfig: CpFormConfig<InitialForm> = {
     selector: '[data-dm-id="form_find_vehicle"]',
     onSuccess: (ctx) => {
       conf.actions.switchStep(1, ctx)
     },
-    onError: (error: string, ctx) => {
+    onError: (error, ctx) => {
       ctx.forms.initial.setError(error)
     },
-    onSubmit: (data: InitialForm, ctx, success, fail) => submitInitialForm({ data, ctx, success, fail, state })
+    onSubmit: (data, ctx, success, fail) => submitInitialForm({ data, ctx, success, fail, state })
   }
 
   const vehicleErrorMessages: Partial<FormErrorMessages> = {
     pattern: state.messages.invalidEmailError
   }
 
-  const vehicleFormConfig: CpFormConfig = {
+  const vehicleFormConfig: CpFormConfig<VehicleForm> = {
     selector: '[data-dm-id="form_vehicle"]',
     errorMessages: vehicleErrorMessages,
     onSuccess: (ctx) => {
       conf.actions.switchStep(2, ctx)
     },
-    onError: (error: string, ctx) => {
+    onError: (error, ctx) => {
       ctx.forms.vehicle.setError(error)
     },
-    onSubmit: (data: VehicleForm, ctx, success, fail) => submitVehicleForm({ data, ctx, success, fail, state })
+    onSubmit: (data, ctx, success, fail) => submitVehicleForm({ data, ctx, success, fail, state })
   }
 
-  const filesFormConfig: CpFormConfig = {
+  const filesFormConfig: CpFormConfig<FileForm> = {
     selector: '[data-dm-id="form_files"]',
     onSuccess: (ctx) => {
       conf.actions.switchStep(3, ctx)
     },
-    onError: (error: string, ctx) => {
+    onError: (error, ctx) => {
       ctx.forms.files.setError(error)
     },
-    onSubmit: (data: FileForm, ctx, success, fail) => submitFiles({ data, ctx, success, fail, state })
+    onSubmit: (data, ctx, success, fail) => submitFiles({ data, ctx, success, fail, state })
   }
 
   const cfg: AppConfig = {

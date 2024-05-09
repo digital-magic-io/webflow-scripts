@@ -18,15 +18,10 @@ export type ElementConfig = {
   selector: string
 }
 
-export type FormConfig<F extends string, B extends string, L extends string> = {
-  onSubmit: <T extends Record<string, unknown>>(
-    data: T,
-    ctx: PageContext<F, B, L>,
-    success: Handler<void>,
-    fail: Handler<unknown>
-  ) => Promise<void>
+export type FormConfig<F extends string, B extends string, L extends string, V extends Record<string, unknown>> = {
+  onSubmit: (data: V, ctx: PageContext<F, B, L>, success: Handler<void>, fail: Handler<string>) => Promise<void>
   onSuccess: (ctx: PageContext<F, B, L>) => void
-  onError: <T>(error: T, ctx: PageContext<F, B, L>) => void
+  onError: (error: string, ctx: PageContext<F, B, L>) => void
   errorMessages?: Partial<FormErrorMessages>
 } & ElementConfig
 
@@ -45,7 +40,8 @@ export type Config<F extends string, B extends string, L extends string> = {
     setFieldState: (selector: string, state: DmFieldState) => void
   }
   */
-  forms?: Record<F, FormConfig<F, B, L>>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  forms?: Record<F, FormConfig<F, B, L, any>>
   buttons?: Record<B, ButtonConfig<F, B, L>>
   labels?: Record<L, LabelConfig>
   errorMessages?: FormErrorMessages

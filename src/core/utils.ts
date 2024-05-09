@@ -11,7 +11,6 @@ export const mapOrElse = <T, R>(value: NullableType<T>, f: FN<T, R>, defaultValu
 export const createState = <T>(initialState: T): ManagedState<T> => {
   let state = initialState
   return {
-    value: state,
     set: (newState: T) => {
       state = newState
     },
