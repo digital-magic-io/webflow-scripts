@@ -3,6 +3,11 @@ export type Handler<T> = FN<T, void>
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type NullableType<T = NonNullable<any>> = T | null | undefined
 
+export type ManagedState<T> = {
+  set: (state: T) => void
+  get: () => T
+}
+
 export type FailedValidationType = 'required' | 'minlength' | 'maxlength' | 'pattern' | 'min' | 'max'
 
 export type Validator = (v: string | number | undefined) => true | FailedValidationType

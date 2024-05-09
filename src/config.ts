@@ -9,8 +9,9 @@ export type CpConfig = Readonly<{
   formSelectors: Record<FormName, string>
   buttonSelectors: Record<ButtonName, string>
   labelSelectors: Record<LabelName, string>
+  loaderSelector?: string
   messages: CpMessages
   actions: CpActions
   captchaKey?: string
 }> &
-  Pick<Config<FormName, ButtonName, LabelName>, 'errorMessages' | 'handlers'>
+  Pick<Config<FormName, ButtonName, LabelName>, 'errorMessages'>

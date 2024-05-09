@@ -11,24 +11,17 @@ import {
   submitVehicleForm,
   VehicleForm
 } from './cp'
-import { init, LabelConfig } from './core'
+import { init } from './core'
 import { FormErrorMessages } from './core/types'
+import { getElement } from './core/dom'
+import { createState } from './core/utils'
 
 export const initCp = (conf: CpConfig): void => {
   console.log('Initializing...', conf)
 
-  // eslint-disable-next-line prefer-const
-  let formId: string | undefined = undefined
-  const setFormId = (id: string): void => {
-    formId = id
-  }
-  const getFormId = (): string | undefined => {
-    return formId
-  }
-
   const state: ActionState = {
-    getFormId,
-    setFormId,
+    formId: createState(undefined),
+    loaderDisplayStyle: createState(undefined),
     messages: conf.messages,
     captchaKey: conf.captchaKey
   }
@@ -116,7 +109,26 @@ export const initCp = (conf: CpConfig): void => {
     },
     buttons: buttonConfig,
     labels: labelConfig,
-    handlers: conf.handlers,
+    handlers: {
+      beforeSubmit: (form) => {
+        form.setFormDisabled(true)
+        if (conf.loaderSelector) {
+          const loaderElements = document.querySelectorAll<HTMLElement>(conf.loaderSelector)
+          loaderElements.forEach((el) => {
+            el.style.display = 'flex'
+          })
+        }
+      },
+      afterSubmit: (form) => {
+        form.setFormDisabled(false)
+        if (conf.loaderSelector) {
+          const loaderElements = document.querySelectorAll<HTMLElement>(conf.loaderSelector)
+          loaderElements.forEach((el) => {
+            el.style.display = 'none'
+          })
+        }
+      }
+    },
     errorMessages: conf.errorMessages,
     afterInit: (ctx) => {
       console.log('After init:', ctx)

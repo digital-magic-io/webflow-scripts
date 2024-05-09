@@ -1,5 +1,5 @@
 import { Config, FormConfig, PageContext } from '../core'
-import { FN, Handler } from '../core/types'
+import { FN, Handler, ManagedState } from '../core/types'
 
 export type FormName = 'initial' | 'vehicle' | 'files'
 export type ButtonName = never
@@ -18,8 +18,7 @@ export type CpFormConfig = FormConfig<FormName, ButtonName, LabelName>
 export type CpPageContext = PageContext<FormName, ButtonName, LabelName>
 
 export type ActionState = Readonly<{
-  setFormId: Handler<string>
-  getFormId: FN<void, string | undefined>
+  formId: ManagedState<string | undefined>
   messages: CpMessages
   captchaKey?: string
 }>

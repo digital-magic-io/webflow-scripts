@@ -40,18 +40,7 @@
             vehicle: '[data-dm-id="form_vehicle"]',
             files: '[data-dm-id="form_files"]'
           },
-          handlers: {
-            beforeSubmit: (form) => {
-              console.debug('Before submit:', form);
-              document.getElementById('loading').style.display = 'block';
-              form.setFormDisabled(true);
-            },
-            afterSubmit: (form) => {
-              console.debug('After submit:', form);
-              form.setFormDisabled(false);
-              document.getElementById('loading').style.display = 'none';
-            }
-          },
+          loaderSelector: '[data-dm-type="loader"]',
           actions: {
             switchStep: (step, ctx) => {
               console.log('Next step: ', step);
@@ -201,7 +190,7 @@
         <p>Thank you for submitting the form.</p>
       </div>
     </div>
-    <div id="loading" style="display: none; position: absolute; left: 0; right: 0; top: 0; bottom: 0; background: rgba(125, 125, 125, 0.5)">
+    <div id="loading" data-dm-type="loader" style="display: none; position: absolute; left: 0; right: 0; top: 0; bottom: 0; background: rgba(125, 125, 125, 0.5)">
       <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 5px;">
         <h2>Loading...</h2>
       </div>

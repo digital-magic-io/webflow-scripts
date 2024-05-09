@@ -30,7 +30,7 @@ export const submitInitialForm = async ({
       formType: 'BUYOUT'
     })
     console.debug('Initial form response', resp)
-    state.setFormId(resp.formUuid)
+    state.formId.set(resp.formUuid)
     if (resp.mntData) {
       const { mark, model, firstRegYear, registrationNumber } = resp.mntData
       ctx.forms.vehicle.setFormValues({
@@ -106,7 +106,7 @@ export const submitVehicleForm = async ({
   fail,
   state
 }: ActionParams<VehicleForm>): Promise<void> => {
-  const formId = state.getFormId()
+  const formId = state.formId.get()
   if (!formId) {
     throw new Error('FormId is missing')
   }
@@ -134,7 +134,7 @@ export const submitVehicleForm = async ({
 }
 
 export const submitFiles = async ({ data, ctx, success, fail, state }: ActionParams<FileForm>): Promise<void> => {
-  const formId = state.getFormId()
+  const formId = state.formId.get()
   if (!formId) {
     throw new Error('FormId is missing')
   }
