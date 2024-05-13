@@ -2,6 +2,8 @@ type Language = 'et' | 'ru' | 'en'
 
 type FormType = 'BUYOUT'
 
+type RequestOrigin = 'CARBUY_ORIGIN' | 'CARPROF_ORIGIN'
+
 export type ErrorResponse = Readonly<{
   errorCode: string
   error: string
@@ -17,11 +19,12 @@ export type CarRegistryData = Readonly<{
 export type LookupCarRegistryRequest = CarRegistryData
 
 export type InitialDataRequest = Readonly<{
-  captchaToken?: string
+  captchaToken: string
   phoneNumber: string
   carNumber: string
   language: Language
   formType: FormType
+  formSource: RequestOrigin
 }>
 
 export type InitialDataResponse = Readonly<{

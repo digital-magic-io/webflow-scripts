@@ -2,13 +2,14 @@ import { Config, FormConfig, PageContext } from '../core'
 import { Handler, ManagedState } from '../core/types'
 
 export type FormName = 'initial' | 'vehicle' | 'files'
-export type ButtonName = never
+export type ButtonName = 'updateVehicle'
 export type LabelName = 'markAndModel' | 'plateNumber'
 
 export type CpMessages = {
   internalError: string
   invalidPhoneError: string
   invalidEmailError: string
+  vehicleNotFoundError: string
 }
 
 export type AppConfig = Config<FormName, ButtonName, LabelName>
@@ -20,7 +21,7 @@ export type CpPageContext = PageContext<FormName, ButtonName, LabelName>
 export type ActionState = Readonly<{
   formId: ManagedState<string | undefined>
   messages: CpMessages
-  captchaKey?: string
+  captchaKey: string
 }>
 
 export type ActionParams<T extends Record<string, string | number | File | FileList | undefined>> = Readonly<{

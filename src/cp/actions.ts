@@ -21,13 +21,14 @@ export const submitInitialForm = async ({
     console.debug('Initial form submitted', data)
     ctx.forms.initial.clearAllErrors()
 
-    const token = state.captchaKey ? await grecaptcha.execute(state.captchaKey, { action: 'submit' }) : undefined
+    const token = await grecaptcha.execute(state.captchaKey, { action: 'submit' })
     const resp = await sendInitForm({
       captchaToken: token,
       phoneNumber: data.phone,
       carNumber: data.plateNumber,
       language: 'et',
-      formType: 'BUYOUT'
+      formType: 'BUYOUT',
+      formSource: 'CARBUY_ORIGIN'
     })
     console.debug('Initial form response', resp)
     state.formId.set(resp.formUuid)
@@ -50,15 +51,13 @@ export const submitInitialForm = async ({
   } catch (e) {
     if (e instanceof ApiError) {
       if (e.response.status === 400) {
-        const { errorCode, error } = await getErrorFromResponse<ErrorResponse>(e.response)
-        console.error('Response error: ', error)
+        const { errorCode } = await getErrorFromResponse<ErrorResponse>(e.response)
         if (errorCode === 'INVALID_PHONE_NUMBER') {
           fail(state.messages.invalidPhoneError)
         } else {
           fail(state.messages.internalError)
         }
       } else if (e.response.status === 403) {
-        console.error('Response error: ', e)
         fail('Captcha error')
       } else {
         console.error('Response error: ', e)
@@ -94,8 +93,17 @@ export const reloadVehicleFormData = async ({
       success()
     }
   } catch (e) {
-    console.error('Lookup error:', e)
-    fail(state.messages.internalError)
+    if (e instanceof ApiError && e.response.status === 400) {
+      const { errorCode } = await getErrorFromResponse<ErrorResponse>(e.response)
+      if (errorCode === 'CAR_NOT_FOUND') {
+        fail(state.messages.vehicleNotFoundError)
+      } else {
+        fail(state.messages.internalError)
+      }
+    } else {
+      console.error('Response error: ', e)
+      fail(state.messages.internalError)
+    }
   }
 }
 

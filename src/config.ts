@@ -12,6 +12,6 @@ export type CpConfig = Readonly<{
   loaderSelector?: string
   messages: CpMessages
   actions: CpActions
-  captchaKey?: string
+  captchaKey: string
 }> &
   Pick<Config<FormName, ButtonName, LabelName>, 'errorMessages'>

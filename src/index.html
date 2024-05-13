@@ -25,12 +25,11 @@
             internalError: 'Unable to send form. Please try again later.',
             invalidPhoneError: 'Invalid phone number!',
             invalidEmailError: 'Invalid email address!',
+            vehicleNotFoundError: 'Vehicle not found!',
           },
-          /*
           buttonSelectors: {
-            manual: '[data-dm-id="manual"]'
+            updateVehicle: '[data-dm-id="refresh-number"]'
           },
-          */
           labelSelectors: {
             markAndModel:  '[data-dm-id="labelMarkAndModel"]',
             plateNumber: '[data-dm-id="labelPlateNumber"]'
@@ -103,6 +102,9 @@
             <label for="plateNumber_display" data-dm-type="label">Plate number:</label>
             <input type="text" id="plateNumber_display" name="plateNumber" value="" data-dm-type="input" required />
             <em data-dm-type="error" class="error"></em>
+          </div>
+          <div>
+            <button type="button" data-dm-type="button" data-dm-id="refresh-number">Search</button>
           </div>
         </fieldset>
 

@@ -20,7 +20,6 @@ export class ApiError extends Error {
 
 export const getErrorFromResponse = async <T>(response: Response): Promise<T> => {
   const responseText = await response.text()
-  console.log('Error body: ', responseText)
   if (!responseText || responseText.length === 0) {
     return undefined as unknown as T
   } else {

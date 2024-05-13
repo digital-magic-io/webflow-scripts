@@ -14,6 +14,7 @@ import {
 import { init } from './core'
 import { FormErrorMessages } from './core/types'
 import { createState } from './core/utils'
+import { DmForm } from './core/form'
 
 const setVisibilityForAll = (selector: string | undefined, value: boolean): void => {
   if (selector) {
@@ -24,17 +25,6 @@ const setVisibilityForAll = (selector: string | undefined, value: boolean): void
   }
 }
 
-/*
-const setVisibility = (selector: string | undefined, value: boolean): void => {
-  if (selector) {
-    const el = document.querySelector<HTMLElement>(selector)
-    if (el) {
-      setElementVisible(el, value)
-    }
-  }
-}
-*/
-
 const setElementVisible = (el: HTMLElement, value: boolean): void => {
   el.style.display = value ? 'flex' : 'none'
 }
@@ -44,6 +34,20 @@ export const initCp = (conf: CpConfig): void => {
     formId: createState<string | undefined>(undefined),
     messages: conf.messages,
     captchaKey: conf.captchaKey
+  }
+
+  const beforeSubmit = (form: DmForm<string>): void => {
+    form.setFormDisabled(true)
+    setVisibilityForAll(conf.loaderSelector, true)
+  }
+  const afterSubmit = (form: DmForm<string>): void => {
+    form.setFormDisabled(false)
+    setVisibilityForAll(conf.loaderSelector, false)
+  }
+
+  const withSubmitAction = async (form: DmForm<string>, action: () => Promise<void>): Promise<void> => {
+    beforeSubmit(form)
+    await action().finally(() => afterSubmit(form))
   }
 
   const labelConfig: AppConfig['labels'] = {
@@ -66,21 +70,22 @@ export const initCp = (conf: CpConfig): void => {
    */
 
   const buttonConfig: AppConfig['buttons'] = {
-    /*
-    manual: {
-      selector: '[data-dm-id="manual"]',
+    updateVehicle: {
+      selector: conf.buttonSelectors.updateVehicle,
       onClick: (ctx) => {
         console.debug('Button clicked:', ctx)
-        ctx.buttons.manual.setDisabled(true)
-        ctx.buttons.manual.setLabel('Loading...')
-        ctx.labels.testLabel.setLabel('Test label')
-        setTimeout(() => {
-          ctx.forms.initial.el.style.display = 'none'
-          ctx.forms.vehicle.el.removeAttribute('style')
-        }, 3000)
+        void withSubmitAction(ctx.forms.vehicle, async () => {
+          const plateNumber = ctx.forms.vehicle.fields.plateNumber.input.el.value
+          await reloadVehicleFormData({
+            data: { plateNumber },
+            ctx,
+            success: () => {},
+            fail: (error) => ctx.forms.vehicle.setError(error),
+            state
+          })
+        })
       }
     }
-    */
   }
 
   const initialFormConfig: CpFormConfig<InitialForm> = {
@@ -129,30 +134,10 @@ export const initCp = (conf: CpConfig): void => {
     },
     buttons: buttonConfig,
     labels: labelConfig,
-    handlers: {
-      beforeSubmit: (form) => {
-        form.setFormDisabled(true)
-        setVisibilityForAll(conf.loaderSelector, true)
-      },
-      afterSubmit: (form) => {
-        form.setFormDisabled(false)
-        setVisibilityForAll(conf.loaderSelector, false)
-      }
-    },
+    handlers: { beforeSubmit, afterSubmit },
     errorMessages: conf.errorMessages,
-    afterInit: (ctx) => {
+    afterInit: () => {
       setVisibilityForAll(conf.loaderSelector, false)
-      ctx.forms.vehicle.fields.plateNumber.input.el.onblur = () => {
-        const plateNumber = ctx.forms.vehicle.fields.plateNumber.input.el.value
-        const formCfg = vehicleFormConfig
-        void reloadVehicleFormData({
-          data: { plateNumber },
-          ctx,
-          success: () => {},
-          fail: (error) => formCfg.onError(error, ctx),
-          state
-        })
-      }
     }
   }
   init(cfg)
