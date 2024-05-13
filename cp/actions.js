@@ -8,13 +8,14 @@ const submitInitialForm = async ({ data, ctx, success, fail, state }) => {
     try {
         console.debug('Initial form submitted', data);
         ctx.forms.initial.clearAllErrors();
-        const token = state.captchaKey ? await grecaptcha.execute(state.captchaKey, { action: 'submit' }) : undefined;
+        const token = await grecaptcha.execute(state.captchaKey, { action: 'submit' });
         const resp = await (0, api_1.sendInitForm)({
             captchaToken: token,
             phoneNumber: data.phone,
             carNumber: data.plateNumber,
             language: 'et',
-            formType: 'BUYOUT'
+            formType: 'BUYOUT',
+            formSource: 'CARBUY_ORIGIN'
         });
         console.debug('Initial form response', resp);
         state.formId.set(resp.formUuid);

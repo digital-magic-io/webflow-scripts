@@ -211,7 +211,6 @@ class $0a1ca124440e1613$export$f2e832acab1bdd79 extends Error {
 }
 const $0a1ca124440e1613$export$7780d7826aafbede = async (response)=>{
     const responseText = await response.text();
-    console.log("Error body: ", responseText);
     if (!responseText || responseText.length === 0) return undefined;
     else return JSON.parse(responseText);
 };
@@ -361,9 +360,9 @@ const $74010a292a3af4c1$export$b916619e652ca675 = async ({ data: data, ctx: ctx,
     try {
         console.debug("Initial form submitted", data);
         ctx.forms.initial.clearAllErrors();
-        const token = state.captchaKey ? await grecaptcha.execute(state.captchaKey, {
+        const token = await grecaptcha.execute(state.captchaKey, {
             action: "submit"
-        }) : undefined;
+        });
         const resp = await (0, $c4603da3cc6467fa$export$a6b4d7d396320855)({
             captchaToken: token,
             phoneNumber: data.phone,
@@ -391,14 +390,11 @@ const $74010a292a3af4c1$export$b916619e652ca675 = async ({ data: data, ctx: ctx,
     } catch (e) {
         if (e instanceof (0, $0a1ca124440e1613$export$f2e832acab1bdd79)) {
             if (e.response.status === 400) {
-                const { errorCode: errorCode, error: error } = await (0, $0a1ca124440e1613$export$7780d7826aafbede)(e.response);
-                console.error("Response error: ", error);
+                const { errorCode: errorCode } = await (0, $0a1ca124440e1613$export$7780d7826aafbede)(e.response);
                 if (errorCode === "INVALID_PHONE_NUMBER") fail(state.messages.invalidPhoneError);
                 else fail(state.messages.internalError);
-            } else if (e.response.status === 403) {
-                console.error("Response error: ", e);
-                fail("Captcha error");
-            } else {
+            } else if (e.response.status === 403) fail("Captcha error");
+            else {
                 console.error("Response error: ", e);
                 fail(state.messages.internalError);
             }
@@ -425,8 +421,14 @@ const $74010a292a3af4c1$export$9af790bd8a0132a2 = async ({ data: { plateNumber: 
             success();
         }
     } catch (e) {
-        console.error("Lookup error:", e);
-        fail(state.messages.internalError);
+        if (e instanceof (0, $0a1ca124440e1613$export$f2e832acab1bdd79) && e.response.status === 400) {
+            const { errorCode: errorCode } = await (0, $0a1ca124440e1613$export$7780d7826aafbede)(e.response);
+            if (errorCode === "CAR_NOT_FOUND") fail(state.messages.vehicleNotFoundError);
+            else fail(state.messages.internalError);
+        } else {
+            console.error("Response error: ", e);
+            fail(state.messages.internalError);
+        }
     }
 };
 const $74010a292a3af4c1$export$8d5773d32b4cfd23 = async ({ data: data, ctx: ctx, success: success, fail: fail, state: state })=>{
@@ -482,16 +484,7 @@ const $b3a133cf85b0ceb6$var$setVisibilityForAll = (selector, value)=>{
         });
     }
 };
-/*
-const setVisibility = (selector: string | undefined, value: boolean): void => {
-  if (selector) {
-    const el = document.querySelector<HTMLElement>(selector)
-    if (el) {
-      setElementVisible(el, value)
-    }
-  }
-}
-*/ const $b3a133cf85b0ceb6$var$setElementVisible = (el, value)=>{
+const $b3a133cf85b0ceb6$var$setElementVisible = (el, value)=>{
     el.style.display = value ? "flex" : "none";
 };
 const $b3a133cf85b0ceb6$export$cd874e48ff214f68 = (conf)=>{
@@ -499,6 +492,18 @@ const $b3a133cf85b0ceb6$export$cd874e48ff214f68 = (conf)=>{
         formId: (0, $7285b5c83f5ca196$export$e6a0daad8304de)(undefined),
         messages: conf.messages,
         captchaKey: conf.captchaKey
+    };
+    const beforeSubmit = (form)=>{
+        form.setFormDisabled(true);
+        $b3a133cf85b0ceb6$var$setVisibilityForAll(conf.loaderSelector, true);
+    };
+    const afterSubmit = (form)=>{
+        form.setFormDisabled(false);
+        $b3a133cf85b0ceb6$var$setVisibilityForAll(conf.loaderSelector, false);
+    };
+    const withSubmitAction = async (form, action)=>{
+        beforeSubmit(form);
+        await action().finally(()=>afterSubmit(form));
     };
     const labelConfig = {
         markAndModel: {
@@ -518,6 +523,24 @@ const $b3a133cf85b0ceb6$export$cd874e48ff214f68 = (conf)=>{
   }))
   .reduce((acc, val) => ({ ...acc, ...val }), {})
    */ const buttonConfig = {
+        updateVehicle: {
+            selector: conf.buttonSelectors.updateVehicle,
+            onClick: (ctx)=>{
+                console.debug("Button clicked:", ctx);
+                withSubmitAction(ctx.forms.vehicle, async ()=>{
+                    const plateNumber = ctx.forms.vehicle.fields.plateNumber.input.el.value;
+                    await (0, $74010a292a3af4c1$export$9af790bd8a0132a2)({
+                        data: {
+                            plateNumber: plateNumber
+                        },
+                        ctx: ctx,
+                        success: ()=>{},
+                        fail: (error)=>ctx.forms.vehicle.setError(error),
+                        state: state
+                    });
+                });
+            }
+        }
     };
     const initialFormConfig = {
         selector: '[data-dm-id="form_find_vehicle"]',
@@ -580,31 +603,12 @@ const $b3a133cf85b0ceb6$export$cd874e48ff214f68 = (conf)=>{
         buttons: buttonConfig,
         labels: labelConfig,
         handlers: {
-            beforeSubmit: (form)=>{
-                form.setFormDisabled(true);
-                $b3a133cf85b0ceb6$var$setVisibilityForAll(conf.loaderSelector, true);
-            },
-            afterSubmit: (form)=>{
-                form.setFormDisabled(false);
-                $b3a133cf85b0ceb6$var$setVisibilityForAll(conf.loaderSelector, false);
-            }
+            beforeSubmit: beforeSubmit,
+            afterSubmit: afterSubmit
         },
         errorMessages: conf.errorMessages,
-        afterInit: (ctx)=>{
+        afterInit: ()=>{
             $b3a133cf85b0ceb6$var$setVisibilityForAll(conf.loaderSelector, false);
-            ctx.forms.vehicle.fields.plateNumber.input.el.onblur = ()=>{
-                const plateNumber = ctx.forms.vehicle.fields.plateNumber.input.el.value;
-                const formCfg = vehicleFormConfig;
-                (0, $74010a292a3af4c1$export$9af790bd8a0132a2)({
-                    data: {
-                        plateNumber: plateNumber
-                    },
-                    ctx: ctx,
-                    success: ()=>{},
-                    fail: (error)=>formCfg.onError(error, ctx),
-                    state: state
-                });
-            };
         }
     };
     (0, $7f00477e1c5eda60$export$2cd8252107eb640b)(cfg);

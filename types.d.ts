@@ -66,12 +66,13 @@ type Config<F extends string, B extends string, L extends string> = {
     afterInit?: Handler<PageContext<F, B, L>>;
 };
 type FormName = 'initial' | 'vehicle' | 'files';
-type ButtonName = never;
+type ButtonName = 'updateVehicle';
 type LabelName = 'markAndModel' | 'plateNumber';
 type CpMessages = {
     internalError: string;
     invalidPhoneError: string;
     invalidEmailError: string;
+    vehicleNotFoundError: string;
 };
 type CpPageContext = PageContext<FormName, ButtonName, LabelName>;
 declare global {
@@ -92,7 +93,7 @@ type CpConfig = Readonly<{
     loaderSelector?: string;
     messages: CpMessages;
     actions: CpActions;
-    captchaKey?: string;
+    captchaKey: string;
 }> & Pick<Config<FormName, ButtonName, LabelName>, 'errorMessages'>;
 export const initCp: (conf: CpConfig) => void;
 

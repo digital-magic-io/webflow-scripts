@@ -16,7 +16,6 @@ const setElementVisible = (el, value) => {
     el.style.display = value ? 'flex' : 'none';
 };
 const initCp = (conf) => {
-    console.log('Initializing...', conf);
     const state = {
         formId: (0, utils_1.createState)(undefined),
         messages: conf.messages,
@@ -30,7 +29,22 @@ const initCp = (conf) => {
             selector: conf.labelSelectors.plateNumber
         }
     };
-    const buttonConfig = {};
+    const buttonConfig = {
+        updateVehicle: {
+            selector: conf.buttonSelectors.updateVehicle,
+            onClick: (ctx) => {
+                console.debug('Button clicked:', ctx);
+                const plateNumber = ctx.forms.vehicle.fields.plateNumber.input.el.value;
+                void (0, cp_1.reloadVehicleFormData)({
+                    data: { plateNumber },
+                    ctx,
+                    success: () => { },
+                    fail: (error) => ctx.forms.vehicle.setError(error),
+                    state
+                });
+            }
+        }
+    };
     const initialFormConfig = {
         selector: '[data-dm-id="form_find_vehicle"]',
         onSuccess: (ctx) => {
@@ -84,20 +98,8 @@ const initCp = (conf) => {
             }
         },
         errorMessages: conf.errorMessages,
-        afterInit: (ctx) => {
-            console.log('After init:', ctx);
-            ctx.forms.vehicle.fields.plateNumber.input.el.onblur = () => {
-                const plateNumber = ctx.forms.vehicle.fields.plateNumber.input.el.value;
-                console.log('On blur:', ctx.forms.vehicle.fields.plateNumber.input.el.value);
-                const formCfg = vehicleFormConfig;
-                void (0, cp_1.reloadVehicleFormData)({
-                    data: { plateNumber },
-                    ctx,
-                    success: () => { },
-                    fail: (error) => formCfg.onError(error, ctx),
-                    state
-                });
-            };
+        afterInit: () => {
+            setVisibilityForAll(conf.loaderSelector, false);
         }
     };
     (0, core_1.init)(cfg);
