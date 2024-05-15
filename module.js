@@ -333,8 +333,8 @@ const $7f00477e1c5eda60$export$2cd8252107eb640b = (conf)=>{
 };
 
 
-const $c4603da3cc6467fa$var$apiUrl = "https://test.carprof.ee/api";
-// const apiUrl = 'https://carprof.ee/api'
+//const apiUrl = 'https://test.carprof.ee/api'
+const $c4603da3cc6467fa$var$apiUrl = "https://carprof.ee/api";
 const $c4603da3cc6467fa$var$formsUrl = `${$c4603da3cc6467fa$var$apiUrl}/v2/forms`;
 const $c4603da3cc6467fa$var$initialFormUrl = `${$c4603da3cc6467fa$var$formsUrl}/initial-data`;
 const $c4603da3cc6467fa$var$lookupCarRegistryUrl = (plateNumber)=>`${$c4603da3cc6467fa$var$apiUrl}/v1/cars/mnt/${plateNumber}`;
@@ -472,7 +472,7 @@ const $74010a292a3af4c1$export$cc36134c338ba9da = async ({ data: data, ctx: ctx,
             else if (data.files instanceof File) await (0, $c4603da3cc6467fa$export$42404212ef451a92)(formId, [
                 data.files
             ]);
-            else {
+            else if (!(data.files instanceof FileList)) {
                 // eslint-disable-next-line no-console
                 console.error("Invalid files submitted: ", data);
                 fail(state.messages.internalError);
