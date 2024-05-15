@@ -152,9 +152,11 @@ export const submitFiles = async ({ data, ctx, success, fail, state }: ActionPar
       } else if (data.files instanceof File) {
         await uploadAndSendPhotos(formId, [data.files])
       } else {
-        // eslint-disable-next-line no-console
-        console.error('Invalid files submitted: ', data)
-        fail(state.messages.internalError)
+        if (!(data.files instanceof FileList)) {
+          // eslint-disable-next-line no-console
+          console.error('Invalid files submitted: ', data)
+          fail(state.messages.internalError)
+        }
       }
     }
     ctx.resetAll()
