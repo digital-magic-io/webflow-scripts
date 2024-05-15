@@ -252,7 +252,9 @@ const $f20d18f353317b2a$export$bc226234bbb4652f = (files)=>{
     if ((0, $7546c35f5f2b619a$export$96bdbc84526f3739)(files)) for (const file of files)result.push(file);
     return result;
 };
-const $f20d18f353317b2a$export$7b64c937225679ee = (upload, onFileUploadSuccess, onFileUploadError)=>(files)=>Promise.all(files.map((file)=>upload(file).then((result)=>{
+const $f20d18f353317b2a$export$7b64c937225679ee = (upload, onFileUploadSuccess, onFileUploadError)=>(files)=>{
+        console.log("uploadFilesList", files);
+        return Promise.all(files.map((file)=>upload(file).then((result)=>{
                 onFileUploadSuccess?.();
                 return result;
             }).catch((e)=>{
@@ -261,6 +263,7 @@ const $f20d18f353317b2a$export$7b64c937225679ee = (upload, onFileUploadSuccess, 
                 onFileUploadError?.(e);
                 throw e;
             }))).then((result)=>result.filter((0, $7546c35f5f2b619a$export$96bdbc84526f3739)));
+    };
 const $f20d18f353317b2a$export$1ea25e59dc2c9809 = (url, files)=>$f20d18f353317b2a$export$7b64c937225679ee($f20d18f353317b2a$export$e132348fd6a678a(url))(files);
 const $f20d18f353317b2a$export$b2fd9029d5529a00 = (url, files)=>$f20d18f353317b2a$export$1ea25e59dc2c9809(url, $f20d18f353317b2a$export$bc226234bbb4652f(files));
 
