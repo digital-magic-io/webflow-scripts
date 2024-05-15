@@ -7,6 +7,7 @@ $parcel$export(module.exports, "initCp", function () { return $15451612c40a4a0c$
 const $68d6acfa1617944c$export$d16800b7e59a8051 = (selector, parent)=>{
     const el = (parent ?? document).querySelector(selector);
     if (el === null) {
+        // eslint-disable-next-line no-console
         console.error(`Element not found by selector: ${parent ? "parent" : "document"}.${selector}.`);
         return undefined;
     } else return el;
@@ -104,13 +105,13 @@ const $7b19bfce950638d7$export$f681a8129d2e9d28 = (selector, formName, formError
     // TODO: Must be optional!
     const formErrorElement = $7b19bfce950638d7$var$createFormError(formElement);
     const fieldNames = $7b19bfce950638d7$var$scanFormFieldNames(formElement);
-    console.debug("Fields scanned:", fieldNames);
+    //console.debug('Fields scanned:', fieldNames)
     const fieldElements = fieldNames.map((name)=>$7b19bfce950638d7$var$createFormField(formElement, name)).reduce((acc, cur)=>({
             ...acc,
             [cur.input.el.name]: cur
         }), {});
-    const getFormValues = ()=>Object.entries(fieldElements).filter(([, instance])=>!!instance && instance.input.el.value.trim().length > 0).map(([name, instance])=>({
-                [name]: instance.input.el.value
+    const getFormValues = ()=>Object.entries(fieldElements).filter(([, instance])=>!!instance && (instance.input.el.type !== "file" && instance.input.el.value.trim().length > 0 || instance.input.el.type === "file")).map(([name, instance])=>({
+                [name]: instance.input.el.type === "file" ? instance.input.el.files : instance.input.el.value
             })).reduce((acc, cur)=>({
                 ...acc,
                 ...cur
@@ -141,6 +142,7 @@ const $7b19bfce950638d7$export$f681a8129d2e9d28 = (selector, formName, formError
                 }), {});
             const hasErrors = Object.values(errors).some((error)=>error !== true);
             if (hasErrors) {
+                // eslint-disable-next-line no-console
                 console.error("Validation errors", errors);
                 Object.entries(errors).forEach(([name, error])=>{
                     if (error !== true) fieldElements[name].setError(formErrorMessages[error]);
@@ -252,9 +254,7 @@ const $f20d18f353317b2a$export$bc226234bbb4652f = (files)=>{
     if ((0, $7546c35f5f2b619a$export$96bdbc84526f3739)(files)) for (const file of files)result.push(file);
     return result;
 };
-const $f20d18f353317b2a$export$7b64c937225679ee = (upload, onFileUploadSuccess, onFileUploadError)=>(files)=>{
-        console.log("uploadFilesList", files);
-        return Promise.all(files.map((file)=>upload(file).then((result)=>{
+const $f20d18f353317b2a$export$7b64c937225679ee = (upload, onFileUploadSuccess, onFileUploadError)=>(files)=>Promise.all(files.map((file)=>upload(file).then((result)=>{
                 onFileUploadSuccess?.();
                 return result;
             }).catch((e)=>{
@@ -263,7 +263,6 @@ const $f20d18f353317b2a$export$7b64c937225679ee = (upload, onFileUploadSuccess, 
                 onFileUploadError?.(e);
                 throw e;
             }))).then((result)=>result.filter((0, $7546c35f5f2b619a$export$96bdbc84526f3739)));
-    };
 const $f20d18f353317b2a$export$1ea25e59dc2c9809 = (url, files)=>$f20d18f353317b2a$export$7b64c937225679ee($f20d18f353317b2a$export$e132348fd6a678a(url))(files);
 const $f20d18f353317b2a$export$b2fd9029d5529a00 = (url, files)=>$f20d18f353317b2a$export$1ea25e59dc2c9809(url, $f20d18f353317b2a$export$bc226234bbb4652f(files));
 
@@ -271,16 +270,16 @@ const $f20d18f353317b2a$export$b2fd9029d5529a00 = (url, files)=>$f20d18f353317b2
 
 
 const $0564b07561875788$var$setupForm = (ctx, formName, formConfig, globalErrorMessages, handlers)=>{
-    console.debug("Form:", formName, formConfig);
+    //console.debug('Form:', formName, formConfig)
     const form = (0, $7b19bfce950638d7$export$f681a8129d2e9d28)(formConfig.selector, formName, {
         ...globalErrorMessages,
         ...formConfig.errorMessages
     });
     handlers?.init?.(form);
     form.setOnSubmit(async ()=>{
-        console.log("Form submitted:", formName, form.fields);
         handlers?.beforeSubmit?.(form);
         await formConfig.onSubmit(form.getFormValues(), ctx, ()=>formConfig.onSuccess(ctx), (error)=>formConfig.onError(error, ctx)).catch((error)=>{
+            // eslint-disable-next-line no-console
             console.error("Unhandled exception!", error);
             formConfig.onError("Unexpected error!", ctx);
         }).finally(()=>{
@@ -316,7 +315,6 @@ const $0564b07561875788$var$defaultErrors = {
     max: "Field value is too big"
 };
 const $0564b07561875788$export$2cd8252107eb640b = (conf)=>{
-    console.log("Initializing...", conf);
     const ctx = {
         forms: {},
         buttons: {},
@@ -337,13 +335,12 @@ const $0564b07561875788$export$2cd8252107eb640b = (conf)=>{
             $0564b07561875788$var$setupLabel(ctx, labelName, labelConfig);
         });
         conf.afterInit?.(ctx);
-        console.log("Initialized with context: ", ctx);
     }
 };
 
 
-//const apiUrl = 'https://test.carprof.ee/api'
-const $9875fc359f01f731$var$apiUrl = "https://carprof.ee/api";
+const $9875fc359f01f731$var$apiUrl = "https://test.carprof.ee/api";
+// const apiUrl = 'https://carprof.ee/api'
 const $9875fc359f01f731$var$formsUrl = `${$9875fc359f01f731$var$apiUrl}/v2/forms`;
 const $9875fc359f01f731$var$initialFormUrl = `${$9875fc359f01f731$var$formsUrl}/initial-data`;
 const $9875fc359f01f731$var$lookupCarRegistryUrl = (plateNumber)=>`${$9875fc359f01f731$var$apiUrl}/v1/cars/mnt/${plateNumber}`;
@@ -355,10 +352,17 @@ const $9875fc359f01f731$export$a6b4d7d396320855 = (request)=>(0, $f20d18f353317b
 const $9875fc359f01f731$export$e7cdd9ab52da88de = (formId, data)=>(0, $f20d18f353317b2a$export$e842d00bb3325f27)($9875fc359f01f731$var$formDataUrl(formId), data);
 const $9875fc359f01f731$export$d1e050cff6279152 = (formId, data)=>(0, $f20d18f353317b2a$export$e842d00bb3325f27)($9875fc359f01f731$var$photosUrl(formId), data);
 const $9875fc359f01f731$export$42404212ef451a92 = async (formId, files)=>{
-    const fileIds = await (0, $f20d18f353317b2a$export$b2fd9029d5529a00)($9875fc359f01f731$var$fileUrl, files);
-    await $9875fc359f01f731$export$d1e050cff6279152(formId, {
-        imageIds: fileIds.map((v)=>v.fileId)
-    });
+    if (files instanceof FileList) {
+        const fileIds = await (0, $f20d18f353317b2a$export$b2fd9029d5529a00)($9875fc359f01f731$var$fileUrl, files);
+        await $9875fc359f01f731$export$d1e050cff6279152(formId, {
+            imageIds: fileIds.map((v)=>v.fileId)
+        });
+    } else if (Array.isArray(files)) {
+        const fileIds = await (0, $f20d18f353317b2a$export$1ea25e59dc2c9809)($9875fc359f01f731$var$fileUrl, files);
+        await $9875fc359f01f731$export$d1e050cff6279152(formId, {
+            imageIds: fileIds.map((v)=>v.fileId)
+        });
+    } else throw new Error("Unable to upload files!");
 };
 
 
@@ -368,7 +372,6 @@ const $9875fc359f01f731$export$42404212ef451a92 = async (formId, files)=>{
 
 const $3ee52bcfba46d30d$export$b916619e652ca675 = async ({ data: data, ctx: ctx, success: success, fail: fail, state: state })=>{
     try {
-        console.debug("Initial form submitted", data);
         ctx.forms.initial.clearAllErrors();
         const token = await grecaptcha.execute(state.captchaKey, {
             action: "submit"
@@ -381,7 +384,6 @@ const $3ee52bcfba46d30d$export$b916619e652ca675 = async ({ data: data, ctx: ctx,
             formType: "BUYOUT",
             formSource: "CARBUY_ORIGIN"
         });
-        console.debug("Initial form response", resp);
         state.formId.set(resp.formUuid);
         if (resp.mntData) {
             const { mark: mark, model: model, firstRegYear: firstRegYear, registrationNumber: registrationNumber } = resp.mntData;
@@ -405,10 +407,12 @@ const $3ee52bcfba46d30d$export$b916619e652ca675 = async ({ data: data, ctx: ctx,
                 else fail(state.messages.internalError);
             } else if (e.response.status === 403) fail("Captcha error");
             else {
+                // eslint-disable-next-line no-console
                 console.error("Response error: ", e);
                 fail(state.messages.internalError);
             }
         } else {
+            // eslint-disable-next-line no-console
             console.error("Response error: ", e);
             fail(state.messages.internalError);
         }
@@ -416,11 +420,9 @@ const $3ee52bcfba46d30d$export$b916619e652ca675 = async ({ data: data, ctx: ctx,
 };
 const $3ee52bcfba46d30d$export$9af790bd8a0132a2 = async ({ data: { plateNumber: plateNumber }, ctx: ctx, success: success, fail: fail, state: state })=>{
     try {
-        console.debug("Reloading vehicle data for plate number:", plateNumber);
         ctx.forms.vehicle.clearAllErrors();
         const resp = await (0, $9875fc359f01f731$export$8bdb25a87ae6a6fa)(plateNumber);
         if (resp) {
-            console.debug("Lookup response:", resp);
             const { mark: mark, model: model, firstRegYear: firstRegYear, registrationNumber: registrationNumber } = resp;
             ctx.forms.vehicle.setFormValues({
                 make: mark,
@@ -436,6 +438,7 @@ const $3ee52bcfba46d30d$export$9af790bd8a0132a2 = async ({ data: { plateNumber: 
             if (errorCode === "CAR_NOT_FOUND") fail(state.messages.vehicleNotFoundError);
             else fail(state.messages.internalError);
         } else {
+            // eslint-disable-next-line no-console
             console.error("Response error: ", e);
             fail(state.messages.internalError);
         }
@@ -445,9 +448,8 @@ const $3ee52bcfba46d30d$export$8d5773d32b4cfd23 = async ({ data: data, ctx: ctx,
     const formId = state.formId.get();
     if (!formId) throw new Error("FormId is missing");
     try {
-        console.debug("Vehicle form submitted", data);
         ctx.forms.vehicle.clearAllErrors();
-        const response = await (0, $9875fc359f01f731$export$e7cdd9ab52da88de)(formId, {
+        await (0, $9875fc359f01f731$export$e7cdd9ab52da88de)(formId, {
             carNumber: data.plateNumber,
             mark: data.make,
             model: data.model,
@@ -457,11 +459,11 @@ const $3ee52bcfba46d30d$export$8d5773d32b4cfd23 = async ({ data: data, ctx: ctx,
             fullName: data.name,
             email: data.email
         });
-        console.debug("Vehicle form response", response);
         ctx.labels.markAndModel.setLabel(`${data.make}, ${data.model}`);
         ctx.labels.plateNumber.setLabel(data.plateNumber);
         success();
     } catch (e) {
+        // eslint-disable-next-line no-console
         console.error("Response error:", e);
         fail(state.messages.internalError);
     }
@@ -470,12 +472,22 @@ const $3ee52bcfba46d30d$export$cc36134c338ba9da = async ({ data: data, ctx: ctx,
     const formId = state.formId.get();
     if (!formId) throw new Error("FormId is missing");
     try {
-        console.debug("Files submitted", data);
         ctx.forms.files.clearAllErrors();
-        if (data?.files && data.files.length > 0) await (0, $9875fc359f01f731$export$42404212ef451a92)(formId, data.files);
+        if (data?.files) {
+            if (data.files instanceof FileList && data.files.length > 0) await (0, $9875fc359f01f731$export$42404212ef451a92)(formId, data.files);
+            else if (data.files instanceof File) await (0, $9875fc359f01f731$export$42404212ef451a92)(formId, [
+                data.files
+            ]);
+            else {
+                // eslint-disable-next-line no-console
+                console.error("Invalid files submitted: ", data);
+                fail(state.messages.internalError);
+            }
+        }
         ctx.resetAll();
         success();
     } catch (e) {
+        // eslint-disable-next-line no-console
         console.error("Response error:", e);
         fail(state.messages.internalError);
     }
@@ -536,7 +548,6 @@ const $15451612c40a4a0c$export$cd874e48ff214f68 = (conf)=>{
         updateVehicle: {
             selector: conf.buttonSelectors.updateVehicle,
             onClick: (ctx)=>{
-                console.debug("Button clicked:", ctx);
                 withSubmitAction(ctx.forms.vehicle, async ()=>{
                     const plateNumber = ctx.forms.vehicle.fields.plateNumber.input.el.value;
                     await (0, $3ee52bcfba46d30d$export$9af790bd8a0132a2)({
