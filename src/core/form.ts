@@ -154,7 +154,7 @@ export const createForm = <T extends string>(
   const formErrorElement = createFormError(formElement)
 
   const fieldNames = scanFormFieldNames(formElement)
-  console.debug('Fields scanned:', fieldNames)
+  //console.debug('Fields scanned:', fieldNames)
 
   const fieldElements: Record<string, DmField> = fieldNames
     .map((name) => createFormField(formElement, name))
@@ -162,8 +162,15 @@ export const createForm = <T extends string>(
 
   const getFormValues = (): Record<T, string> =>
     Object.entries<DmField>(fieldElements)
-      .filter(([, instance]) => !!instance && instance.input.el.value.trim().length > 0)
-      .map(([name, instance]) => ({ [name]: instance.input.el.value }))
+      .filter(
+        ([, instance]) =>
+          !!instance &&
+          ((instance.input.el.type !== 'file' && instance.input.el.value.trim().length > 0) ||
+            instance.input.el.type === 'file')
+      )
+      .map(([name, instance]) => ({
+        [name]: instance.input.el.type === 'file' ? instance.input.el.files : instance.input.el.value
+      }))
       .reduce((acc, cur) => ({ ...acc, ...cur }), {}) as Record<T, string>
 
   const setFormValues = (values: Record<T, string>): void => {
@@ -201,6 +208,7 @@ export const createForm = <T extends string>(
         .reduce((acc, cur) => ({ ...acc, ...cur }), {})
       const hasErrors = Object.values(errors).some((error) => error !== true)
       if (hasErrors) {
+        // eslint-disable-next-line no-console
         console.error('Validation errors', errors)
         Object.entries(errors).forEach(([name, error]) => {
           if (error !== true) {

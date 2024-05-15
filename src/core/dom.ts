@@ -4,6 +4,7 @@ export const getElement = <T extends HTMLElement = HTMLElement>(
 ): T | undefined => {
   const el: HTMLElement | null = (parent ?? document).querySelector(selector)
   if (el === null) {
+    // eslint-disable-next-line no-console
     console.error(`Element not found by selector: ${parent ? 'parent' : 'document'}.${selector}.`)
     return undefined
   } else {

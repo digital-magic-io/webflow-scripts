@@ -73,7 +73,6 @@ export const initCp = (conf: CpConfig): void => {
     updateVehicle: {
       selector: conf.buttonSelectors.updateVehicle,
       onClick: (ctx) => {
-        console.debug('Button clicked:', ctx)
         void withSubmitAction(ctx.forms.vehicle, async () => {
           const plateNumber = ctx.forms.vehicle.fields.plateNumber.input.el.value
           await reloadVehicleFormData({

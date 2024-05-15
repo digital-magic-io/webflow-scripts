@@ -1,4 +1,4 @@
-import { getTyped, postTyped, uploadTypedFileList } from '../../core'
+import { getTyped, postTyped, uploadTypedArray, uploadTypedFileList } from '../../core'
 import {
   FormDataRequest,
   FormPhotosRequest,
@@ -26,7 +26,14 @@ export const sendFormData = (formId: string, data: FormDataRequest): Promise<voi
 
 export const sendPhotos = (formId: string, data: FormPhotosRequest): Promise<void> => postTyped(photosUrl(formId), data)
 
-export const uploadAndSendPhotos = async (formId: string, files: FileList): Promise<void> => {
-  const fileIds = await uploadTypedFileList<{ fileId: string }>(fileUrl, files)
-  await sendPhotos(formId, { imageIds: fileIds.map((v) => v.fileId) })
+export const uploadAndSendPhotos = async (formId: string, files: FileList | Array<File>): Promise<void> => {
+  if (files instanceof FileList) {
+    const fileIds = await uploadTypedFileList<{ fileId: string }>(fileUrl, files)
+    await sendPhotos(formId, { imageIds: fileIds.map((v) => v.fileId) })
+  } else if (Array.isArray(files)) {
+    const fileIds = await uploadTypedArray<{ fileId: string }>(fileUrl, files)
+    await sendPhotos(formId, { imageIds: fileIds.map((v) => v.fileId) })
+  } else {
+    throw new Error('Unable to upload files!')
+  }
 }

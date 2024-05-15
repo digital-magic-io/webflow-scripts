@@ -14,11 +14,10 @@ const setupForm = <F extends string, B extends string, L extends string>(
   globalErrorMessages: FormErrorMessages,
   handlers?: FormHandlers
 ): DmForm<F> => {
-  console.debug('Form:', formName, formConfig)
+  //console.debug('Form:', formName, formConfig)
   const form = createForm(formConfig.selector, formName, { ...globalErrorMessages, ...formConfig.errorMessages })
   handlers?.init?.(form)
   form.setOnSubmit(async () => {
-    console.log('Form submitted:', formName, form.fields)
     handlers?.beforeSubmit?.(form)
     await formConfig
       .onSubmit(
@@ -28,6 +27,7 @@ const setupForm = <F extends string, B extends string, L extends string>(
         (error) => formConfig.onError(error, ctx)
       )
       .catch((error) => {
+        // eslint-disable-next-line no-console
         console.error('Unhandled exception!', error)
         formConfig.onError('Unexpected error!', ctx)
       })
@@ -80,8 +80,6 @@ const defaultErrors: Record<FailedValidationType, string> = {
 }
 
 export const init = <F extends string, B extends string, L extends string>(conf: Config<F, B, L>): void => {
-  console.log('Initializing...', conf)
-
   const ctx: PageContext<F, B, L> = {
     forms: {},
     buttons: {},
@@ -114,7 +112,5 @@ export const init = <F extends string, B extends string, L extends string>(conf:
     }
 
     conf.afterInit?.(ctx)
-
-    console.log('Initialized with context: ', ctx)
   }
 }

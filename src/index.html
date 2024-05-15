@@ -10,7 +10,6 @@
     <script type="module" defer>
       import { initCp } from './module.js';
       window.onload = () => {
-        console.log("page is fully loaded");
         initCp({
           captchaKey: '6LfAgNQpAAAAAOYmB_Y_tmUGjP4AY-hRzyHxE3JF',
           errorMessages: {
@@ -55,7 +54,6 @@
                 case 3:
                   ctx.forms.files.el.style.display = 'none'
                   document.getElementById('success_step')?.removeAttribute('style')
-                  console.log('Great Success!')
                   break;
               }
             }

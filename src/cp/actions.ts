@@ -18,7 +18,6 @@ export const submitInitialForm = async ({
   state
 }: ActionParams<InitialForm>): Promise<void> => {
   try {
-    console.debug('Initial form submitted', data)
     ctx.forms.initial.clearAllErrors()
 
     const token = await grecaptcha.execute(state.captchaKey, { action: 'submit' })
@@ -30,7 +29,6 @@ export const submitInitialForm = async ({
       formType: 'BUYOUT',
       formSource: 'CARBUY_ORIGIN'
     })
-    console.debug('Initial form response', resp)
     state.formId.set(resp.formUuid)
     if (resp.mntData) {
       const { mark, model, firstRegYear, registrationNumber } = resp.mntData
@@ -60,10 +58,12 @@ export const submitInitialForm = async ({
       } else if (e.response.status === 403) {
         fail('Captcha error')
       } else {
+        // eslint-disable-next-line no-console
         console.error('Response error: ', e)
         fail(state.messages.internalError)
       }
     } else {
+      // eslint-disable-next-line no-console
       console.error('Response error: ', e)
       fail(state.messages.internalError)
     }
@@ -78,11 +78,9 @@ export const reloadVehicleFormData = async ({
   state
 }: ActionParams<LookupVehicleForm>): Promise<void> => {
   try {
-    console.debug('Reloading vehicle data for plate number:', plateNumber)
     ctx.forms.vehicle.clearAllErrors()
     const resp = await lookupCarRegistry(plateNumber)
     if (resp) {
-      console.debug('Lookup response:', resp)
       const { mark, model, firstRegYear, registrationNumber } = resp
       ctx.forms.vehicle.setFormValues({
         make: mark,
@@ -101,6 +99,7 @@ export const reloadVehicleFormData = async ({
         fail(state.messages.internalError)
       }
     } else {
+      // eslint-disable-next-line no-console
       console.error('Response error: ', e)
       fail(state.messages.internalError)
     }
@@ -119,9 +118,8 @@ export const submitVehicleForm = async ({
     throw new Error('FormId is missing')
   }
   try {
-    console.debug('Vehicle form submitted', data)
     ctx.forms.vehicle.clearAllErrors()
-    const response = await sendFormData(formId, {
+    await sendFormData(formId, {
       carNumber: data.plateNumber,
       mark: data.make,
       model: data.model,
@@ -131,11 +129,11 @@ export const submitVehicleForm = async ({
       fullName: data.name,
       email: data.email
     })
-    console.debug('Vehicle form response', response)
     ctx.labels.markAndModel.setLabel(`${data.make}, ${data.model}`)
     ctx.labels.plateNumber.setLabel(data.plateNumber)
     success()
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.error('Response error:', e)
     fail(state.messages.internalError)
   }
@@ -147,14 +145,22 @@ export const submitFiles = async ({ data, ctx, success, fail, state }: ActionPar
     throw new Error('FormId is missing')
   }
   try {
-    console.debug('Files submitted', data)
     ctx.forms.files.clearAllErrors()
-    if (data?.files && data.files.length > 0) {
-      await uploadAndSendPhotos(formId, data.files)
+    if (data?.files) {
+      if (data.files instanceof FileList && data.files.length > 0) {
+        await uploadAndSendPhotos(formId, data.files)
+      } else if (data.files instanceof File) {
+        await uploadAndSendPhotos(formId, [data.files])
+      } else {
+        // eslint-disable-next-line no-console
+        console.error('Invalid files submitted: ', data)
+        fail(state.messages.internalError)
+      }
     }
     ctx.resetAll()
     success()
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.error('Response error:', e)
     fail(state.messages.internalError)
   }
