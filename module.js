@@ -333,7 +333,8 @@ const $7f00477e1c5eda60$export$2cd8252107eb640b = (conf)=>{
 };
 
 
-const $c4603da3cc6467fa$var$apiUrl = "https://test.carprof.ee/api";
+//const apiUrl = 'https://test.carprof.ee/api'
+const $c4603da3cc6467fa$var$apiUrl = "https://carprof.ee/api";
 const $c4603da3cc6467fa$var$formsUrl = `${$c4603da3cc6467fa$var$apiUrl}/v2/forms`;
 const $c4603da3cc6467fa$var$initialFormUrl = `${$c4603da3cc6467fa$var$formsUrl}/initial-data`;
 const $c4603da3cc6467fa$var$lookupCarRegistryUrl = (plateNumber)=>`${$c4603da3cc6467fa$var$apiUrl}/v1/cars/mnt/${plateNumber}`;
