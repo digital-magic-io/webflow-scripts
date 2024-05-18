@@ -1,7 +1,15 @@
 import { ActionParams, FileForm, InitialForm, LookupVehicleForm, VehicleForm } from './types'
-import { ErrorResponse, lookupCarRegistry, sendFormData, sendInitForm, uploadAndSendPhotos } from './api'
+import {
+  ErrorResponse,
+  lookupCarRegistry,
+  sendFormData,
+  sendInitForm,
+  uploadAndSendPhotos,
+  ValidationErrorResponse
+} from './api'
 import { mapOrElse, mapValue } from '../core/utils'
 import { ApiError, getErrorFromResponse } from '../core'
+import { isValidationError } from './api/utils'
 
 declare global {
   const grecaptcha: {
@@ -51,8 +59,10 @@ export const submitInitialForm = async ({
       if (e.response.status === 400) {
         const { errorCode } = await getErrorFromResponse<ErrorResponse>(e.response)
         if (errorCode === 'INVALID_PHONE_NUMBER') {
-          fail(state.messages.invalidPhoneError)
+          ctx.forms.initial.fields.phone.setError(state.messages.invalidPhoneError)
         } else {
+          // eslint-disable-next-line no-console
+          console.error('Unknown API Error:', e)
           fail(state.messages.internalError)
         }
       } else if (e.response.status === 403) {
@@ -133,9 +143,26 @@ export const submitVehicleForm = async ({
     ctx.labels.plateNumber.setLabel(data.plateNumber)
     success()
   } catch (e) {
-    // eslint-disable-next-line no-console
-    console.error('Response error:', e)
-    fail(state.messages.internalError)
+    if (e instanceof ApiError && e.response.status === 400) {
+      const error = await getErrorFromResponse<ValidationErrorResponse>(e.response)
+      if (isValidationError(error)) {
+        if (error.rows.some((row) => row.field === 'email')) {
+          ctx.forms.vehicle.fields.email.setError(state.messages.invalidEmailError)
+        } else {
+          // eslint-disable-next-line no-console
+          console.error('Validation error:', error)
+          fail('Unhandled validation error: ' + error.rows.map((row) => row.message).join(', '))
+        }
+      } else {
+        // eslint-disable-next-line no-console
+        console.error('Unknown API Error:', e)
+        fail(state.messages.internalError)
+      }
+    } else {
+      // eslint-disable-next-line no-console
+      console.error('Response error:', e)
+      fail(state.messages.internalError)
+    }
   }
 }
 

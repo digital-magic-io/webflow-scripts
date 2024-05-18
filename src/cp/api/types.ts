@@ -9,6 +9,15 @@ export type ErrorResponse = Readonly<{
   error: string
 }>
 
+export type ValidationErrorResponse = Readonly<{
+  type: 'ARGUMENT_NOT_VALID'
+  rows: ReadonlyArray<{
+    field: string
+    reason: string
+    message: string
+  }>
+}>
+
 export type CarRegistryData = Readonly<{
   mark: string
   model: string
