@@ -1,4 +1,4 @@
-import { ActionParams, FileForm, InitialForm, LookupVehicleForm, VehicleForm } from './types'
+import { ActionParams, ActionState, FileForm, InitialForm, LookupVehicleForm, VehicleForm } from './types'
 import {
   ErrorResponse,
   lookupCarRegistry,
@@ -16,7 +16,40 @@ declare global {
     ready: (callback: () => void) => void
     execute: (siteKey: string, options: { action: string }) => Promise<string>
   }
+
+  function fbq(event: string, value: unknown): void
 }
+
+const fbTrackLead = (): void => {
+  if (typeof fbq === 'function') {
+    console.debug('Lead sent')
+    fbq('track', 'Lead')
+  } else {
+    console.debug('Lead not sent')
+  }
+}
+
+const validateFile =
+  (state: ActionState) =>
+  (file: File): string | undefined => {
+    if (file.size > state.limits.maxFileSizeMb * 1024 * 1024) {
+      return state.messages.fileToLargeError
+    } else {
+      return undefined
+    }
+  }
+
+const validateFiles =
+  (state: ActionState) =>
+  (files: FileList): string | undefined => {
+    if (files.length > state.limits.maxFilesCount) {
+      return state.messages.filesTooMuchError
+    } else {
+      return Array.from(files)
+        .map((file) => validateFile(state)(file))
+        .find((error) => error !== undefined)
+    }
+  }
 
 export const submitInitialForm = async ({
   data,
@@ -175,18 +208,32 @@ export const submitFiles = async ({ data, ctx, success, fail, state }: ActionPar
     ctx.forms.files.clearAllErrors()
     if (data?.files) {
       if (data.files instanceof FileList && data.files.length > 0) {
-        await uploadAndSendPhotos(formId, data.files)
+        const error = validateFiles(state)(data.files)
+        if (error) {
+          fail(error)
+          return
+        } else {
+          await uploadAndSendPhotos(formId, data.files)
+        }
       } else if (data.files instanceof File) {
-        await uploadAndSendPhotos(formId, [data.files])
+        const error = validateFile(state)(data.files)
+        if (error) {
+          fail(error)
+          return
+        } else {
+          await uploadAndSendPhotos(formId, [data.files])
+        }
       } else {
         if (!(data.files instanceof FileList)) {
           // eslint-disable-next-line no-console
           console.error('Invalid files submitted: ', data)
           fail(state.messages.internalError)
+          return
         }
       }
     }
     ctx.resetAll()
+    fbTrackLead()
     success()
   } catch (e) {
     // eslint-disable-next-line no-console

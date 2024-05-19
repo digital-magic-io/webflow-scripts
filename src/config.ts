@@ -1,5 +1,5 @@
 import { Config } from './core'
-import { ButtonName, CpMessages, CpPageContext, FormName, LabelName } from './cp'
+import { ButtonName, CpLimits, CpMessages, CpPageContext, FormName, LabelName } from './cp'
 
 export type CpActions = Readonly<{
   switchStep: (step: number, ctx: CpPageContext) => void
@@ -13,5 +13,6 @@ export type CpConfig = Readonly<{
   messages: CpMessages
   actions: CpActions
   captchaKey: string
+  limits?: Partial<CpLimits>
 }> &
   Pick<Config<FormName, ButtonName, LabelName>, 'errorMessages'>

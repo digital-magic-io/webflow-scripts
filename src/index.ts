@@ -33,7 +33,11 @@ export const initCp = (conf: CpConfig): void => {
   const state: ActionState = {
     formId: createState<string | undefined>(undefined),
     messages: conf.messages,
-    captchaKey: conf.captchaKey
+    captchaKey: conf.captchaKey,
+    limits: {
+      maxFilesCount: conf.limits?.maxFilesCount ?? 10,
+      maxFileSizeMb: conf.limits?.maxFileSizeMb ?? 10
+    }
   }
 
   const beforeSubmit = (form: DmForm<string>): void => {

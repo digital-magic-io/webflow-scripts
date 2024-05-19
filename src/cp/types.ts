@@ -10,7 +10,14 @@ export type CpMessages = {
   invalidPhoneError: string
   invalidEmailError: string
   vehicleNotFoundError: string
+  filesTooMuchError: string
+  fileToLargeError: string
 }
+
+export type CpLimits = Readonly<{
+  maxFilesCount: number
+  maxFileSizeMb: number
+}>
 
 export type AppConfig = Config<FormName, ButtonName, LabelName>
 
@@ -22,6 +29,7 @@ export type ActionState = Readonly<{
   formId: ManagedState<string | undefined>
   messages: CpMessages
   captchaKey: string
+  limits: CpLimits
 }>
 
 export type ActionParams<T extends Record<string, string | number | File | FileList | undefined>> = Readonly<{
