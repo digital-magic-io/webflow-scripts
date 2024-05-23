@@ -25,6 +25,8 @@
             invalidPhoneError: 'Invalid phone number!',
             invalidEmailError: 'Invalid email address!',
             vehicleNotFoundError: 'Vehicle not found!',
+            filesTooMuchError: 'Files count must be 10 or less!',
+            fileToLargeError: 'File size must be 10MB or less!',
           },
           buttonSelectors: {
             updateVehicle: '[data-dm-id="refresh-number"]'
@@ -114,7 +116,7 @@
           </div>
           <div data-dm-type="control" data-dm-name="email">
             <label for="email" data-dm-type="label">Email:</label>
-            <input type="email" id="email" name="email" value="" data-dm-type="input" />
+            <input type="email" id="email" name="email" pattern="^(\S{1,255}@\S{2,255}\.\S{2,10})?$" value="" data-dm-type="input" />
             <em data-dm-type="error" class="error"></em>
           </div>
           <div data-dm-type="control" data-dm-name="phone">

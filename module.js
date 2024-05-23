@@ -140,6 +140,7 @@ const $f0956f6e9b7f6ccd$export$f681a8129d2e9d28 = (selector, formName, formError
                 console.error("Validation errors", errors);
                 Object.entries(errors).forEach(([name, error])=>{
                     if (error !== true) fieldElements[name].setError(formErrorMessages[error]);
+                    else fieldElements[name].clearError();
                 });
             //formErrorElement.textContent = 'Form has errors!'
             } else handler(e);
@@ -333,8 +334,7 @@ const $7f00477e1c5eda60$export$2cd8252107eb640b = (conf)=>{
 };
 
 
-//const apiUrl = 'https://test.carprof.ee/api'
-const $c4603da3cc6467fa$var$apiUrl = "https://carprof.ee/api";
+const $c4603da3cc6467fa$var$apiUrl = "https://test.carprof.ee/api";
 const $c4603da3cc6467fa$var$formsUrl = `${$c4603da3cc6467fa$var$apiUrl}/v2/forms`;
 const $c4603da3cc6467fa$var$initialFormUrl = `${$c4603da3cc6467fa$var$formsUrl}/initial-data`;
 const $c4603da3cc6467fa$var$lookupCarRegistryUrl = (plateNumber)=>`${$c4603da3cc6467fa$var$apiUrl}/v1/cars/mnt/${plateNumber}`;
@@ -364,6 +364,23 @@ const $c4603da3cc6467fa$export$42404212ef451a92 = async (formId, files)=>{
 
 
 
+const $b6b0ef53a0d5837a$export$f715db496ec47204 = (obj)=>Object.hasOwn(obj, "type") && obj.type === "ARGUMENT_NOT_VALID";
+
+
+const $74010a292a3af4c1$var$fbTrackLead = ()=>{
+    if (typeof fbq === "function") {
+        console.debug("Lead sent");
+        fbq("track", "Lead");
+    } else console.debug("Lead not sent");
+};
+const $74010a292a3af4c1$var$validateFile = (state)=>(file)=>{
+        if (file.size > state.limits.maxFileSizeMb * 1048576) return state.messages.fileToLargeError;
+        else return undefined;
+    };
+const $74010a292a3af4c1$var$validateFiles = (state)=>(files)=>{
+        if (files.length > state.limits.maxFilesCount) return state.messages.filesTooMuchError;
+        else return Array.from(files).map((file)=>$74010a292a3af4c1$var$validateFile(state)(file)).find((error)=>error !== undefined);
+    };
 const $74010a292a3af4c1$export$b916619e652ca675 = async ({ data: data, ctx: ctx, success: success, fail: fail, state: state })=>{
     try {
         ctx.forms.initial.clearAllErrors();
@@ -397,8 +414,12 @@ const $74010a292a3af4c1$export$b916619e652ca675 = async ({ data: data, ctx: ctx,
         if (e instanceof (0, $0a1ca124440e1613$export$f2e832acab1bdd79)) {
             if (e.response.status === 400) {
                 const { errorCode: errorCode } = await (0, $0a1ca124440e1613$export$7780d7826aafbede)(e.response);
-                if (errorCode === "INVALID_PHONE_NUMBER") fail(state.messages.invalidPhoneError);
-                else fail(state.messages.internalError);
+                if (errorCode === "INVALID_PHONE_NUMBER") ctx.forms.initial.fields.phone.setError(state.messages.invalidPhoneError);
+                else {
+                    // eslint-disable-next-line no-console
+                    console.error("Unknown API Error:", e);
+                    fail(state.messages.internalError);
+                }
             } else if (e.response.status === 403) fail("Captcha error");
             else {
                 // eslint-disable-next-line no-console
@@ -457,9 +478,25 @@ const $74010a292a3af4c1$export$8d5773d32b4cfd23 = async ({ data: data, ctx: ctx,
         ctx.labels.plateNumber.setLabel(data.plateNumber);
         success();
     } catch (e) {
-        // eslint-disable-next-line no-console
-        console.error("Response error:", e);
-        fail(state.messages.internalError);
+        if (e instanceof (0, $0a1ca124440e1613$export$f2e832acab1bdd79) && e.response.status === 400) {
+            const error = await (0, $0a1ca124440e1613$export$7780d7826aafbede)(e.response);
+            if ((0, $b6b0ef53a0d5837a$export$f715db496ec47204)(error)) {
+                if (error.rows.some((row)=>row.field === "email")) ctx.forms.vehicle.fields.email.setError(state.messages.invalidEmailError);
+                else {
+                    // eslint-disable-next-line no-console
+                    console.error("Validation error:", error);
+                    fail("Unhandled validation error: " + error.rows.map((row)=>row.message).join(", "));
+                }
+            } else {
+                // eslint-disable-next-line no-console
+                console.error("Unknown API Error:", e);
+                fail(state.messages.internalError);
+            }
+        } else {
+            // eslint-disable-next-line no-console
+            console.error("Response error:", e);
+            fail(state.messages.internalError);
+        }
     }
 };
 const $74010a292a3af4c1$export$cc36134c338ba9da = async ({ data: data, ctx: ctx, success: success, fail: fail, state: state })=>{
@@ -468,17 +505,29 @@ const $74010a292a3af4c1$export$cc36134c338ba9da = async ({ data: data, ctx: ctx,
     try {
         ctx.forms.files.clearAllErrors();
         if (data?.files) {
-            if (data.files instanceof FileList && data.files.length > 0) await (0, $c4603da3cc6467fa$export$42404212ef451a92)(formId, data.files);
-            else if (data.files instanceof File) await (0, $c4603da3cc6467fa$export$42404212ef451a92)(formId, [
-                data.files
-            ]);
-            else if (!(data.files instanceof FileList)) {
+            if (data.files instanceof FileList && data.files.length > 0) {
+                const error = $74010a292a3af4c1$var$validateFiles(state)(data.files);
+                if (error) {
+                    fail(error);
+                    return;
+                } else await (0, $c4603da3cc6467fa$export$42404212ef451a92)(formId, data.files);
+            } else if (data.files instanceof File) {
+                const error = $74010a292a3af4c1$var$validateFile(state)(data.files);
+                if (error) {
+                    fail(error);
+                    return;
+                } else await (0, $c4603da3cc6467fa$export$42404212ef451a92)(formId, [
+                    data.files
+                ]);
+            } else if (!(data.files instanceof FileList)) {
                 // eslint-disable-next-line no-console
                 console.error("Invalid files submitted: ", data);
                 fail(state.messages.internalError);
+                return;
             }
         }
         ctx.resetAll();
+        $74010a292a3af4c1$var$fbTrackLead();
         success();
     } catch (e) {
         // eslint-disable-next-line no-console
@@ -507,7 +556,11 @@ const $b3a133cf85b0ceb6$export$cd874e48ff214f68 = (conf)=>{
     const state = {
         formId: (0, $7285b5c83f5ca196$export$e6a0daad8304de)(undefined),
         messages: conf.messages,
-        captchaKey: conf.captchaKey
+        captchaKey: conf.captchaKey,
+        limits: {
+            maxFilesCount: conf.limits?.maxFilesCount ?? 10,
+            maxFileSizeMb: conf.limits?.maxFileSizeMb ?? 10
+        }
     };
     const beforeSubmit = (form)=>{
         form.setFormDisabled(true);

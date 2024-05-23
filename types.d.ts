@@ -73,7 +73,13 @@ type CpMessages = {
     invalidPhoneError: string;
     invalidEmailError: string;
     vehicleNotFoundError: string;
+    filesTooMuchError: string;
+    fileToLargeError: string;
 };
+type CpLimits = Readonly<{
+    maxFilesCount: number;
+    maxFileSizeMb: number;
+}>;
 type CpPageContext = PageContext<FormName, ButtonName, LabelName>;
 declare global {
     const grecaptcha: {
@@ -82,6 +88,7 @@ declare global {
             action: string;
         }) => Promise<string>;
     };
+    function fbq(event: string, value: unknown): void;
 }
 type CpActions = Readonly<{
     switchStep: (step: number, ctx: CpPageContext) => void;
@@ -94,6 +101,7 @@ type CpConfig = Readonly<{
     messages: CpMessages;
     actions: CpActions;
     captchaKey: string;
+    limits?: Partial<CpLimits>;
 }> & Pick<Config<FormName, ButtonName, LabelName>, 'errorMessages'>;
 export const initCp: (conf: CpConfig) => void;
 
