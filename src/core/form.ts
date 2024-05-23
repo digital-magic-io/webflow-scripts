@@ -213,6 +213,8 @@ export const createForm = <T extends string>(
         Object.entries(errors).forEach(([name, error]) => {
           if (error !== true) {
             fieldElements[name].setError(formErrorMessages[error])
+          } else {
+            fieldElements[name].clearError()
           }
         })
         //formErrorElement.textContent = 'Form has errors!'
