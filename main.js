@@ -469,6 +469,7 @@ const $3ee52bcfba46d30d$export$8d5773d32b4cfd23 = async ({ data: data, ctx: ctx,
     const formId = state.formId.get();
     if (!formId) throw new Error("FormId is missing");
     try {
+        console.debug(data);
         ctx.forms.vehicle.clearAllErrors();
         await (0, $9875fc359f01f731$export$e7cdd9ab52da88de)(formId, {
             carNumber: data.plateNumber,
@@ -478,7 +479,8 @@ const $3ee52bcfba46d30d$export$8d5773d32b4cfd23 = async ({ data: data, ctx: ctx,
             location: data.location,
             requestedPrice: Number(data.price),
             fullName: data.name,
-            email: data.email
+            email: data.email,
+            additionalInfo: data["more-info"]
         });
         ctx.labels.markAndModel.setLabel(`${data.make}, ${data.model}`);
         ctx.labels.plateNumber.setLabel(data.plateNumber);
