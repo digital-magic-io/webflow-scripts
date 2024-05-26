@@ -50,6 +50,7 @@ export type FormDataRequest = Readonly<{
   requestedPrice: number
   fullName?: string
   email?: string
+  additionalInfo?: string
 }>
 
 export type FormPhotosRequest = Readonly<{

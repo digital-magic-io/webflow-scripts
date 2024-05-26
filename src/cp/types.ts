@@ -59,6 +59,7 @@ export type VehicleForm = Readonly<{
   price: string
   name?: string
   email?: string
+  'more-info'?: string
 }>
 
 export type FileForm = Readonly<{

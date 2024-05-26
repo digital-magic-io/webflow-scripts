@@ -170,7 +170,8 @@ export const submitVehicleForm = async ({
       location: data.location,
       requestedPrice: Number(data.price),
       fullName: data.name,
-      email: data.email
+      email: data.email,
+      additionalInfo: data['more-info']
     })
     ctx.labels.markAndModel.setLabel(`${data.make}, ${data.model}`)
     ctx.labels.plateNumber.setLabel(data.plateNumber)
