@@ -98,14 +98,16 @@ const $7b19bfce950638d7$var$createFormField = (formElement, name)=>{
         setInputValue: (value)=>inputElement.value = value
     };
 };
-const $7b19bfce950638d7$export$f681a8129d2e9d28 = (selector, formName, formErrorMessages)=>{
+const $7b19bfce950638d7$export$f681a8129d2e9d28 = (selector, formName, formErrorMessages, debug)=>{
+    if (debug) // eslint-disable-next-line no-console
     console.debug("Creating form:", formName, selector);
     const formElement = (0, $68d6acfa1617944c$export$465c18d0577ffcf1)(selector);
     if (!formElement) throw new Error("Form element not found by selector: " + selector);
     // TODO: Must be optional!
     const formErrorElement = $7b19bfce950638d7$var$createFormError(formElement);
     const fieldNames = $7b19bfce950638d7$var$scanFormFieldNames(formElement);
-    //console.debug('Fields scanned:', fieldNames)
+    if (debug) // eslint-disable-next-line no-console
+    console.debug("Fields scanned:", fieldNames);
     const fieldElements = fieldNames.map((name)=>$7b19bfce950638d7$var$createFormField(formElement, name)).reduce((acc, cur)=>({
             ...acc,
             [cur.input.el.name]: cur
@@ -148,7 +150,6 @@ const $7b19bfce950638d7$export$f681a8129d2e9d28 = (selector, formName, formError
                     if (error !== true) fieldElements[name].setError(formErrorMessages[error]);
                     else fieldElements[name].clearError();
                 });
-            //formErrorElement.textContent = 'Form has errors!'
             } else handler(e);
         });
     // TODO: Avoid this duplication
@@ -271,13 +272,17 @@ const $f20d18f353317b2a$export$b2fd9029d5529a00 = (url, files)=>$f20d18f353317b2
 
 
 const $0564b07561875788$var$setupForm = (ctx, formName, formConfig, globalErrorMessages, handlers)=>{
-    //console.debug('Form:', formName, formConfig)
+    const debug = ctx.debug;
+    if (debug) // eslint-disable-next-line no-console
+    console.debug("Form:", formName, formConfig);
     const form = (0, $7b19bfce950638d7$export$f681a8129d2e9d28)(formConfig.selector, formName, {
         ...globalErrorMessages,
         ...formConfig.errorMessages
-    });
+    }, debug);
     handlers?.init?.(form);
     form.setOnSubmit(async ()=>{
+        if (debug) // eslint-disable-next-line no-console
+        console.log("Form submitted:", formName, form.fields, form.getFormValues());
         handlers?.beforeSubmit?.(form);
         await formConfig.onSubmit(form.getFormValues(), ctx, ()=>formConfig.onSuccess(ctx), (error)=>formConfig.onError(error, ctx)).catch((error)=>{
             // eslint-disable-next-line no-console
@@ -316,10 +321,14 @@ const $0564b07561875788$var$defaultErrors = {
     max: "Field value is too big"
 };
 const $0564b07561875788$export$2cd8252107eb640b = (conf)=>{
+    const debug = conf.debug ?? false;
+    if (debug) // eslint-disable-next-line no-console
+    console.log("Initializing...", conf);
     const ctx = {
         forms: {},
         buttons: {},
-        labels: {}
+        labels: {},
+        debug: debug
     };
     if (conf.forms) {
         // TODO: Update foreach to map or reduce
@@ -336,6 +345,8 @@ const $0564b07561875788$export$2cd8252107eb640b = (conf)=>{
             $0564b07561875788$var$setupLabel(ctx, labelName, labelConfig);
         });
         conf.afterInit?.(ctx);
+        if (debug) // eslint-disable-next-line no-console
+        console.log("Initialized with context: ", ctx);
     }
 };
 
@@ -373,11 +384,13 @@ const $9875fc359f01f731$export$42404212ef451a92 = async (formId, files)=>{
 const $6f5a76ffef3a38e8$export$f715db496ec47204 = (obj)=>Object.hasOwn(obj, "type") && obj.type === "ARGUMENT_NOT_VALID";
 
 
-const $3ee52bcfba46d30d$var$fbTrackLead = ()=>{
+const $3ee52bcfba46d30d$var$fbTrackLead = (debug)=>{
     if (typeof fbq === "function") {
+        if (debug) // eslint-disable-next-line no-console
         console.debug("Lead sent");
         fbq("track", "Lead");
-    } else console.debug("Lead not sent");
+    } else if (debug) // eslint-disable-next-line no-console
+    console.debug("Lead not sent");
 };
 const $3ee52bcfba46d30d$var$validateFile = (state)=>(file)=>{
         if (file.size > state.limits.maxFileSizeMb * 1048576) return state.messages.fileToLargeError;
@@ -389,6 +402,8 @@ const $3ee52bcfba46d30d$var$validateFiles = (state)=>(files)=>{
     };
 const $3ee52bcfba46d30d$export$b916619e652ca675 = async ({ data: data, ctx: ctx, success: success, fail: fail, state: state })=>{
     try {
+        if (ctx.debug) // eslint-disable-next-line no-console
+        console.debug("Initial form submitted", data);
         ctx.forms.initial.clearAllErrors();
         const token = await grecaptcha.execute(state.captchaKey, {
             action: "submit"
@@ -441,6 +456,8 @@ const $3ee52bcfba46d30d$export$b916619e652ca675 = async ({ data: data, ctx: ctx,
 };
 const $3ee52bcfba46d30d$export$9af790bd8a0132a2 = async ({ data: { plateNumber: plateNumber }, ctx: ctx, success: success, fail: fail, state: state })=>{
     try {
+        if (ctx.debug) // eslint-disable-next-line no-console
+        console.debug("Reloading vehicle data for plate number:", plateNumber);
         ctx.forms.vehicle.clearAllErrors();
         const resp = await (0, $9875fc359f01f731$export$8bdb25a87ae6a6fa)(plateNumber);
         if (resp) {
@@ -469,7 +486,8 @@ const $3ee52bcfba46d30d$export$8d5773d32b4cfd23 = async ({ data: data, ctx: ctx,
     const formId = state.formId.get();
     if (!formId) throw new Error("FormId is missing");
     try {
-        console.debug(data);
+        if (ctx.debug) // eslint-disable-next-line no-console
+        console.debug("Vehicle form submitted", data);
         ctx.forms.vehicle.clearAllErrors();
         await (0, $9875fc359f01f731$export$e7cdd9ab52da88de)(formId, {
             carNumber: data.plateNumber,
@@ -511,6 +529,8 @@ const $3ee52bcfba46d30d$export$cc36134c338ba9da = async ({ data: data, ctx: ctx,
     const formId = state.formId.get();
     if (!formId) throw new Error("FormId is missing");
     try {
+        if (ctx.debug) // eslint-disable-next-line no-console
+        console.debug("Files submitted", data);
         ctx.forms.files.clearAllErrors();
         if (data?.files) {
             if (data.files instanceof FileList && data.files.length > 0) {
@@ -535,7 +555,7 @@ const $3ee52bcfba46d30d$export$cc36134c338ba9da = async ({ data: data, ctx: ctx,
             }
         }
         ctx.resetAll();
-        $3ee52bcfba46d30d$var$fbTrackLead();
+        $3ee52bcfba46d30d$var$fbTrackLead(ctx.debug);
         success();
     } catch (e) {
         // eslint-disable-next-line no-console
@@ -603,6 +623,8 @@ const $15451612c40a4a0c$export$cd874e48ff214f68 = (conf)=>{
         updateVehicle: {
             selector: conf.buttonSelectors.updateVehicle,
             onClick: (ctx)=>{
+                if (ctx.debug) // eslint-disable-next-line no-console
+                console.debug("Button clicked:", ctx);
                 withSubmitAction(ctx.forms.vehicle, async ()=>{
                     const plateNumber = ctx.forms.vehicle.fields.plateNumber.input.el.value;
                     await (0, $3ee52bcfba46d30d$export$9af790bd8a0132a2)({
@@ -671,6 +693,7 @@ const $15451612c40a4a0c$export$cd874e48ff214f68 = (conf)=>{
             })
     };
     const cfg = {
+        debug: conf.debug,
         forms: {
             initial: initialFormConfig,
             vehicle: vehicleFormConfig,

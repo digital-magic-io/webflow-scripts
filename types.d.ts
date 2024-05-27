@@ -38,6 +38,7 @@ type PageContext<F extends string, B extends string, L extends string> = {
     labels: Record<L, DmLabel>;
     forms: Record<F, DmForm<string>>;
     resetAll: Handler<void>;
+    debug: boolean;
 };
 type FormHandlers = {
     init?: Handler<DmForm<string>>;
@@ -64,6 +65,7 @@ type Config<F extends string, B extends string, L extends string> = {
     errorMessages?: FormErrorMessages;
     handlers?: FormHandlers;
     afterInit?: Handler<PageContext<F, B, L>>;
+    debug?: boolean;
 };
 type FormName = 'initial' | 'vehicle' | 'files';
 type ButtonName = 'updateVehicle';
@@ -102,7 +104,7 @@ type CpConfig = Readonly<{
     actions: CpActions;
     captchaKey: string;
     limits?: Partial<CpLimits>;
-}> & Pick<Config<FormName, ButtonName, LabelName>, 'errorMessages'>;
+}> & Pick<Config<FormName, ButtonName, LabelName>, 'errorMessages' | 'debug'>;
 export const initCp: (conf: CpConfig) => void;
 
 //# sourceMappingURL=types.d.ts.map
