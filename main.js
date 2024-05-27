@@ -68,12 +68,16 @@ const $7b19bfce950638d7$var$createFieldValidation = (inputElement)=>{
     const min = inputElement.getAttribute("min");
     const max = inputElement.getAttribute("max");
     return (value)=>{
-        if (required && !value) return "required";
-        if (minLength && String(value).length < Number(minLength)) return "minlength";
-        if (maxLength && String(value).length > Number(maxLength)) return "maxlength";
-        if (pattern && !new RegExp(pattern).test(String(value))) return "pattern";
-        if (min && Number(value) < Number(min)) return "min";
-        if (max && Number(value) > Number(max)) return "max";
+        if (inputElement.type === "checkbox") {
+            if (required && !inputElement.checked) return "required";
+        } else {
+            if (required && !value) return "required";
+            if (minLength && String(value).length < Number(minLength)) return "minlength";
+            if (maxLength && String(value).length > Number(maxLength)) return "maxlength";
+            if (pattern && !new RegExp(pattern).test(String(value))) return "pattern";
+            if (min && Number(value) < Number(min)) return "min";
+            if (max && Number(value) > Number(max)) return "max";
+        }
         return true;
     };
 };
