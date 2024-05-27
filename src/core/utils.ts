@@ -17,3 +17,5 @@ export const createState = <T>(initialState: T): ManagedState<T> => {
     get: () => state
   }
 }
+
+export const getUrlQueryString = (): string => window.location.search.slice(1)

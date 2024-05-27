@@ -7,7 +7,7 @@ import {
   uploadAndSendPhotos,
   ValidationErrorResponse
 } from './api'
-import { mapOrElse, mapValue } from '../core/utils'
+import { getUrlQueryString, mapOrElse, mapValue } from '../core/utils'
 import { ApiError, getErrorFromResponse } from '../core'
 import { isValidationError } from './api/utils'
 
@@ -79,7 +79,8 @@ export const submitInitialForm = async ({
       carNumber: data.plateNumber,
       language: 'et',
       formType: 'BUYOUT',
-      formSource: 'CARBUY_ORIGIN'
+      formSource: 'CARBUY_ORIGIN',
+      source: getUrlQueryString()
     })
     state.formId.set(resp.formUuid)
     if (resp.mntData) {
