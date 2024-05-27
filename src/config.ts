@@ -15,4 +15,4 @@ export type CpConfig = Readonly<{
   captchaKey: string
   limits?: Partial<CpLimits>
 }> &
-  Pick<Config<FormName, ButtonName, LabelName>, 'errorMessages'>
+  Pick<Config<FormName, ButtonName, LabelName>, 'errorMessages' | 'debug'>

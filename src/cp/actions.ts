@@ -20,12 +20,18 @@ declare global {
   function fbq(event: string, value: unknown): void
 }
 
-const fbTrackLead = (): void => {
+const fbTrackLead = (debug: boolean): void => {
   if (typeof fbq === 'function') {
-    console.debug('Lead sent')
+    if (debug) {
+      // eslint-disable-next-line no-console
+      console.debug('Lead sent')
+    }
     fbq('track', 'Lead')
   } else {
-    console.debug('Lead not sent')
+    if (debug) {
+      // eslint-disable-next-line no-console
+      console.debug('Lead not sent')
+    }
   }
 }
 
@@ -59,6 +65,11 @@ export const submitInitialForm = async ({
   state
 }: ActionParams<InitialForm>): Promise<void> => {
   try {
+    if (ctx.debug) {
+      // eslint-disable-next-line no-console
+      console.debug('Initial form submitted', data)
+    }
+
     ctx.forms.initial.clearAllErrors()
 
     const token = await grecaptcha.execute(state.captchaKey, { action: 'submit' })
@@ -121,6 +132,11 @@ export const reloadVehicleFormData = async ({
   state
 }: ActionParams<LookupVehicleForm>): Promise<void> => {
   try {
+    if (ctx.debug) {
+      // eslint-disable-next-line no-console
+      console.debug('Reloading vehicle data for plate number:', plateNumber)
+    }
+
     ctx.forms.vehicle.clearAllErrors()
     const resp = await lookupCarRegistry(plateNumber)
     if (resp) {
@@ -161,6 +177,11 @@ export const submitVehicleForm = async ({
     throw new Error('FormId is missing')
   }
   try {
+    if (ctx.debug) {
+      // eslint-disable-next-line no-console
+      console.debug('Vehicle form submitted', data)
+    }
+
     ctx.forms.vehicle.clearAllErrors()
     await sendFormData(formId, {
       carNumber: data.plateNumber,
@@ -206,6 +227,11 @@ export const submitFiles = async ({ data, ctx, success, fail, state }: ActionPar
     throw new Error('FormId is missing')
   }
   try {
+    if (ctx.debug) {
+      // eslint-disable-next-line no-console
+      console.debug('Files submitted', data)
+    }
+
     ctx.forms.files.clearAllErrors()
     if (data?.files) {
       if (data.files instanceof FileList && data.files.length > 0) {
@@ -234,7 +260,7 @@ export const submitFiles = async ({ data, ctx, success, fail, state }: ActionPar
       }
     }
     ctx.resetAll()
-    fbTrackLead()
+    fbTrackLead(ctx.debug)
     success()
   } catch (e) {
     // eslint-disable-next-line no-console

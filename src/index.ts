@@ -77,6 +77,11 @@ export const initCp = (conf: CpConfig): void => {
     updateVehicle: {
       selector: conf.buttonSelectors.updateVehicle,
       onClick: (ctx) => {
+        if (ctx.debug) {
+          // eslint-disable-next-line no-console
+          console.debug('Button clicked:', ctx)
+        }
+
         void withSubmitAction(ctx.forms.vehicle, async () => {
           const plateNumber = ctx.forms.vehicle.fields.plateNumber.input.el.value
           await reloadVehicleFormData({
@@ -130,6 +135,7 @@ export const initCp = (conf: CpConfig): void => {
   }
 
   const cfg: AppConfig = {
+    debug: conf.debug,
     forms: {
       initial: initialFormConfig,
       vehicle: vehicleFormConfig,

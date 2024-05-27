@@ -142,9 +142,13 @@ const createFormField = (formElement: HTMLFormElement, name: string): DmField =>
 export const createForm = <T extends string>(
   selector: string,
   formName: T,
-  formErrorMessages: FormErrorMessages
+  formErrorMessages: FormErrorMessages,
+  debug: boolean
 ): DmForm<T> => {
-  console.debug('Creating form:', formName, selector)
+  if (debug) {
+    // eslint-disable-next-line no-console
+    console.debug('Creating form:', formName, selector)
+  }
   const formElement = getFormElement(selector)
   if (!formElement) {
     throw new Error('Form element not found by selector: ' + selector)
@@ -154,7 +158,11 @@ export const createForm = <T extends string>(
   const formErrorElement = createFormError(formElement)
 
   const fieldNames = scanFormFieldNames(formElement)
-  //console.debug('Fields scanned:', fieldNames)
+
+  if (debug) {
+    // eslint-disable-next-line no-console
+    console.debug('Fields scanned:', fieldNames)
+  }
 
   const fieldElements: Record<string, DmField> = fieldNames
     .map((name) => createFormField(formElement, name))
@@ -217,7 +225,6 @@ export const createForm = <T extends string>(
             fieldElements[name].clearError()
           }
         })
-        //formErrorElement.textContent = 'Form has errors!'
       } else {
         handler(e)
       }

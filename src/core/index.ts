@@ -14,10 +14,19 @@ const setupForm = <F extends string, B extends string, L extends string>(
   globalErrorMessages: FormErrorMessages,
   handlers?: FormHandlers
 ): DmForm<F> => {
-  //console.debug('Form:', formName, formConfig)
-  const form = createForm(formConfig.selector, formName, { ...globalErrorMessages, ...formConfig.errorMessages })
+  const debug = ctx.debug
+
+  if (debug) {
+    // eslint-disable-next-line no-console
+    console.debug('Form:', formName, formConfig)
+  }
+  const form = createForm(formConfig.selector, formName, { ...globalErrorMessages, ...formConfig.errorMessages }, debug)
   handlers?.init?.(form)
   form.setOnSubmit(async () => {
+    if (debug) {
+      // eslint-disable-next-line no-console
+      console.log('Form submitted:', formName, form.fields, form.getFormValues())
+    }
     handlers?.beforeSubmit?.(form)
     await formConfig
       .onSubmit(
@@ -80,10 +89,18 @@ const defaultErrors: Record<FailedValidationType, string> = {
 }
 
 export const init = <F extends string, B extends string, L extends string>(conf: Config<F, B, L>): void => {
+  const debug = conf.debug ?? false
+
+  if (debug) {
+    // eslint-disable-next-line no-console
+    console.log('Initializing...', conf)
+  }
+
   const ctx: PageContext<F, B, L> = {
     forms: {},
     buttons: {},
-    labels: {}
+    labels: {},
+    debug
   } as PageContext<F, B, L>
 
   if (conf.forms) {
@@ -112,5 +129,10 @@ export const init = <F extends string, B extends string, L extends string>(conf:
     }
 
     conf.afterInit?.(ctx)
+
+    if (debug) {
+      // eslint-disable-next-line no-console
+      console.log('Initialized with context: ', ctx)
+    }
   }
 }

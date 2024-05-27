@@ -6,6 +6,7 @@ export type PageContext<F extends string, B extends string, L extends string> = 
   labels: Record<L, DmLabel>
   forms: Record<F, DmForm<string>>
   resetAll: Handler<void>
+  debug: boolean
 }
 
 export type FormHandlers = {
@@ -47,4 +48,5 @@ export type Config<F extends string, B extends string, L extends string> = {
   errorMessages?: FormErrorMessages
   handlers?: FormHandlers
   afterInit?: Handler<PageContext<F, B, L>>
+  debug?: boolean
 }
