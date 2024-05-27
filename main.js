@@ -206,6 +206,7 @@ const $7546c35f5f2b619a$export$e6a0daad8304de = (initialState)=>{
         get: ()=>state
     };
 };
+const $7546c35f5f2b619a$export$5f2e2ef2907d3a11 = ()=>window.location.search.slice(1);
 
 
 class $f20d18f353317b2a$export$f2e832acab1bdd79 extends Error {
@@ -418,7 +419,8 @@ const $3ee52bcfba46d30d$export$b916619e652ca675 = async ({ data: data, ctx: ctx,
             carNumber: data.plateNumber,
             language: "et",
             formType: "BUYOUT",
-            formSource: "CARBUY_ORIGIN"
+            formSource: "CARBUY_ORIGIN",
+            source: (0, $7546c35f5f2b619a$export$5f2e2ef2907d3a11)()
         });
         state.formId.set(resp.formUuid);
         if (resp.mntData) {
